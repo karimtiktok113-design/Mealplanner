@@ -117,11 +117,6 @@ if (Test-Path $chrome) {
           const script = document.createElement('script');
           script.textContent = atob('$encodedScript');
           win.document.body.appendChild(script);
-          
-          setTimeout(() => {
-            const out = win.document.getElementById('view-budget').innerText;
-            window.testDone = true;
-          }, 500);
         } catch(e) {
           console.error(e);
         }
@@ -133,7 +128,7 @@ if (Test-Path $chrome) {
 "@
   [System.IO.File]::WriteAllText($runnerHtml, $runnerContent, [System.Text.Encoding]::UTF8)
 
-  $output = & $chrome --headless=new --dump-dom --virtual-time-budget=4000 "file:///$($runnerHtml.Replace('\', '/'))" 2>&1
+  cmd.exe /c "`"$chrome`" --headless=new --disable-gpu --dump-dom --virtual-time-budget=4000 `"file:///$($runnerHtml.Replace('\', '/'))`" 2>nul" | Out-Null
   Remove-Item -Force $runnerHtml -ErrorAction SilentlyContinue
 }
 

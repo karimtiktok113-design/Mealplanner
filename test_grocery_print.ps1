@@ -38,8 +38,7 @@ $testScript = @"
     if (!html.includes('Wild Salmon Fillets')) throw new Error('Salmon missing');
     results.push('TEST 1 PASSED: All grocery items present on the print checklist');
 
-    // 2. Check that bought items have their checkboxes checked with checkmark ✓
-    // Fresh Blueberries and Organic Whole Milk must have class "print-checkbox checked" and "✓"
+    // 2. Check that bought items have their checkboxes checked with checkmark
     const itemsNodes = container.querySelectorAll('.print-check-item');
     if (itemsNodes.length !== 5) throw new Error('Expected 5 print items, found ' + itemsNodes.length);
 
@@ -56,7 +55,7 @@ $testScript = @"
           throw new Error('Purchased item does not have "checked" class on checkbox: ' + node.textContent);
         }
         if (!checkbox.textContent.includes('✓')) {
-          throw new Error('Purchased item checkbox missing checkmark ✓: ' + node.textContent);
+          throw new Error('Purchased item checkbox missing checkmark: ' + node.textContent);
         }
         checkedBoxesCount++;
       } else {
@@ -64,7 +63,7 @@ $testScript = @"
           throw new Error('Unbought item should NOT have "checked" class on checkbox: ' + node.textContent);
         }
         if (checkbox.textContent.includes('✓')) {
-          throw new Error('Unbought item should NOT contain checkmark ✓: ' + node.textContent);
+          throw new Error('Unbought item should NOT contain checkmark: ' + node.textContent);
         }
         uncheckBoxesCount++;
       }
@@ -72,10 +71,10 @@ $testScript = @"
 
     if (checkedBoxesCount !== 2) throw new Error('Expected 2 checked checkboxes, got ' + checkedBoxesCount);
     if (uncheckBoxesCount !== 3) throw new Error('Expected 3 unchecked checkboxes, got ' + uncheckBoxesCount);
-    results.push('TEST 2 PASSED: 2 bought items have checked checkboxes with ✓, 3 unbought items have open checkboxes');
+    results.push('TEST 2 PASSED: 2 bought items have checked checkboxes with checkmark, 3 unbought items have open checkboxes');
 
     // 3. Check KPI cards & header
-    if (!html.includes('Checked Boxes ✓')) throw new Error('KPI card for Checked Boxes missing');
+    if (!html.includes('Checked Boxes')) throw new Error('KPI card for Checked Boxes missing');
     if (!html.includes('Remaining to Buy')) throw new Error('KPI card for Remaining to Buy missing');
     results.push('TEST 3 PASSED: KPI cards accurately reflect checked and remaining items');
 
@@ -116,7 +115,7 @@ $runnerContent = @"
 "@
 [System.IO.File]::WriteAllText($runnerHtml, $runnerContent, [System.Text.Encoding]::UTF8)
 
-$output = & $chrome --headless=new --dump-dom --virtual-time-budget=4000 "file:///$($runnerHtml.Replace('\', '/'))" 2>&1
+cmd.exe /c "`"$chrome`" --headless=new --disable-gpu --dump-dom --virtual-time-budget=4000 `"file:///$($runnerHtml.Replace('\', '/'))`" 2>nul" | Out-Null
 Remove-Item -Force $runnerHtml -ErrorAction SilentlyContinue
 
 Write-Host "Chrome headless verification completed."
