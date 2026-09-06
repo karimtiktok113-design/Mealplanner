@@ -1848,13 +1848,34 @@
       }
 
       .print-checkbox {
-        display: inline-block;
-        width: 11px;
-        height: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 12px;
+        height: 12px;
         border: 1.5px solid #475569;
         border-radius: 2px;
         margin-right: 6px;
         vertical-align: middle;
+        font-size: 8.5pt;
+        font-weight: 800;
+        line-height: 1;
+        box-sizing: border-box;
+        text-align: center;
+      }
+      .print-checkbox.checked {
+        border-color: #0f172a !important;
+        color: #0f172a !important;
+        background-color: #e2e8f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .print-check-item.purchased {
+        opacity: 0.72;
+      }
+      .print-check-item.purchased strong {
+        text-decoration: line-through;
+        color: #64748b;
       }
 
       /* Infographic Bar Chart Elements */
@@ -5958,51 +5979,99 @@
     },
 
     // 5. SMART GROCERY: Categorized Shopping Checklist
+    // 5. SMART GROCERY: Categorized Shopping Checklist (Bought Items Checked)
     printGroceryList: function(autoTrigger = true) {
       const items = window.appState.groceryList || [];
       const purchasedCount = items.filter(x => x.purchased).length;
       const pendingCount = items.length - purchasedCount;
-      const estimatedCost = items.reduce((sum, it) => sum + (it.estimatedPrice || (it.quantity * 1.5)), 0);
-      const categories = ['Produce', 'Meat', 'Seafood', 'Dairy', 'Eggs', 'Grains', 'Pantry', 'Frozen', 'Beverages', 'Snacks', 'Spices', 'Other'];
+      const curr = (window.appState && window.appState.profile && window.appState.profile.currency) || '$';
+
+      const totalCost = items.reduce((sum, it) => {
+        const price = (it.estimatedPrice !== undefined && it.estimatedPrice !== null && !isNaN(Number(it.estimatedPrice)))
+          ? Number(it.estimatedPrice)
+          : (Number(it.quantity) || 1) * 1.5;
+        return sum + price;
+      }, 0);
+
+      const pendingCost = items.filter(x => !x.purchased).reduce((sum, it) => {
+        const price = (it.estimatedPrice !== undefined && it.estimatedPrice !== null && !isNaN(Number(it.estimatedPrice)))
+          ? Number(it.estimatedPrice)
+          : (Number(it.quantity) || 1) * 1.5;
+        return sum + price;
+      }, 0);
+
+      const baseCategories = ['Produce', 'Meat', 'Seafood', 'Dairy', 'Eggs', 'Grains', 'Pantry', 'Frozen', 'Beverages', 'Snacks', 'Spices', 'Other'];
+      const extraCategories = Array.from(new Set(items.map(x => x.category || 'Other'))).filter(c => !baseCategories.includes(c));
+      const categories = [...baseCategories, ...extraCategories];
+
+      const subtitle = items.length > 0
+        ? `${items.length} Total Items (${purchasedCount} Checked ✓ • ${pendingCount} Remaining to Buy)`
+        : '0 Items On List';
+
+      let itemsHtml = '';
+      if (items.length === 0) {
+        itemsHtml = `
+          <div class="print-card" style="text-align: center; padding: 36px 20px; margin: 24px 0; border: 1.5px dashed #94a3b8; background: #f8fafc;">
+            <div style="font-size: 26pt; margin-bottom: 10px;">🛒</div>
+            <div style="font-size: 13pt; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Your Grocery Shopping List is Empty</div>
+            <div style="font-size: 9.5pt; color: #64748b; max-width: 480px; margin: 0 auto; line-height: 1.5;">
+              Generate a new shopping list from your weekly meal plan or add items directly from the Smart Grocery module.
+            </div>
+          </div>
+        `;
+      } else {
+        itemsHtml = `
+          <div class="print-grid-2">
+            ${categories.map(cat => {
+              const catItems = items.filter(x => (x.category || 'Other') === cat);
+              if (catItems.length === 0) return '';
+              
+              // Sort so pending items appear first in the category, followed by checked/purchased items
+              const sortedCatItems = [...catItems].sort((a, b) => (a.purchased === b.purchased ? 0 : a.purchased ? 1 : -1));
+              const catPendingCount = catItems.filter(x => !x.purchased).length;
+              const catCost = catItems.reduce((s, it) => s + (Number(it.estimatedPrice) || 0), 0);
+
+              return `
+                <div class="print-card" style="break-inside: avoid; page-break-inside: avoid;">
+                  <div style="font-size: 10pt; font-weight: 700; color: #0f172a; border-bottom: 1.5px solid #cbd5e1; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>${cat}</span>
+                    <span class="print-badge print-badge-neutral">
+                      ${catPendingCount} to buy${catItems.length > catPendingCount ? ` (${catItems.length - catPendingCount} checked)` : ''}${catCost > 0 ? ` • ${curr}${catCost.toFixed(2)}` : ''}
+                    </span>
+                  </div>
+                  ${sortedCatItems.map(it => `
+                    <div class="print-check-item ${it.purchased ? 'purchased' : ''}">
+                      <span>
+                        <span class="print-checkbox ${it.purchased ? 'checked' : ''}">${it.purchased ? '✓' : ''}</span>
+                        <strong>${it.ingredient}</strong>
+                        ${it.notes ? `<span style="font-size: 7.5pt; color: #64748b;">(${it.notes})</span>` : ''}
+                        ${it.purchased ? `<span class="print-badge print-badge-neutral" style="font-size: 6.5pt; padding: 1px 4px; margin-left: 4px;">✓ Bought</span>` : ''}
+                      </span>
+                      <span style="font-weight: 600; color: ${it.purchased ? '#94a3b8' : '#334155'};">${it.quantity} ${it.unit}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
 
       const html = `
-        ${this.createPrintHeader('Smart Grocery Shopping Checklist', `${items.length} Total Items Categorized`, 'Shopping List')}
+        ${this.createPrintHeader('Smart Grocery Shopping Checklist', subtitle, 'Shopping List')}
 
         <!-- KPI SUMMARY -->
         <div class="print-kpi-grid">
           ${this.createKpiCard('Total Items', `${items.length}`, 'On List', 'print-badge-primary')}
-          ${this.createKpiCard('Pending to Buy', `${pendingCount}`, 'Need In Store', pendingCount > 0 ? 'print-badge-warning' : 'print-badge-primary')}
-          ${this.createKpiCard('Already Bought', `${purchasedCount}`, 'Checked Off', 'print-badge-primary')}
-          ${this.createKpiCard('Estimated Total', `$${estimatedCost.toFixed(2)}`, 'Projected Spend', 'print-badge-info')}
+          ${this.createKpiCard('Remaining to Buy', `${pendingCount}`, 'Open Checkboxes', pendingCount > 0 ? 'print-badge-warning' : 'print-badge-primary')}
+          ${this.createKpiCard('Already Bought', `${purchasedCount}`, 'Checked Boxes ✓', 'print-badge-neutral')}
+          ${this.createKpiCard('Estimated Total', `${curr}${totalCost.toFixed(2)}`, `${curr}${pendingCost.toFixed(2)} pending`, 'print-badge-info')}
         </div>
 
-        <!-- 2-COLUMN CATEGORIZED ITEMS -->
-        <div class="print-grid-2">
-          ${categories.map(cat => {
-            const catItems = items.filter(x => (x.category || 'Other') === cat);
-            if (catItems.length === 0) return '';
-            return `
-              <div class="print-card" style="break-inside: avoid; page-break-inside: avoid;">
-                <div style="font-size: 10pt; font-weight: 700; color: #0f172a; border-bottom: 1.5px solid #cbd5e1; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;">
-                  <span>${cat}</span>
-                  <span class="print-badge print-badge-neutral">${catItems.length} items</span>
-                </div>
-                ${catItems.map(it => `
-                  <div class="print-check-item">
-                    <span>
-                      <span class="print-checkbox"></span>
-                      <strong>${it.ingredient}</strong>
-                      ${it.notes ? `<span style="font-size: 7.5pt; color: #64748b;">(${it.notes})</span>` : ''}
-                    </span>
-                    <span style="font-weight: 600; color: #334155;">${it.quantity} ${it.unit}</span>
-                  </div>
-                `).join('')}
-              </div>
-            `;
-          }).join('')}
-        </div>
+        <!-- 2-COLUMN CATEGORIZED ITEMS (BOUGHT ITEMS CHECKED) -->
+        ${itemsHtml}
 
-        ${this.createPrintFooter('Smart Grocery Shopping Checklist • Print & Bring to Store')}
+        ${this.createPrintFooter('Smart Grocery Shopping Checklist • Items with ✓ are already purchased')}
       `;
 
       this.renderAndPrint(html, 'grocery', autoTrigger);
