@@ -327,9 +327,11 @@
     .app-layout {
       display: flex;
       min-height: 100vh;
-      width: 100vw;
+      width: 100%;
+      max-width: 100%;
       background: var(--bg-app);
       overflow-x: hidden;
+      position: relative;
     }
 
     /* Sidebar Navigation */
@@ -553,14 +555,57 @@
 
     .sidebar-toggle-btn {
       display: none;
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       align-items: center;
       justify-content: center;
       border-radius: var(--radius-md);
       color: var(--text-secondary);
       background: var(--bg-muted);
       border: 1px solid var(--border-color);
+      flex-shrink: 0;
+      transition: all var(--transition-fast);
+    }
+    .sidebar-toggle-btn:hover {
+      background: var(--border-color);
+      color: var(--text-main);
+    }
+
+    .mobile-header-brand {
+      display: none;
+      align-items: center;
+      gap: 7px;
+      user-select: none;
+      min-width: 0;
+    }
+    .mobile-brand-icon {
+      font-size: 20px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .mobile-brand-text {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(3px);
+      z-index: 998;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-normal);
+    }
+    .sidebar-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .global-search-box {
@@ -1953,16 +1998,24 @@
     }
 
     /* ==========================================================================
-       7. RESPONSIVE MEDIA QUERIES
+       7. RESPONSIVE MEDIA QUERIES & MOBILE ARCHITECTURE (Zero Horizontal Sliding)
        ========================================================================== */
     @media (max-width: 1024px) {
       .app-sidebar {
         position: fixed;
-        left: -100%;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 280px;
+        max-width: 85vw;
+        height: 100vh;
         z-index: 999;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 4px 0 24px rgba(0,0,0,0.18);
       }
       .app-sidebar.open {
-        left: 0;
+        transform: translateX(0);
       }
       .sidebar-toggle-btn {
         display: inline-flex;
@@ -1971,42 +2024,392 @@
         padding: 20px;
       }
       .weekly-meal-grid {
-        grid-template-columns: repeat(7, 190px);
+        grid-template-columns: repeat(7, minmax(170px, 1fr));
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
       }
     }
 
     @media (max-width: 768px) {
+      /* Prevent any child element from forcing horizontal scroll */
+      * {
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* 1. Header Responsiveness & Component Balancing */
       .app-header {
-        padding: 0 16px;
+        height: 56px !important;
+        min-height: 56px !important;
+        max-height: 56px !important;
+        padding: 0 12px !important;
+        gap: 8px !important;
+        position: sticky !important;
+        top: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        z-index: 90 !important;
       }
+
+      .header-left {
+        gap: 8px !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+      }
+
+      .sidebar-toggle-btn {
+        display: inline-flex !important;
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: var(--radius-md) !important;
+        background: var(--bg-muted) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+      }
+
+      .mobile-header-brand {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        min-width: 0 !important;
+      }
+
       .global-search-box {
-        display: none;
+        display: none !important;
       }
+
+      .header-right {
+        gap: 6px !important;
+        flex-shrink: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+      }
+
+      /* Compact sync indicator (pulsing dot only, hidden text) */
+      .sync-status {
+        height: 32px !important;
+        padding: 0 8px !important;
+        gap: 0 !important;
+        background: var(--bg-muted) !important;
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: var(--radius-full) !important;
+        justify-content: center !important;
+      }
+      #sync-status-text {
+        display: none !important;
+      }
+
+      /* Header quick action buttons: icon-only on mobile */
+      .header-actions {
+        gap: 6px !important;
+        display: flex !important;
+        align-items: center !important;
+      }
+      .header-actions .btn {
+        height: 34px !important;
+        width: 34px !important;
+        min-width: 34px !important;
+        padding: 0 !important;
+        justify-content: center !important;
+        border-radius: var(--radius-md) !important;
+      }
+      .header-actions .btn span:not(.nav-icon) {
+        display: none !important;
+      }
+      .header-actions .btn-icon {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+      }
+
+      /* Compact User Avatar (hidden username text) */
+      .user-profile-badge {
+        padding: 2px !important;
+        background: transparent !important;
+        border: none !important;
+        cursor: pointer !important;
+      }
+      .user-profile-badge .user-name {
+        display: none !important;
+      }
+      .user-avatar {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 11.5px !important;
+      }
+
+      /* 2. Main Content & Page Padding */
       .page-content {
-        padding: 16px 14px 80px;
+        padding: 14px 12px 84px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
       }
+
       .mobile-bottom-nav {
-        display: flex;
+        display: flex !important;
       }
+
+      .page-header {
+        margin-bottom: 16px !important;
+        gap: 12px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+      }
+      .page-title-group h1 {
+        font-size: 20px !important;
+        line-height: 1.25 !important;
+      }
+      .page-subtitle {
+        font-size: 12px !important;
+      }
+      .page-actions {
+        width: 100% !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+      }
+      .page-actions .btn {
+        flex: 1 1 auto !important;
+        min-width: 120px !important;
+        justify-content: center !important;
+      }
+
+      /* 3. MEAL PLANNER: STACKED DAY CARDS WITH ZERO HORIZONTAL SLIDING */
+      .planner-view-controls {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        width: 100% !important;
+      }
+      .week-navigator {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+      }
+      .current-week-label {
+        font-size: 13.5px !important;
+        text-align: center !important;
+        flex: 1 !important;
+      }
+      .planner-view-controls .tabs-nav {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        margin-bottom: 8px !important;
+        overflow-x: auto !important;
+      }
+      .planner-view-controls .tab-item {
+        padding: 8px 8px !important;
+        font-size: 12px !important;
+        text-align: center !important;
+        flex: 1 !important;
+      }
+      .weekly-meal-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        padding-bottom: 0 !important;
+      }
+      .day-column {
+        min-height: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .day-slots-container {
+        padding: 10px !important;
+        gap: 8px !important;
+      }
+      .meal-slot-box {
+        padding: 8px 10px !important;
+      }
+
+      /* 4. ALL INLINE GRIDS WITH FIXED MINMAX TO 1FR */
+      [style*="minmax(340px"],
+      [style*="minmax(320px"],
+      [style*="minmax(300px"],
+      [style*="minmax(290px"],
+      [style*="minmax(260px"] {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+
+      /* 5. DASHBOARD & STATS */
       .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        margin-bottom: 16px !important;
       }
+      .stat-card {
+        padding: 12px 14px !important;
+      }
+      .stat-value {
+        font-size: 20px !important;
+      }
+
+      /* 6. RECIPES SCREEN */
+      .recipes-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+      }
+      .recipe-card-img-wrap {
+        height: 180px !important;
+      }
+
+      /* 7. GROCERY & PANTRY */
+      .pantry-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+      .grocery-category-card {
+        padding: 14px !important;
+        margin-bottom: 12px !important;
+      }
+      .grocery-item-row {
+        padding: 8px 6px !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+      }
+      .grocery-item-left {
+        gap: 8px !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+      }
+      .grocery-item-name {
+        font-size: 13px !important;
+        word-break: break-word !important;
+      }
+
+      /* 8. ANALYTICS CALORIE CHART ON MOBILE */
+      #analytics-calorie-chart-track {
+        height: 150px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .calorie-chart-column {
+        min-width: 0 !important;
+        flex: 1 1 0% !important;
+      }
+      .calorie-day-label {
+        font-size: 10px !important;
+      }
+      .calorie-val-label {
+        font-size: 9px !important;
+      }
+      #analytics-calorie-tooltip {
+        max-width: 88vw !important;
+        font-size: 11px !important;
+      }
+
+      /* 9. HYDRATION & BUDGET */
       .water-bottle-wrap {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: column !important;
+        align-items: center !important;
+        padding: 16px !important;
+        text-align: center !important;
+      }
+      .hydration-quick-btns {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+      }
+
+      /* 10. UNIVERSAL MODALS */
+      .modal-backdrop {
+        padding: 10px !important;
+      }
+      .modal-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 94vh !important;
+        border-radius: var(--radius-lg) !important;
+        margin: 0 !important;
+      }
+      .modal-header {
+        padding: 14px 16px !important;
+      }
+      .modal-body {
+        padding: 16px !important;
+        overflow-x: hidden !important;
+      }
+      .modal-footer {
+        padding: 12px 16px !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+      }
+      .modal-footer .btn {
+        flex: 1 1 auto !important;
+        min-width: 100px !important;
+        justify-content: center !important;
+      }
+
+      /* 11. TABS & FORM ROWS */
+      .form-row {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+      .tabs-nav {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        width: 100% !important;
+      }
+
+      /* 12. TABLES SCROLL CONFINEMENT */
+      .table-responsive, table {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
       }
     }
 
+    /* Extra Small Devices (Smartphones <= 480px & 360px) */
     @media (max-width: 480px) {
-      .stats-grid {
-        grid-template-columns: 1fr;
+      .app-header {
+        padding: 0 8px !important;
+        gap: 6px !important;
       }
-      .page-title-group h1 {
-        font-size: 22px;
+      .header-left {
+        gap: 6px !important;
+      }
+      .mobile-brand-text {
+        font-size: 13.5px !important;
+      }
+      #header-quick-meal-btn {
+        display: none !important;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr !important;
       }
       .btn {
-        padding: 8px 14px;
-        font-size: 13px;
+        padding: 8px 12px !important;
+        font-size: 12.5px !important;
+      }
+      .page-title-group h1 {
+        font-size: 18px !important;
+      }
+      .card {
+        padding: 14px !important;
+        border-radius: var(--radius-md) !important;
       }
     }
   </style>
@@ -2177,6 +2580,9 @@
       </div>
     </aside>
 
+    <!-- MOBILE SIDEBAR BACKDROP -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
     <!-- ======================================================================
          MAIN APPLICATION BODY
          ====================================================================== -->
@@ -2187,6 +2593,11 @@
           <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" aria-label="Toggle navigation menu">
             <span class="nav-icon" data-icon="menu"></span>
           </button>
+
+          <div class="mobile-header-brand" id="mobile-header-brand">
+            <span class="mobile-brand-icon">🥗</span>
+            <span class="mobile-brand-text">Meal Planner</span>
+          </div>
           
           <div class="global-search-box">
             <span class="global-search-icon" data-icon="search"></span>
@@ -9260,13 +9671,32 @@
       window.Router.navigate('dashboard');
     });
 
-    // 4. Bind Header Controls
+    // 4. Bind Header Controls & Mobile Sidebar Drawer
+    const toggleMobileSidebar = (forceState) => {
+      const sb = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      if (!sb) return;
+      const willOpen = forceState !== undefined ? forceState : !sb.classList.contains('open');
+      if (willOpen) {
+        sb.classList.add('open');
+        if (backdrop) backdrop.classList.add('active');
+        document.body.classList.add('sidebar-drawer-open');
+      } else {
+        sb.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('active');
+        document.body.classList.remove('sidebar-drawer-open');
+      }
+    };
+    window.toggleMobileSidebar = toggleMobileSidebar;
+
     const toggleBtn = document.getElementById('sidebar-toggle-btn');
     if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
-        const sb = document.getElementById('app-sidebar');
-        if (sb) sb.classList.toggle('open');
-      });
+      toggleBtn.addEventListener('click', () => toggleMobileSidebar());
+    }
+
+    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+    if (sidebarBackdrop) {
+      sidebarBackdrop.addEventListener('click', () => toggleMobileSidebar(false));
     }
 
     const themeToggleBtn = document.getElementById('theme-mode-toggle-btn');
@@ -9335,12 +9765,15 @@
       });
     }
 
-    // Bind sidebar links
+    // Bind sidebar links (auto-close drawer on mobile on navigation)
     document.querySelectorAll('.app-sidebar .nav-link').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         const viewId = link.getAttribute('data-view');
-        if (viewId) window.Router.navigate(viewId);
+        if (viewId) {
+          window.Router.navigate(viewId);
+          if (window.innerWidth <= 1024) toggleMobileSidebar(false);
+        }
       });
     });
 
@@ -9348,16 +9781,16 @@
     document.querySelectorAll('.mobile-bottom-nav .mobile-nav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const viewId = btn.getAttribute('data-view');
-        if (viewId) window.Router.navigate(viewId);
+        if (viewId) {
+          window.Router.navigate(viewId);
+          if (window.innerWidth <= 1024) toggleMobileSidebar(false);
+        }
       });
     });
 
     const mobileMore = document.getElementById('mobile-more-btn');
     if (mobileMore) {
-      mobileMore.addEventListener('click', () => {
-        const sb = document.getElementById('app-sidebar');
-        if (sb) sb.classList.toggle('open');
-      });
+      mobileMore.addEventListener('click', () => toggleMobileSidebar());
     }
 
     // Browser native print & Ctrl+P lifecycle hook
