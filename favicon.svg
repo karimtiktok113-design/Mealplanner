@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1f4431"/>
+      <stop offset="50%" stop-color="#336348"/>
+      <stop offset="100%" stop-color="#46815e"/>
+    </linearGradient>
+    <linearGradient id="bowlGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e2eee6"/>
+    </linearGradient>
+    <linearGradient id="leafLeft" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#276749"/>
+      <stop offset="100%" stop-color="#48bb78"/>
+    </linearGradient>
+    <linearGradient id="leafRight" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38a169"/>
+      <stop offset="100%" stop-color="#68d391"/>
+    </linearGradient>
+    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle App Badge -->
+  <rect width="100" height="100" rx="24" fill="url(#bg)"/>
+  <rect width="94" height="94" x="3" y="3" rx="22" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+
+  <!-- Bowl & Salad Group with subtle shadow -->
+  <g filter="url(#dropShadow)">
+    <!-- Left Leaf -->
+    <path d="M42,50 C36,36 41,25 50,21 C52,32 47,44 42,50 Z" fill="url(#leafLeft)"/>
+    <path d="M46,36 Q44,44 42,50" stroke="#a7f3d0" stroke-width="1" stroke-linecap="round" fill="none"/>
+
+    <!-- Right Leaf -->
+    <path d="M50,48 C54,33 65,27 73,30 C70,41 60,47 50,48 Z" fill="url(#leafRight)"/>
+    <path d="M57,38 Q53,44 50,48" stroke="#d1fae5" stroke-width="1" stroke-linecap="round" fill="none"/>
+
+    <!-- Center Sprout Leaf -->
+    <path d="M46,49 C46,39 52,32 57,30 C56,38 52,45 46,49 Z" fill="#68d391"/>
+
+    <!-- Fresh Tomato / Berry Garnish -->
+    <circle cx="34" cy="45" r="6" fill="#f56565"/>
+    <circle cx="32" cy="43" r="1.8" fill="#feb2b2"/>
+
+    <!-- Golden Citrus / Avocado Accent -->
+    <path d="M58,40 C63,41 66,45 65,49 C60,49 57,45 58,40 Z" fill="#ecc94b"/>
+
+    <!-- Ceramic Salad Bowl -->
+    <path d="M21,50 C21,73 34,81 50,81 C66,81 79,73 79,50 Z" fill="url(#bowlGrad)"/>
+    <!-- Bowl Rim Highlight -->
+    <path d="M20,50 Q50,54 80,50" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <path d="M25,52 Q50,56 75,52" stroke="#d4e6db" stroke-width="1" stroke-linecap="round" fill="none"/>
+
+    <!-- Nutrition Golden Sparkle -->
+    <path d="M77,16 Q77,22 83,22 Q77,22 77,28 Q77,22 71,22 Q77,22 77,16 Z" fill="#f6e05e"/>
+    <circle cx="77" cy="22" r="1" fill="#ffffff"/>
+  </g>
+</svg>

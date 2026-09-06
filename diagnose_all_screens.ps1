@@ -44,7 +44,7 @@ Write-Host "========================================================`n" -Foregro
 $passedCount = 0
 foreach ($s in $screens) {
   $url = "$baseUri#$($s.hash)"
-  $domOutput = & $chrome --headless=new --disable-gpu --dump-dom $url 2>$null | Out-String
+  $domOutput = cmd.exe /c "`"$chrome`" --headless=new --disable-gpu --dump-dom `"$url`" 2>nul"
 
   $hasTitle = $domOutput -like "*$($s.title)*"
   $hasViewId = $domOutput -like "*id=`"$($s.viewId)`"*"
