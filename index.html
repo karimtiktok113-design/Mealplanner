@@ -1699,7 +1699,7 @@
         text-transform: uppercase;
         letter-spacing: 0.04em;
       }
-      .print-badge-primary { background: #e8f3ed !important; color: #2d5540 !important; border: 1px solid #c4decfa !important; }
+      .print-badge-primary { background: #e8f3ed !important; color: #2d5540 !important; border: 1px solid #c4decf !important; }
       .print-badge-info { background: #eff6ff !important; color: #1e40af !important; border: 1px solid #bfdbfe !important; }
       .print-badge-warning { background: #fffbeb !important; color: #92400e !important; border: 1px solid #fde68a !important; }
       .print-badge-danger { background: #fef2f2 !important; color: #991b1b !important; border: 1px solid #fecaca !important; }
@@ -2347,6 +2347,40 @@
     });
   };
 
+  // Universal recipe image and icon renderer (supports Base64 data URLs, local uploads, remote URLs, and emoji fallbacks)
+  window.renderRecipeImage = function(imageSrc, altText = 'Recipe', size = 'md', extraClass = '') {
+    const isImageFile = typeof imageSrc === 'string' && (
+      imageSrc.startsWith('data:image/') ||
+      imageSrc.startsWith('http://') ||
+      imageSrc.startsWith('https://') ||
+      imageSrc.startsWith('blob:') ||
+      /\.(jpg|jpeg|png|webp|avif|gif|svg)($|\?)/i.test(imageSrc)
+    );
+
+    let fontSize = '56px';
+    if (typeof size === 'number') fontSize = `${Math.round(size * 0.6)}px`;
+    else if (size === 'sm') fontSize = '26px';
+    else if (size === 'lg') fontSize = '64px';
+    else if (size === 'print') fontSize = '36px';
+
+    if (isImageFile) {
+      let sizeStyle = 'width: 100%; height: 100%; object-fit: cover; border-radius: inherit;';
+      if (typeof size === 'number') {
+        sizeStyle = `width: ${size}px; height: ${size}px; min-width: ${size}px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0;`;
+      } else if (size === 'sm') {
+        sizeStyle = 'width: 44px; height: 44px; min-width: 44px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0;';
+      } else if (size === 'lg') {
+        sizeStyle = 'width: 90px; height: 90px; min-width: 90px; border-radius: var(--radius-lg); object-fit: cover; flex-shrink: 0; box-shadow: var(--shadow-sm);';
+      } else if (size === 'print') {
+        sizeStyle = 'width: 70px; height: 70px; min-width: 70px; border-radius: 6px; object-fit: cover; border: 1px solid #cbd5e1;';
+      }
+      return `<img src="${imageSrc}" alt="${altText}" class="recipe-card-img ${extraClass}" style="${sizeStyle}" loading="lazy" onerror="this.onerror=null; this.style.display='none'; if(this.nextElementSibling){this.nextElementSibling.style.display='inline-flex';}"><span class="recipe-emoji fallback-emoji ${extraClass}" style="display: none; font-size: ${fontSize}; user-select: none; align-items: center; justify-content: center;">🍲</span>`;
+    }
+
+    // Otherwise emoji / symbol fallback
+    return `<span class="recipe-emoji ${extraClass}" style="font-size: ${fontSize}; user-select: none; display: inline-flex; align-items: center; justify-content: center;">${imageSrc || '🍲'}</span>`;
+  };
+
   // Helper ID generator
   window.generateId = function(prefix = 'id') {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
@@ -2380,7 +2414,7 @@
     {
       id: 'rec_avocado_toast',
       name: 'Avocado Toast with Poached Egg',
-      image: '🥑',
+      image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=80',
       description: 'Artisanal sourdough toast topped with smashed avocado, chili flakes, a farm-fresh poached egg, and organic microgreens.',
       mealType: 'Breakfast',
       cuisine: 'Mediterranean',
@@ -2418,7 +2452,7 @@
     {
       id: 'rec_greek_yogurt_bowl',
       name: 'Greek Yogurt Berry Crunch Bowl',
-      image: '🫐',
+      image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80',
       description: 'Rich probiotic Greek yogurt layered with wild blueberries, raw almonds, chia seeds, and raw honey.',
       mealType: 'Breakfast',
       cuisine: 'Mediterranean',
@@ -2454,7 +2488,7 @@
     {
       id: 'rec_chicken_quinoa_bowl',
       name: 'Mediterranean Grilled Chicken Quinoa Bowl',
-      image: '🥗',
+      image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
       description: 'Herbed grilled chicken breast over fluffy tricolor quinoa, cucumber, cherry tomatoes, kalamata olives, and lemon oregano vinaigrette.',
       mealType: 'Lunch',
       cuisine: 'Mediterranean',
@@ -2492,7 +2526,7 @@
     {
       id: 'rec_teriyaki_salmon',
       name: 'Asian Glazed Teriyaki Salmon & Bok Choy',
-      image: '🍣',
+      image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=800&q=80',
       description: 'Pan-seared Atlantic salmon glazed in low-sodium ginger teriyaki sauce, served with steamed bok choy and jasmine rice.',
       mealType: 'Dinner',
       cuisine: 'Asian',
@@ -2532,7 +2566,7 @@
     {
       id: 'rec_korean_beef_bowl',
       name: 'Korean Beef & Steamed Broccoli Bowl',
-      image: '🥩',
+      image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=800&q=80',
       description: 'Lean ground beef caramelized with garlic, ginger, sesame oil, and scallions over brown rice with crisp broccoli florets.',
       mealType: 'Dinner',
       cuisine: 'Asian',
@@ -2570,7 +2604,7 @@
     {
       id: 'rec_creamy_tuscan_chicken',
       name: 'Creamy Tuscan Garlic Chicken',
-      image: '🧄',
+      image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80',
       description: 'Tender pan-seared chicken cutlets in a velvety garlic parmesan sauce with fresh baby spinach and sun-dried tomatoes.',
       mealType: 'Dinner',
       cuisine: 'Italian',
@@ -2608,7 +2642,7 @@
     {
       id: 'rec_turkey_skillet',
       name: 'Turkey, Kale & Sweet Potato Skillet',
-      image: '🍠',
+      image: 'https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=800&q=80',
       description: 'Ground turkey skillet with roasted sweet potato cubes, Tuscan kale, and caramelized red onions.',
       mealType: 'Dinner',
       cuisine: 'American',
@@ -2644,7 +2678,7 @@
     {
       id: 'rec_chickpea_tahini_salad',
       name: 'Roasted Chickpea & Tahini Crunch Salad',
-      image: '🥗',
+      image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80',
       description: 'Spiced oven-roasted chickpeas over mixed greens, shredded carrots, cucumbers, and creamy lemon garlic tahini dressing.',
       mealType: 'Lunch',
       cuisine: 'Mediterranean',
@@ -2681,7 +2715,7 @@
     {
       id: 'rec_shrimp_fajita_bowl',
       name: 'Zesty Shrimp Fajita & Cilantro Rice Bowl',
-      image: '🍤',
+      image: 'https://images.unsplash.com/photo-1551248429-40975aa4de74?auto=format&fit=crop&w=800&q=80',
       description: 'Succulent spiced wild shrimp with charred bell peppers and onions over cilantro lime brown rice with salsa.',
       mealType: 'Lunch',
       cuisine: 'Mexican',
@@ -2719,7 +2753,7 @@
     {
       id: 'rec_protein_smoothie',
       name: 'Peanut Butter Banana Protein Smoothie',
-      image: '🥤',
+      image: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=800&q=80',
       description: 'Creamy high-energy recovery shake with banana, natural peanut butter, whey protein isolate, and unsweetened almond milk.',
       mealType: 'Morning Snack',
       cuisine: 'American',
@@ -2755,7 +2789,7 @@
     {
       id: 'rec_almond_egg_snack',
       name: 'Boiled Eggs & Roasted Almonds Snack Pack',
-      image: '🥚',
+      image: 'https://images.unsplash.com/photo-1506976785307-8732e854ad03?auto=format&fit=crop&w=800&q=80',
       description: 'Perfect hard-boiled pasture-raised eggs paired with salted roasted California almonds.',
       mealType: 'Afternoon Snack',
       cuisine: 'American',
@@ -2788,7 +2822,7 @@
     {
       id: 'rec_chia_pudding',
       name: 'Dark Chocolate Raspberry Chia Pudding',
-      image: '🍮',
+      image: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=800&q=80',
       description: 'Decadent chilled chia pudding infused with dark cocoa powder, almond milk, and fresh organic raspberries.',
       mealType: 'Evening Snack',
       cuisine: 'American',
@@ -2824,7 +2858,7 @@
     {
       id: 'rec_lemon_chicken_asparagus',
       name: 'Grilled Lemon Herb Chicken & Roasted Asparagus',
-      image: '🍗',
+      image: 'https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=800&q=80',
       description: 'Zesty lemon-marinated chicken breast paired with crisp roasted tender asparagus spears.',
       mealType: 'Dinner',
       cuisine: 'Mediterranean',
@@ -2860,7 +2894,7 @@
     {
       id: 'rec_overnight_protein_oats',
       name: 'Vanilla Blueberry Overnight Protein Oats',
-      image: '🥣',
+      image: 'https://images.unsplash.com/photo-1517673400267-0251440c45dc?auto=format&fit=crop&w=800&q=80',
       description: 'Rolled oats soaked overnight in almond milk with vanilla whey, chia seeds, and wild blueberries.',
       mealType: 'Breakfast',
       cuisine: 'American',
@@ -2896,7 +2930,7 @@
     {
       id: 'rec_classic_minestrone',
       name: 'Classic Tuscan Vegetable Minestrone',
-      image: '🍲',
+      image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80',
       description: 'Slow-simmered aromatic soup with cannellini beans, zucchini, tomatoes, ditalini pasta, and fragrant basil pesto.',
       mealType: 'Lunch',
       cuisine: 'Italian',
@@ -3226,6 +3260,16 @@
               } else {
                 window.appState.budget.monthlyBudget = Number(window.appState.budget.monthlyBudget);
               }
+            }
+
+            // Upgrade demo recipes if they still have legacy emoji icons in saved localStorage
+            if (Array.isArray(window.appState.recipes)) {
+              window.appState.recipes.forEach(r => {
+                const seed = SEED_RECIPES.find(s => s.id === r.id);
+                if (seed && seed.image && (!r.image || (!r.image.startsWith('http') && !r.image.startsWith('data:image')))) {
+                  r.image = seed.image;
+                }
+              });
             }
             return true;
           }
@@ -4146,7 +4190,7 @@
                 ${pantryMatches.length > 0 ? pantryMatches.map(m => `
                   <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--bg-muted); border-radius: var(--radius-md);">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                      <span style="font-size: 26px;">${m.recipe.image || '🍲'}</span>
+                      ${window.renderRecipeImage(m.recipe.image, m.recipe.name, 'sm')}
                       <div>
                         <div style="font-size: 13.5px; font-weight: 700; color: var(--text-main);">${m.recipe.name}</div>
                         <div style="font-size: 11.5px; color: var(--text-secondary);">
@@ -4648,7 +4692,7 @@
           ${recipes.map(r => `
             <div class="recipe-card">
               <div class="recipe-card-img-wrap">
-                <span style="font-size: 56px;">${r.image || '🥗'}</span>
+                ${window.renderRecipeImage(r.image, r.name, 'md')}
                 <button class="recipe-favorite-btn ${r.favorite ? 'active' : ''}" onclick="window.ModulesUI.toggleFavoriteRecipe('${r.id}')" title="Favorite">
                   ${window.renderIcon('heart')}
                 </button>
@@ -5635,7 +5679,7 @@
           ${favRecipes.map(r => `
             <div class="recipe-card">
               <div class="recipe-card-img-wrap">
-                <span style="font-size: 56px;">${r.image || '🍲'}</span>
+                ${window.renderRecipeImage(r.image, r.name, 'md')}
                 <button class="recipe-favorite-btn active" onclick="window.ModulesUI.toggleFavoriteRecipe('${r.id}')">
                   ${window.renderIcon('heart')}
                 </button>
@@ -5730,13 +5774,37 @@
     },
 
     // --------------------------------------------------------------------------
-    // 13. ANALYTICS MODULE
+    // 13. ANALYTICS MODULE (FULLY INTERACTIVE & SYNCED CALORIE TREND GRAPH)
     // --------------------------------------------------------------------------
     renderAnalytics: function() {
       const container = document.getElementById('view-analytics');
       if (!container) return;
 
-      const weeklyNutri = window.CalculationEngine.calculateWeeklyNutrition(window.plannerActiveMonday);
+      window.analyticsActiveMonday = window.analyticsActiveMonday || window.plannerActiveMonday || window.getMonday();
+      const activeMon = window.analyticsActiveMonday;
+      const activeSun = window.addDays(activeMon, 6);
+      const weeklyNutri = window.CalculationEngine.calculateWeeklyNutrition(activeMon);
+      const targetCal = window.appState.goals?.calories || window.appState.profile?.dailyCalories || 2200;
+      const targetProtein = window.appState.goals?.protein || 140;
+      const targetCarbs = window.appState.goals?.carbs || 220;
+      const targetFat = window.appState.goals?.fat || 70;
+
+      const formatShortDate = (d) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      const weekRangeLabel = `${formatShortDate(activeMon)} – ${formatShortDate(activeSun)}, ${activeMon.getFullYear()}`;
+
+      // Scaling calculation for the chart
+      const maxDayCal = Math.max(...weeklyNutri.days.map(d => d.totals.calories), 0);
+      const maxCal = Math.max(targetCal * 1.25, maxDayCal * 1.15, 2400);
+      const chartHeight = 175; // explicit pixel track height
+      const targetLineBottom = Math.round((targetCal / maxCal) * chartHeight);
+
+      // Weekly adherence count
+      let onTargetDays = 0;
+      weeklyNutri.days.forEach(d => {
+        if (d.totals.calories > 0 && Math.abs(d.totals.calories - targetCal) <= targetCal * 0.12) {
+          onTargetDays++;
+        }
+      });
 
       container.innerHTML = `
         <div class="page-header">
@@ -5751,54 +5819,186 @@
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
-          <div class="card">
-            <h3 class="card-title" style="margin-bottom: 16px;">Weekly Calorie Trend</h3>
-            <div style="display: flex; align-items: flex-end; justify-content: space-between; height: 180px; padding-top: 20px;">
-              ${weeklyNutri.days.map(d => {
-                const dayName = new Date(d.dateStr + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'narrow' });
-                const heightPct = Math.min(100, Math.round((d.totals.calories / 3000) * 100));
-                return `
-                  <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1;">
-                    <span style="font-size: 10px; font-weight: 700; color: var(--text-muted);">${d.totals.calories}</span>
-                    <div style="width: 24px; height: ${heightPct}%; background: var(--primary); border-radius: var(--radius-sm); transition: height 0.3s ease;"></div>
-                    <span style="font-size: 12px; font-weight: 600; color: var(--text-main);">${dayName}</span>
-                  </div>
-                `;
-              }).join('')}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px;">
+          <!-- CARD 1: WEEKLY CALORIE TREND GRAPH -->
+          <div class="card" style="position: relative;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <h3 class="card-title" style="margin-bottom: 2px;">Weekly Calorie Trend</h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Interactive intake vs. daily goal</p>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <button class="btn-icon btn-sm" onclick="window.ModulesUI.shiftAnalyticsWeek(-7)" title="Previous Week">
+                  ${window.renderIcon('chevron-left')}
+                </button>
+                <span style="font-size: 12px; font-weight: 700; color: var(--text-main); min-width: 130px; text-align: center;">
+                  ${weekRangeLabel}
+                </span>
+                <button class="btn-icon btn-sm" onclick="window.ModulesUI.shiftAnalyticsWeek(7)" title="Next Week">
+                  ${window.renderIcon('chevron-right')}
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="window.ModulesUI.resetAnalyticsWeek()" style="font-size: 11px; padding: 2px 8px;">
+                  Current Week
+                </button>
+              </div>
+            </div>
+
+            <!-- MINI KPI METRICS STRIP -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">
+              <div style="background: var(--bg-muted); padding: 8px 10px; border-radius: var(--radius-md); text-align: center;">
+                <div style="font-size: 10.5px; color: var(--text-muted); font-weight: 600;">Daily Average</div>
+                <div style="font-size: 15px; font-weight: 800; color: var(--text-main);">${weeklyNutri.avgCalories.toLocaleString()} <span style="font-size: 10px;">kcal</span></div>
+              </div>
+              <div style="background: var(--bg-muted); padding: 8px 10px; border-radius: var(--radius-md); text-align: center;">
+                <div style="font-size: 10.5px; color: var(--text-muted); font-weight: 600;">Daily Target</div>
+                <div style="font-size: 15px; font-weight: 800; color: var(--primary);">${targetCal.toLocaleString()} <span style="font-size: 10px;">kcal</span></div>
+              </div>
+              <div style="background: var(--bg-muted); padding: 8px 10px; border-radius: var(--radius-md); text-align: center;">
+                <div style="font-size: 10.5px; color: var(--text-muted); font-weight: 600;">Total Calories</div>
+                <div style="font-size: 15px; font-weight: 800; color: var(--text-main);">${weeklyNutri.totalCalories.toLocaleString()} <span style="font-size: 10px;">kcal</span></div>
+              </div>
+              <div style="background: var(--bg-muted); padding: 8px 10px; border-radius: var(--radius-md); text-align: center;">
+                <div style="font-size: 10.5px; color: var(--text-muted); font-weight: 600;">Adherence</div>
+                <div style="font-size: 15px; font-weight: 800; color: #10b981;">${onTargetDays}/7 <span style="font-size: 10px;">days</span></div>
+              </div>
+            </div>
+
+            <!-- INTERACTIVE GRAPH CANVAS BOX -->
+            <div style="position: relative; padding: 20px 8px 10px 8px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: visible;">
+              <!-- Target Goal Reference Line -->
+              <div style="position: absolute; left: 10px; right: 10px; bottom: ${targetLineBottom + 42}px; border-top: 2px dashed rgba(14, 165, 233, 0.65); z-index: 3; pointer-events: none;">
+                <span style="position: absolute; right: 0; top: -19px; font-size: 10px; font-weight: 700; color: #0284c7; background: var(--bg-surface); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(14, 165, 233, 0.35); box-shadow: var(--shadow-sm);">
+                  🎯 Goal: ${targetCal.toLocaleString()} kcal
+                </span>
+              </div>
+
+              <!-- Reference Dotted Guide Lines -->
+              <div style="position: absolute; left: 10px; right: 10px; bottom: ${Math.round(chartHeight * 0.5) + 42}px; border-top: 1px dotted var(--border-color); z-index: 1; pointer-events: none; opacity: 0.6;"></div>
+              <div style="position: absolute; left: 10px; right: 10px; bottom: ${Math.round(chartHeight * 0.75) + 42}px; border-top: 1px dotted var(--border-color); z-index: 1; pointer-events: none; opacity: 0.6;"></div>
+
+              <!-- Floating Tooltip Box -->
+              <div id="analytics-calorie-tooltip" style="position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: var(--bg-surface); border: 1px solid var(--border-color); box-shadow: var(--shadow-xl); border-radius: var(--radius-md); padding: 10px 14px; pointer-events: none; opacity: 0; transition: opacity 0.15s, left 0.15s; z-index: 25; min-width: 200px; text-align: center;"></div>
+
+              <!-- Explicit Height Columns & Dynamic Bars -->
+              <div style="display: flex; align-items: flex-end; justify-content: space-around; height: ${chartHeight}px; position: relative; z-index: 4;">
+                ${weeklyNutri.days.map((d) => {
+                  const cal = d.totals.calories;
+                  const dayObj = new Date(d.dateStr + 'T00:00:00');
+                  const dayLetter = dayObj.toLocaleDateString(undefined, { weekday: 'narrow' });
+                  const dayShort = dayObj.toLocaleDateString(undefined, { weekday: 'short' });
+                  const barHeightPx = cal > 0 ? Math.max(10, Math.round((cal / maxCal) * chartHeight)) : 6;
+
+                  // Color and gradient based on calorie target
+                  let barBg = 'linear-gradient(180deg, #10b981 0%, #059669 100%)';
+                  let barShadow = '0 4px 12px rgba(16, 185, 129, 0.25)';
+                  if (cal === 0) {
+                    barBg = 'var(--bg-muted)';
+                    barShadow = 'none';
+                  } else if (cal > targetCal * 1.1) {
+                    barBg = 'linear-gradient(180deg, #f59e0b 0%, #d97706 100%)';
+                    barShadow = '0 4px 12px rgba(245, 158, 11, 0.25)';
+                  } else if (cal < targetCal * 0.9) {
+                    barBg = 'linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%)';
+                    barShadow = '0 4px 12px rgba(14, 165, 233, 0.25)';
+                  }
+
+                  return `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; flex: 1; max-width: 50px; position: relative;">
+                      <!-- Calorie Number on Top -->
+                      <span style="font-size: 10.5px; font-weight: 800; color: ${cal > 0 ? 'var(--text-main)' : 'var(--text-muted)'}; margin-bottom: 6px; white-space: nowrap;">
+                        ${cal > 0 ? cal.toLocaleString() : '0'}
+                      </span>
+
+                      <!-- Bar with guaranteed explicit pixel height -->
+                      <div class="analytics-calorie-bar"
+                           style="width: 28px; height: ${barHeightPx}px; background: ${barBg}; box-shadow: ${barShadow}; border-radius: 6px 6px 2px 2px; transition: transform 0.2s ease, filter 0.2s ease; cursor: pointer; border: ${cal === 0 ? '1.5px dashed var(--border-color)' : 'none'};"
+                           onmouseenter="window.ModulesUI.showCalorieTooltip(event, '${d.dateStr}', ${cal}, ${targetCal}, ${d.totals.protein}, ${d.totals.carbs}, ${d.totals.fat}, ${d.totals.plannedCount})"
+                           onmouseleave="window.ModulesUI.hideCalorieTooltip()"
+                           onclick="window.ModulesUI.onCalorieBarClick('${d.dateStr}')"
+                           title="${dayShort} (${d.dateStr}): ${cal} kcal • Click to open in Planner">
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+
+              <!-- Day Letters & Dates at Bottom -->
+              <div style="display: flex; justify-content: space-around; padding-top: 10px; border-top: 1px solid var(--border-color); margin-top: 8px;">
+                ${weeklyNutri.days.map(d => {
+                  const dayObj = new Date(d.dateStr + 'T00:00:00');
+                  const dayLetter = dayObj.toLocaleDateString(undefined, { weekday: 'narrow' });
+                  const dayNum = dayObj.getDate();
+                  const isToday = d.dateStr === window.formatDateISO();
+                  return `
+                    <div style="display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 50px; cursor: pointer;" onclick="window.ModulesUI.onCalorieBarClick('${d.dateStr}')">
+                      <span style="font-size: 12.5px; font-weight: ${isToday ? '800' : '700'}; color: ${isToday ? 'var(--primary)' : 'var(--text-main)'};">
+                        ${dayLetter}
+                      </span>
+                      <span style="font-size: 10px; color: ${isToday ? 'var(--primary)' : 'var(--text-muted)'}; font-weight: ${isToday ? '700' : '500'};">
+                        ${dayNum}
+                      </span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- CHART LEGEND -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 12px; font-size: 11px; color: var(--text-muted); flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 5px;">
+                <span style="width: 10px; height: 10px; border-radius: 2px; background: #10b981; display: inline-block;"></span>
+                <span>On Target (±10%)</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 5px;">
+                <span style="width: 10px; height: 10px; border-radius: 2px; background: #f59e0b; display: inline-block;"></span>
+                <span>Over Goal (&gt;10%)</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 5px;">
+                <span style="width: 10px; height: 10px; border-radius: 2px; background: #0ea5e9; display: inline-block;"></span>
+                <span>Under Goal (&lt;10%)</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 5px;">
+                <span style="width: 14px; border-top: 2px dashed #0284c7; display: inline-block;"></span>
+                <span>Goal Guide (${targetCal} kcal)</span>
+              </div>
             </div>
           </div>
 
+          <!-- CARD 2: MACRONUTRIENT BALANCE SUMMARY -->
           <div class="card">
-            <h3 class="card-title" style="margin-bottom: 16px;">Macronutrient Balance Summary</h3>
-            <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+              <h3 class="card-title" style="margin-bottom: 0;">Macronutrient Balance Summary</h3>
+              <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Daily Averages</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 18px;">
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
                   <span>Average Daily Protein</span>
-                  <strong>${weeklyNutri.avgProtein}g</strong>
+                  <strong>${weeklyNutri.avgProtein}g <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">/ ${targetProtein}g (${Math.round((weeklyNutri.avgProtein / targetProtein) * 100)}%)</span></strong>
                 </div>
-                <div style="height: 8px; background: var(--bg-muted); border-radius: var(--radius-full); margin-top: 6px; overflow: hidden;">
-                  <div style="width: ${Math.min(100, (weeklyNutri.avgProtein / 140) * 100)}%; height: 100%; background: var(--macro-protein);"></div>
+                <div style="height: 10px; background: var(--bg-muted); border-radius: var(--radius-full); overflow: hidden;">
+                  <div style="width: ${Math.min(100, (weeklyNutri.avgProtein / targetProtein) * 100)}%; height: 100%; background: var(--macro-protein); border-radius: inherit;"></div>
                 </div>
               </div>
 
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
                   <span>Average Daily Carbs</span>
-                  <strong>${weeklyNutri.avgCarbs}g</strong>
+                  <strong>${weeklyNutri.avgCarbs}g <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">/ ${targetCarbs}g (${Math.round((weeklyNutri.avgCarbs / targetCarbs) * 100)}%)</span></strong>
                 </div>
-                <div style="height: 8px; background: var(--bg-muted); border-radius: var(--radius-full); margin-top: 6px; overflow: hidden;">
-                  <div style="width: ${Math.min(100, (weeklyNutri.avgCarbs / 220) * 100)}%; height: 100%; background: var(--macro-carbs);"></div>
+                <div style="height: 10px; background: var(--bg-muted); border-radius: var(--radius-full); overflow: hidden;">
+                  <div style="width: ${Math.min(100, (weeklyNutri.avgCarbs / targetCarbs) * 100)}%; height: 100%; background: var(--macro-carbs); border-radius: inherit;"></div>
                 </div>
               </div>
 
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
                   <span>Average Daily Fat</span>
-                  <strong>${weeklyNutri.avgFat}g</strong>
+                  <strong>${weeklyNutri.avgFat}g <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">/ ${targetFat}g (${Math.round((weeklyNutri.avgFat / targetFat) * 100)}%)</span></strong>
                 </div>
-                <div style="height: 8px; background: var(--bg-muted); border-radius: var(--radius-full); margin-top: 6px; overflow: hidden;">
-                  <div style="width: ${Math.min(100, (weeklyNutri.avgFat / 70) * 100)}%; height: 100%; background: var(--macro-fat);"></div>
+                <div style="height: 10px; background: var(--bg-muted); border-radius: var(--radius-full); overflow: hidden;">
+                  <div style="width: ${Math.min(100, (weeklyNutri.avgFat / targetFat) * 100)}%; height: 100%; background: var(--macro-fat); border-radius: inherit;"></div>
                 </div>
               </div>
             </div>
@@ -5807,6 +6007,67 @@
       `;
 
       window.hydrateIcons(container);
+    },
+
+    shiftAnalyticsWeek: function(daysOffset) {
+      window.analyticsActiveMonday = window.addDays(window.analyticsActiveMonday || window.plannerActiveMonday || window.getMonday(), daysOffset);
+      this.renderAnalytics();
+    },
+
+    resetAnalyticsWeek: function() {
+      window.analyticsActiveMonday = window.getMonday();
+      this.renderAnalytics();
+    },
+
+    showCalorieTooltip: function(event, dateStr, cal, targetCal, protein, carbs, fat, mealsCount) {
+      const tooltip = document.getElementById('analytics-calorie-tooltip');
+      if (!tooltip) return;
+
+      const diff = cal - targetCal;
+      const diffText = diff > 0 
+        ? `<span style="color: #f59e0b; font-weight: 700;">+${diff} kcal over goal</span>` 
+        : diff < 0 
+        ? `<span style="color: #0ea5e9; font-weight: 700;">${Math.abs(diff)} kcal under goal</span>` 
+        : `<span style="color: #10b981; font-weight: 700;">Exact goal match!</span>`;
+
+      const d = new Date(dateStr + 'T00:00:00');
+      const dateFormatted = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+
+      tooltip.innerHTML = `
+        <div style="font-weight: 800; color: var(--text-main); font-size: 13px; margin-bottom: 2px;">${dateFormatted}</div>
+        <div style="font-size: 17px; font-weight: 800; color: var(--primary); margin-bottom: 3px;">${cal.toLocaleString()} kcal</div>
+        <div style="font-size: 11.5px; margin-bottom: 8px;">${diffText}</div>
+        <div style="display: flex; justify-content: center; gap: 8px; font-size: 11.5px; border-top: 1px solid var(--border-color); padding-top: 6px; margin-top: 4px;">
+          <span>🥩 <strong>${protein}g</strong> P</span>
+          <span>🌾 <strong>${carbs}g</strong> C</span>
+          <span>🥑 <strong>${fat}g</strong> F</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+          ${mealsCount} meals scheduled • Click to open in Planner
+        </div>
+      `;
+
+      tooltip.style.opacity = '1';
+      const rect = event.currentTarget.getBoundingClientRect();
+      const cardRect = tooltip.parentElement.getBoundingClientRect();
+      let left = rect.left - cardRect.left + (rect.width / 2) - 100;
+      left = Math.max(10, Math.min(cardRect.width - 210, left));
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `10px`;
+    },
+
+    hideCalorieTooltip: function() {
+      const tooltip = document.getElementById('analytics-calorie-tooltip');
+      if (tooltip) tooltip.style.opacity = '0';
+    },
+
+    onCalorieBarClick: function(dateStr) {
+      window.plannerActiveDateStr = dateStr;
+      window.Router.navigate('meal-planner');
+      if (typeof window.ModulesUI.selectPlannerDate === 'function') {
+        window.ModulesUI.selectPlannerDate(dateStr);
+      }
+      window.ToastService.show(`Viewing meal plan for ${dateStr}`);
     }
   };
 
@@ -6148,6 +6409,17 @@
 
       const html = `
         ${this.createPrintHeader(r.name, `${r.mealType} • ${r.cuisine || 'Modern'} • ${r.category}`, 'Chef Card')}
+
+        <!-- RECIPE HERO / PHOTO BANNER -->
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <div style="width: 60px; height: 60px; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #ffffff; border: 1px solid #cbd5e1;">
+            ${window.renderRecipeImage ? window.renderRecipeImage(r.image, r.name, 60) : `<span style="font-size: 32px;">${r.image || '🍲'}</span>`}
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 11pt; font-weight: 800; color: #0f172a;">${r.name}</div>
+            <div style="font-size: 8.5pt; color: #64748b;">${r.description || 'Master culinary recipe with detailed nutrition analysis'}</div>
+          </div>
+        </div>
 
         <!-- KPI SUMMARY -->
         <div class="print-kpi-grid">
@@ -7455,7 +7727,9 @@
           ${alts.map(r => `
             <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface);">
               <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 26px;">${r.image || '🥗'}</span>
+                <div style="width: 38px; height: 38px; border-radius: var(--radius-sm); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--bg-card); border: 1px solid var(--border-color);">
+                  ${window.renderRecipeImage ? window.renderRecipeImage(r.image, r.name, 38) : `<span style="font-size: 26px;">${r.image || '🥗'}</span>`}
+                </div>
                 <div>
                   <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">${r.name}</div>
                   <div style="font-size: 12px; color: var(--text-secondary);">
@@ -7680,7 +7954,9 @@
 
       const bodyHtml = `
         <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
-          <div style="font-size: 64px;">${r.image || '🥗'}</div>
+          <div style="width: 80px; height: 80px; border-radius: var(--radius-md); overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--bg-surface); border: 1px solid var(--border-color); flex-shrink: 0; box-shadow: var(--shadow-sm);">
+            ${window.renderRecipeImage ? window.renderRecipeImage(r.image, r.name, 80) : `<div style="font-size: 64px;">${r.image || '🥗'}</div>`}
+          </div>
           <div>
             <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main);">${r.name}</h2>
             <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">${r.description}</p>
@@ -7830,22 +8106,51 @@
 
       const bodyHtml = `
         <form id="recipe-editor-form" onsubmit="event.preventDefault(); window.ModalService.saveRecipe(${isEdit ? `'${r.id}'` : ''});">
-          <!-- BASIC INFO -->
-          <div class="form-row">
-            <div class="form-group" style="flex: 2;">
-              <label class="form-label">Recipe Name *</label>
-              <input type="text" class="form-control" id="rec-form-name" required value="${nameVal}" placeholder="e.g. Lemon Herb Roasted Salmon">
+          <!-- RECIPE MEDIA & BASIC INFO -->
+          <div style="display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px; padding: 14px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+            <!-- Image / Emoji Preview Box -->
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 112px; flex-shrink: 0;">
+              <div id="rec-image-preview-box" 
+                   onclick="document.getElementById('rec-image-file-input').click()"
+                   onmouseenter="const ov = this.querySelector('#rec-image-hover-overlay'); if (ov) ov.style.opacity='1';"
+                   onmouseleave="const ov = this.querySelector('#rec-image-hover-overlay'); if (ov) ov.style.opacity='0';"
+                   style="width: 104px; height: 104px; border-radius: var(--radius-md); border: 2px dashed var(--border-color); background: var(--bg-card); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; transition: all 0.2s ease; box-shadow: var(--shadow-sm);"
+                   title="Click or drag & drop to upload recipe photo">
+                ${(imageVal && (imageVal.startsWith('data:image') || imageVal.startsWith('http') || imageVal.startsWith('blob:')))
+                  ? `<img id="rec-image-preview-img" src="${imageVal}" alt="Recipe Preview" style="width: 100%; height: 100%; object-fit: cover;">`
+                  : `<span id="rec-image-preview-emoji" style="font-size: 46px;">${imageVal || '🍲'}</span>`
+                }
+                <div id="rec-image-hover-overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.55); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; opacity: 0; transition: opacity 0.2s ease; pointer-events: none;">
+                  <span>📷 Upload</span>
+                </div>
+              </div>
+              <input type="file" id="rec-image-file-input" accept="image/*" style="display: none;" onchange="window.ModalService.handleRecipeImageUpload(event)">
+              <div style="display: flex; gap: 4px; width: 100%;">
+                <button type="button" class="btn btn-secondary btn-sm" style="flex: 1; font-size: 11px; padding: 4px 6px; display: flex; align-items: center; justify-content: center; gap: 3px;" onclick="document.getElementById('rec-image-file-input').click()" title="Upload photo from local computer">
+                  ${window.renderIcon('camera')} Photo
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 4px 6px;" onclick="window.ModalService.resetRecipeImageToEmoji()" title="Reset to emoji">
+                  Emoji
+                </button>
+              </div>
             </div>
-            <div class="form-group" style="flex: 1;">
-              <label class="form-label">Icon / Emoji</label>
-              <div style="display: flex; gap: 6px; align-items: center;">
-                <input type="text" class="form-control" id="rec-form-image" value="${imageVal}" style="width: 55px; text-align: center; font-size: 20px;">
-                <div style="display: flex; gap: 3px; flex-wrap: wrap; max-width: 170px;">
-                  ${emojis.slice(0, 8).map(e => `
-                    <button type="button" class="btn-icon btn-sm" style="width: 24px; height: 24px; font-size: 14px; padding: 0;" onclick="document.getElementById('rec-form-image').value='${e}'">${e}</button>
+
+            <!-- Recipe Name and Quick Preset Emojis -->
+            <div style="flex: 1; min-width: 0;">
+              <div class="form-group" style="margin-bottom: 10px;">
+                <label class="form-label" style="font-weight: 700;">Recipe Name *</label>
+                <input type="text" class="form-control" id="rec-form-name" required value="${nameVal}" placeholder="e.g. Lemon Herb Roasted Salmon">
+              </div>
+
+              <div>
+                <label class="form-label" style="font-size: 11.5px; color: var(--text-secondary); margin-bottom: 4px;">Or Choose Quick Emoji Icon:</label>
+                <div style="display: flex; gap: 5px; flex-wrap: wrap; align-items: center;">
+                  ${emojis.map(e => `
+                    <button type="button" class="btn-icon btn-sm" style="width: 28px; height: 28px; font-size: 16px; padding: 0; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm);" onclick="window.ModalService.setRecipeEmoji('${e}')">${e}</button>
                   `).join('')}
                 </div>
               </div>
+              <input type="hidden" id="rec-form-image" value="${imageVal}">
             </div>
           </div>
 
@@ -7977,6 +8282,29 @@
 
       this.open(modalTitle, bodyHtml, footerHtml, 'modal-lg');
 
+      // Setup drag and drop for local recipe image upload
+      const previewBox = document.getElementById('rec-image-preview-box');
+      if (previewBox) {
+        previewBox.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          previewBox.style.borderColor = 'var(--primary-color)';
+          previewBox.style.background = 'var(--primary-light)';
+        });
+        previewBox.addEventListener('dragleave', (e) => {
+          e.preventDefault();
+          previewBox.style.borderColor = 'var(--border-color)';
+          previewBox.style.background = 'var(--bg-card)';
+        });
+        previewBox.addEventListener('drop', (e) => {
+          e.preventDefault();
+          previewBox.style.borderColor = 'var(--border-color)';
+          previewBox.style.background = 'var(--bg-card)';
+          if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+            this.processRecipeImageFile(e.dataTransfer.files[0]);
+          }
+        });
+      }
+
       // Populate ingredients
       const ingList = (r && Array.isArray(r.ingredients) && r.ingredients.length > 0)
         ? r.ingredients
@@ -8065,6 +8393,93 @@
       const instCountEl = document.getElementById('rec-inst-count');
       if (ingCountEl) ingCountEl.textContent = ingCount;
       if (instCountEl) instCountEl.textContent = instCount;
+    },
+
+    // Process and compress local recipe image files to lightweight Base64 data URLs
+    processRecipeImageFile: function(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        window.ToastService.show('Please select a valid image file (PNG, JPG, WebP, etc.)');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // Downscale via canvas to max 800px maintaining aspect ratio
+          const maxDim = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG data URL
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.84);
+          
+          const hiddenInput = document.getElementById('rec-form-image');
+          if (hiddenInput) hiddenInput.value = compressedDataUrl;
+
+          const previewBox = document.getElementById('rec-image-preview-box');
+          if (previewBox) {
+            previewBox.innerHTML = `
+              <img id="rec-image-preview-img" src="${compressedDataUrl}" alt="Recipe Preview" style="width: 100%; height: 100%; object-fit: cover;">
+              <div id="rec-image-hover-overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.55); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; opacity: 0; transition: opacity 0.2s ease; pointer-events: none;">
+                <span>📷 Change</span>
+              </div>
+            `;
+          }
+
+          window.ToastService.show('Recipe photo loaded successfully! 📷');
+        };
+        img.onerror = () => {
+          window.ToastService.show('Failed to load image file');
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = () => {
+        window.ToastService.show('Failed to read file');
+      };
+      reader.readAsDataURL(file);
+    },
+
+    handleRecipeImageUpload: function(event) {
+      const file = event && event.target && event.target.files ? event.target.files[0] : null;
+      if (file) {
+        this.processRecipeImageFile(file);
+      }
+    },
+
+    setRecipeEmoji: function(emoji) {
+      const hiddenInput = document.getElementById('rec-form-image');
+      if (hiddenInput) hiddenInput.value = emoji;
+
+      const previewBox = document.getElementById('rec-image-preview-box');
+      if (previewBox) {
+        previewBox.innerHTML = `
+          <span id="rec-image-preview-emoji" style="font-size: 46px;">${emoji}</span>
+          <div id="rec-image-hover-overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.55); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; opacity: 0; transition: opacity 0.2s ease; pointer-events: none;">
+            <span>📷 Upload</span>
+          </div>
+        `;
+      }
+    },
+
+    resetRecipeImageToEmoji: function() {
+      this.setRecipeEmoji('🍲');
     },
 
     saveRecipe: function(recipeId = null) {
@@ -8695,13 +9110,14 @@
     currentView: 'dashboard',
 
     navigate: function(viewId) {
+      if (viewId === 'planner') viewId = 'meal-planner';
       this.currentView = viewId;
       window.location.hash = viewId;
 
       // Toggle active link on sidebar
       document.querySelectorAll('.app-sidebar .nav-link').forEach(link => {
         const target = link.getAttribute('data-view');
-        if (target === viewId) {
+        if (target === viewId || (viewId === 'meal-planner' && target === 'meal-planner')) {
           link.classList.add('active');
         } else {
           link.classList.remove('active');
@@ -8711,7 +9127,7 @@
       // Toggle active mobile button
       document.querySelectorAll('.mobile-bottom-nav .mobile-nav-btn').forEach(btn => {
         const target = btn.getAttribute('data-view');
-        if (target === viewId) {
+        if (target === viewId || (viewId === 'meal-planner' && target === 'meal-planner')) {
           btn.classList.add('active');
         } else {
           btn.classList.remove('active');
@@ -8741,6 +9157,7 @@
           window.ModulesUI.renderDashboard();
           break;
         case 'meal-planner':
+        case 'planner':
           window.ModulesUI.renderMealPlanner();
           break;
         case 'recipes':
