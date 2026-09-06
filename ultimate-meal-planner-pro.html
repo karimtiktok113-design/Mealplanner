@@ -1062,7 +1062,7 @@
       inset: 0;
       background: rgba(15, 23, 42, 0.55);
       backdrop-filter: blur(4px);
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       padding: 20px;
@@ -1073,6 +1073,7 @@
     }
 
     .modal-backdrop.open {
+      display: flex !important;
       opacity: 1;
       pointer-events: auto;
     }
@@ -1542,6 +1543,98 @@
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+
+    .pantry-stock-container {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+    }
+
+    .pantry-stock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      border: 1px dashed var(--border-color);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      user-select: none;
+    }
+    .pantry-stock-badge:hover {
+      border-color: var(--primary);
+      background: var(--bg-surface-hover);
+    }
+    .pantry-stock-badge .stock-qty-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .pantry-stock-badge .stock-edit-icon {
+      font-size: 11px;
+      opacity: 0.65;
+      transition: opacity var(--transition-fast);
+    }
+    .pantry-stock-badge:hover .stock-edit-icon {
+      opacity: 1;
+    }
+
+    .pantry-inline-edit {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .pantry-inline-qty-input {
+      width: 68px;
+      padding: 2px 6px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1.5px solid var(--primary);
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .pantry-stock-edit-hero {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .pantry-quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .pantry-quick-chips .chip-btn {
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .pantry-quick-chips .chip-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--bg-surface-hover);
+    }
+    .pantry-quick-chips .chip-btn.chip-danger:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: #fee2e2;
+    }
+    .pantry-quick-chips .chip-btn.chip-accent:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
     }
 
     /* Hydration Widget */
@@ -2176,14 +2269,24 @@
       }
       .page-actions {
         width: 100% !important;
-        display: flex !important;
-        flex-wrap: wrap !important;
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)) !important;
         gap: 8px !important;
       }
       .page-actions .btn {
-        flex: 1 1 auto !important;
-        min-width: 120px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        padding: 8px 10px !important;
+        font-size: 12.5px !important;
+        white-space: nowrap !important;
+        text-overflow: ellipsis !important;
+        overflow: hidden !important;
         justify-content: center !important;
+      }
+
+      .analytics-mini-kpis {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
       }
 
       /* 3. MEAL PLANNER: STACKED DAY CARDS WITH ZERO HORIZONTAL SLIDING */
@@ -2406,6 +2509,9 @@
       }
       .page-title-group h1 {
         font-size: 18px !important;
+      }
+      .page-actions {
+        grid-template-columns: 1fr !important;
       }
       .card {
         padding: 14px !important;
@@ -4080,6 +4186,53 @@
       return 'In Stock';
     },
 
+    // Updates pantry stock quantity directly, recomputes status, saves state, and notifies listeners
+    updatePantryQuantity: function(itemId, newQuantity) {
+      const items = window.appState.pantry || [];
+      const it = items.find(x => x.id === itemId);
+      if (!it) return null;
+
+      const parsedQty = Math.max(0, parseFloat(newQuantity) || 0);
+      it.quantity = Math.round(parsedQty * 100) / 100;
+      it.status = this.calculateStatus(it);
+
+      window.StorageService.saveState();
+      if (window.EventBus) {
+        window.EventBus.emit('PANTRY_UPDATED');
+        window.EventBus.emit('GROCERY_UPDATED');
+      }
+      return it;
+    },
+
+    // Comprehensive update of pantry item properties and stock quantity
+    updatePantryItem: function(itemId, updateData) {
+      const items = window.appState.pantry || [];
+      const it = items.find(x => x.id === itemId);
+      if (!it) return null;
+
+      if (updateData.item !== undefined) it.item = String(updateData.item).trim();
+      if (updateData.name !== undefined && !updateData.item) it.item = String(updateData.name).trim();
+      if (updateData.quantity !== undefined) {
+        const parsedQty = Math.max(0, parseFloat(updateData.quantity) || 0);
+        it.quantity = Math.round(parsedQty * 100) / 100;
+      }
+      if (updateData.unit !== undefined) it.unit = String(updateData.unit).trim();
+      if (updateData.category !== undefined) it.category = updateData.category;
+      if (updateData.expiryDate !== undefined) it.expiryDate = updateData.expiryDate;
+      if (updateData.minStock !== undefined) it.minStock = Math.max(0, parseFloat(updateData.minStock) || 0);
+      if (updateData.cost !== undefined) it.cost = Math.max(0, parseFloat(updateData.cost) || 0);
+      if (updateData.notes !== undefined) it.notes = updateData.notes;
+
+      it.status = this.calculateStatus(it);
+
+      window.StorageService.saveState();
+      if (window.EventBus) {
+        window.EventBus.emit('PANTRY_UPDATED');
+        window.EventBus.emit('GROCERY_UPDATED');
+      }
+      return it;
+    },
+
     // Returns counts for low stock, expiring, in stock
     getPantryStats: function() {
       const items = window.appState.pantry || [];
@@ -5489,12 +5642,16 @@
                 </div>
 
                 <div class="pantry-qty-adjuster" style="margin-top: auto; justify-content: space-between; border-top: 1px solid var(--border-color); padding-top: 10px;">
-                  <div style="font-size: 14px; font-weight: 700; color: var(--primary);">
-                    ${it.quantity} ${it.unit}
+                  <div class="pantry-stock-container" id="pantry-stock-container-${it.id}">
+                    <div class="pantry-stock-badge" onclick="window.ModulesUI.openQuickEditPantryQty('${it.id}')" title="Click to edit stock quantity">
+                      <span class="stock-qty-val">${it.quantity} ${it.unit}</span>
+                      <span class="stock-edit-icon" title="Quick edit">✏️</span>
+                    </div>
                   </div>
-                  <div style="display: flex; gap: 4px;">
-                    <button class="btn-icon btn-sm" onclick="window.ModulesUI.adjustPantryQty('${it.id}', -1)" title="Decrease">-</button>
-                    <button class="btn-icon btn-sm" onclick="window.ModulesUI.adjustPantryQty('${it.id}', 1)" title="Increase">+</button>
+                  <div style="display: flex; gap: 4px; align-items: center;">
+                    <button class="btn-icon btn-sm" onclick="window.ModulesUI.adjustPantryQty('${it.id}', -1)" title="Decrease 1">-</button>
+                    <button class="btn-icon btn-sm" onclick="window.ModulesUI.adjustPantryQty('${it.id}', 1)" title="Increase 1">+</button>
+                    <button class="btn-icon btn-sm" onclick="window.ModalService.openEditPantryModal('${it.id}')" title="Edit Item & Stock Quantity">${window.renderIcon('edit-2')}</button>
                     <button class="btn-icon btn-sm" onclick="window.ModulesUI.deletePantryItem('${it.id}')" title="Delete">${window.renderIcon('trash-2')}</button>
                   </div>
                 </div>
@@ -5507,21 +5664,64 @@
       window.hydrateIcons(container);
     },
 
+    openQuickEditPantryQty: function(itemId) {
+      const it = (window.appState.pantry || []).find(x => x.id === itemId);
+      if (!it) return;
+      const container = document.getElementById(`pantry-stock-container-${itemId}`);
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="pantry-inline-edit">
+          <input type="number" class="pantry-inline-qty-input" id="inline-qty-${it.id}" value="${it.quantity}" step="any" min="0"
+            onkeydown="if(event.key==='Enter'){window.ModulesUI.saveQuickEditPantryQty('${it.id}');}else if(event.key==='Escape'){window.ModulesUI.cancelQuickEditPantryQty('${it.id}');}">
+          <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">${it.unit}</span>
+          <button class="btn btn-primary btn-xs" style="padding: 2px 6px; font-size: 11px;" onclick="window.ModulesUI.saveQuickEditPantryQty('${it.id}')" title="Save">✓</button>
+          <button class="btn btn-secondary btn-xs" style="padding: 2px 6px; font-size: 11px;" onclick="window.ModulesUI.cancelQuickEditPantryQty('${it.id}')" title="Cancel">✕</button>
+        </div>
+      `;
+      const input = document.getElementById(`inline-qty-${it.id}`);
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    },
+
+    saveQuickEditPantryQty: function(itemId) {
+      const input = document.getElementById(`inline-qty-${itemId}`);
+      if (!input) return;
+      const val = parseFloat(input.value);
+      if (isNaN(val) || val < 0) {
+        window.ToastService.show('Please enter a valid stock quantity (0 or greater).', 'warning');
+        return;
+      }
+      const updated = window.PantryService.updatePantryQuantity(itemId, val);
+      if (updated) {
+        window.ToastService.show(`Updated ${updated.item} stock to ${updated.quantity} ${updated.unit}! 🥫`);
+      }
+    },
+
+    cancelQuickEditPantryQty: function(itemId) {
+      this.renderPantry();
+    },
+
     adjustPantryQty: function(itemId, delta) {
       const it = (window.appState.pantry || []).find(x => x.id === itemId);
       if (it) {
-        it.quantity = Math.max(0, (Number(it.quantity) || 0) + delta);
-        it.status = window.PantryService.calculateStatus(it);
-        window.StorageService.saveState();
-        window.EventBus.emit('PANTRY_UPDATED');
+        const nextQty = Math.max(0, (Number(it.quantity) || 0) + delta);
+        window.PantryService.updatePantryQuantity(itemId, nextQty);
       }
     },
 
     deletePantryItem: function(itemId) {
+      const it = (window.appState.pantry || []).find(x => x.id === itemId);
+      const name = it ? it.item : 'Item';
       window.appState.pantry = (window.appState.pantry || []).filter(x => x.id !== itemId);
       window.StorageService.saveState();
-      window.EventBus.emit('PANTRY_UPDATED');
-      window.ToastService.show('Pantry item removed');
+      if (window.EventBus) {
+        window.EventBus.emit('PANTRY_UPDATED');
+        window.EventBus.emit('GROCERY_UPDATED');
+      }
+      window.ToastService.show(`Removed ${name} from pantry inventory`);
     },
 
     transferPantryToGrocery: function() {
@@ -6261,7 +6461,7 @@
             </div>
 
             <!-- MINI KPI METRICS STRIP -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">
+            <div class="analytics-mini-kpis" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 16px;">
               <div style="background: var(--bg-muted); padding: 8px 10px; border-radius: var(--radius-md); text-align: center;">
                 <div style="font-size: 10.5px; color: var(--text-muted); font-weight: 600;">Daily Average</div>
                 <div style="font-size: 15px; font-weight: 800; color: var(--text-main);">${weeklyNutri.avgCalories.toLocaleString()} <span style="font-size: 10px;">kcal</span></div>
@@ -7049,12 +7249,12 @@
               else if (status === 'Expiring Soon' || status === 'Out of Stock') badge = 'print-badge-danger';
               return `
                 <tr>
-                  <td><strong>${it.name}</strong></td>
+                  <td><strong>${it.item || it.name}</strong></td>
                   <td>${it.category || 'Pantry'}</td>
                   <td><strong>${it.quantity}</strong> ${it.unit}</td>
-                  <td>${it.minThreshold || 1} ${it.unit}</td>
+                  <td>${it.minStock || it.minThreshold || 0} ${it.unit}</td>
                   <td><span class="print-badge ${badge}">${status}</span></td>
-                  <td>${it.location || 'Pantry Shelf'}</td>
+                  <td>${it.notes || it.location || 'Pantry Shelf'}</td>
                 </tr>
               `;
             }).join('')}
@@ -9162,8 +9362,192 @@
       window.appState.pantry.push(item);
       window.StorageService.saveState();
       window.EventBus.emit('PANTRY_UPDATED');
+      if (window.EventBus) window.EventBus.emit('GROCERY_UPDATED');
       this.close();
       window.ToastService.show(`Added ${name} to pantry inventory! 🥫`);
+    },
+
+    openEditPantryModal: function(itemId) {
+      const items = window.appState.pantry || [];
+      const it = items.find(x => x.id === itemId);
+      if (!it) {
+        window.ToastService.show('Pantry item not found.', 'warning');
+        return;
+      }
+
+      const bodyHtml = `
+        <!-- FEATURED INVENTORY STOCK QUANTITY SECTION -->
+        <div class="pantry-stock-edit-hero">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label class="form-label" style="font-weight: 700; color: var(--text-main); margin-bottom: 0;">
+              Inventory Stock Quantity
+            </label>
+            <span id="edit-pantry-status-preview" class="pantry-status-badge ${
+              it.status === 'Low Stock' ? 'pantry-status-lowstock' :
+              it.status === 'Out of Stock' ? 'pantry-status-outofstock' :
+              it.status === 'Expiring Soon' ? 'pantry-status-expiring' : 'pantry-status-instock'
+            }">${it.status}</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 8px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <input type="number" class="form-control" id="edit-pantry-qty" value="${it.quantity}" step="any" min="0"
+                style="font-size: 18px; font-weight: 700; color: var(--primary);"
+                oninput="window.ModalService.onEditPantryFieldChange('${it.id}')" placeholder="Quantity">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <input type="text" class="form-control" id="edit-pantry-unit" value="${it.unit || 'pcs'}"
+                style="font-size: 15px; font-weight: 600;" placeholder="Unit (e.g. g)">
+            </div>
+          </div>
+
+          <!-- QUICK STOCK ADJUSTMENT CHIPS -->
+          <div style="margin-top: 10px;">
+            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Quick Adjust Stock:</div>
+            <div class="pantry-quick-chips">
+              <button type="button" class="chip-btn" onclick="window.ModalService.nudgeEditPantryQty(-100, '${it.id}')">-100</button>
+              <button type="button" class="chip-btn" onclick="window.ModalService.nudgeEditPantryQty(-10, '${it.id}')">-10</button>
+              <button type="button" class="chip-btn" onclick="window.ModalService.nudgeEditPantryQty(-1, '${it.id}')">-1</button>
+              <button type="button" class="chip-btn" onclick="window.ModalService.nudgeEditPantryQty(1, '${it.id}')">+1</button>
+              <button type="button" class="chip-btn" onclick="window.ModalService.nudgeEditPantryQty(10, '${it.id}')">+10</button>
+              <button type="button" class="chip-btn" onclick="window.ModalService.nudgeEditPantryQty(100, '${it.id}')">+100</button>
+              <button type="button" class="chip-btn chip-danger" onclick="window.ModalService.setEditPantryQty(0, '${it.id}')">Zero Out (0)</button>
+              <button type="button" class="chip-btn chip-accent" onclick="window.ModalService.setEditPantryQty(${Math.max(1, (it.minStock || 1) * 2)}, '${it.id}')">Restock (2× Min)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ITEM ATTRIBUTES -->
+        <div class="form-group">
+          <label class="form-label">Item Name</label>
+          <input type="text" class="form-control" id="edit-pantry-name" value="${it.item || it.name || ''}" required placeholder="e.g. Chicken Breast">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select" id="edit-pantry-cat">
+              ${['Produce', 'Meat', 'Seafood', 'Dairy', 'Eggs', 'Grains', 'Pantry', 'Snacks', 'Beverages', 'Condiments', 'Oils', 'Baking'].map(c => `
+                <option value="${c}" ${(it.category || '').toLowerCase() === c.toLowerCase() ? 'selected' : ''}>${c}</option>
+              `).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Minimum Stock Alert Threshold</label>
+            <input type="number" class="form-control" id="edit-pantry-min" value="${it.minStock !== undefined ? it.minStock : 100}" step="any" min="0"
+              oninput="window.ModalService.onEditPantryFieldChange('${it.id}')" placeholder="Threshold for low-stock warning">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Expiry Date</label>
+            <input type="date" class="form-control" id="edit-pantry-expiry" value="${it.expiryDate || ''}"
+              oninput="window.ModalService.onEditPantryFieldChange('${it.id}')">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Unit Cost / Price ($)</label>
+            <input type="number" class="form-control" id="edit-pantry-cost" value="${it.cost !== undefined ? it.cost : 3.50}" step="0.01" min="0">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Storage Notes / Location (Optional)</label>
+          <input type="text" class="form-control" id="edit-pantry-notes" value="${it.notes || ''}" placeholder="e.g. Upper pantry shelf, sealed jar">
+        </div>
+      `;
+
+      const footerHtml = `
+        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <button type="button" class="btn btn-secondary btn-sm" style="color: var(--danger); border-color: var(--danger-light);" onclick="window.ModalService.deletePantryItemFromModal('${it.id}')">
+            ${window.renderIcon('trash-2')} Delete Item
+          </button>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn btn-secondary" onclick="window.ModalService.close()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="window.ModalService.savePantryItemEdit('${it.id}')">
+              ${window.renderIcon('check')} Save Changes
+            </button>
+          </div>
+        </div>
+      `;
+
+      this.open(`Edit Pantry Item: ${it.item}`, bodyHtml, footerHtml);
+    },
+
+    nudgeEditPantryQty: function(delta, itemId) {
+      const input = document.getElementById('edit-pantry-qty');
+      if (!input) return;
+      const current = parseFloat(input.value) || 0;
+      const next = Math.max(0, Math.round((current + delta) * 100) / 100);
+      input.value = next;
+      this.onEditPantryFieldChange(itemId);
+    },
+
+    setEditPantryQty: function(qty, itemId) {
+      const input = document.getElementById('edit-pantry-qty');
+      if (!input) return;
+      input.value = Math.max(0, qty);
+      this.onEditPantryFieldChange(itemId);
+    },
+
+    onEditPantryFieldChange: function(itemId) {
+      const qtyInput = document.getElementById('edit-pantry-qty');
+      const minInput = document.getElementById('edit-pantry-min');
+      const expiryInput = document.getElementById('edit-pantry-expiry');
+      const previewBadge = document.getElementById('edit-pantry-status-preview');
+      if (!qtyInput || !previewBadge) return;
+
+      const mockItem = {
+        quantity: parseFloat(qtyInput.value) || 0,
+        minStock: minInput ? (parseFloat(minInput.value) || 0) : 0,
+        expiryDate: expiryInput ? expiryInput.value : ''
+      };
+      const status = window.PantryService.calculateStatus(mockItem);
+      let statusClass = 'pantry-status-instock';
+      if (status === 'Low Stock') statusClass = 'pantry-status-lowstock';
+      else if (status === 'Expiring Soon') statusClass = 'pantry-status-expiring';
+      else if (status === 'Out of Stock') statusClass = 'pantry-status-outofstock';
+
+      previewBadge.className = `pantry-status-badge ${statusClass}`;
+      previewBadge.textContent = status;
+    },
+
+    savePantryItemEdit: function(itemId) {
+      const nameInput = document.getElementById('edit-pantry-name');
+      const qtyInput = document.getElementById('edit-pantry-qty');
+      const unitInput = document.getElementById('edit-pantry-unit');
+      const catInput = document.getElementById('edit-pantry-cat');
+      const minInput = document.getElementById('edit-pantry-min');
+      const expiryInput = document.getElementById('edit-pantry-expiry');
+      const costInput = document.getElementById('edit-pantry-cost');
+      const notesInput = document.getElementById('edit-pantry-notes');
+
+      if (!nameInput || !nameInput.value.trim()) {
+        window.ToastService.show('Please provide an item name.', 'warning');
+        return;
+      }
+
+      const updateData = {
+        item: nameInput.value.trim(),
+        quantity: qtyInput ? parseFloat(qtyInput.value) || 0 : 0,
+        unit: unitInput ? unitInput.value.trim() : 'pcs',
+        category: catInput ? catInput.value : 'Pantry',
+        minStock: minInput ? parseFloat(minInput.value) || 0 : 0,
+        expiryDate: expiryInput ? expiryInput.value : '',
+        cost: costInput ? parseFloat(costInput.value) || 0 : 0,
+        notes: notesInput ? notesInput.value.trim() : ''
+      };
+
+      const updated = window.PantryService.updatePantryItem(itemId, updateData);
+      if (updated) {
+        this.close();
+        window.ToastService.show(`Saved changes for ${updated.item}! Stock: ${updated.quantity} ${updated.unit} 🥫`);
+      }
+    },
+
+    deletePantryItemFromModal: function(itemId) {
+      this.close();
+      window.ModulesUI.deletePantryItem(itemId);
     },
 
     openLogExpenseModal: function() {

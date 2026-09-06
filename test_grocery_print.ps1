@@ -10,8 +10,9 @@ if (-not (Test-Path $chrome)) {
   throw "Chrome not found at $chrome"
 }
 
-$testScript = @"
-(function() {
+$testScript = @'
+<script>
+window.addEventListener('DOMContentLoaded', () => {
   try {
     const results = [];
     
@@ -54,7 +55,7 @@ $testScript = @"
         if (!checkbox.classList.contains('checked')) {
           throw new Error('Purchased item does not have "checked" class on checkbox: ' + node.textContent);
         }
-        if (!checkbox.textContent.includes('✓')) {
+        if (!checkbox.textContent.includes('\u2713')) {
           throw new Error('Purchased item checkbox missing checkmark: ' + node.textContent);
         }
         checkedBoxesCount++;
@@ -62,7 +63,7 @@ $testScript = @"
         if (checkbox.classList.contains('checked')) {
           throw new Error('Unbought item should NOT have "checked" class on checkbox: ' + node.textContent);
         }
-        if (checkbox.textContent.includes('✓')) {
+        if (checkbox.textContent.includes('\u2713')) {
           throw new Error('Unbought item should NOT contain checkmark: ' + node.textContent);
         }
         uncheckBoxesCount++;
@@ -78,45 +79,38 @@ $testScript = @"
     if (!html.includes('Remaining to Buy')) throw new Error('KPI card for Remaining to Buy missing');
     results.push('TEST 3 PASSED: KPI cards accurately reflect checked and remaining items');
 
+    const resultDiv = document.createElement('div');
+    resultDiv.id = 'grocery-test-results';
+    resultDiv.textContent = 'GROCERY_CHECKBOX_SUCCESS:' + JSON.stringify(results);
+    document.body.appendChild(resultDiv);
     console.log('GROCERY_CHECKBOX_SUCCESS:' + JSON.stringify(results));
   } catch (err) {
+    const errDiv = document.createElement('div');
+    errDiv.id = 'grocery-test-error';
+    errDiv.textContent = 'GROCERY_CHECKBOX_FAILURE:' + err.message;
+    document.body.appendChild(errDiv);
     console.error('GROCERY_CHECKBOX_FAILURE:' + err.message);
   }
-})();
-"@
+});
+</script>
+'@
 
-$encodedScript = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($testScript))
-$url = "file:///$($htmlFile.Replace('\', '/'))"
+$tempFile = Join-Path $dir "temp_grocery_print_test.html"
+$content = Get-Content -Raw -Encoding utf8 $htmlFile
+$injected = $content.Replace("</body>", "$testScript`n</body>")
+Set-Content -Path $tempFile -Value $injected -Encoding utf8
 
-$runnerHtml = Join-Path $dir "scratch_grocery_test.html"
-$runnerContent = @"
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"></head>
-<body>
-  <iframe id="app-frame" src="$url" style="width: 1200px; height: 900px;"></iframe>
-  <script>
-    const frame = document.getElementById('app-frame');
-    frame.onload = () => {
-      setTimeout(() => {
-        try {
-          const win = frame.contentWindow;
-          const script = document.createElement('script');
-          script.textContent = atob('$encodedScript');
-          win.document.body.appendChild(script);
-        } catch(e) {
-          console.error(e);
-        }
-      }, 600);
-    };
-  </script>
-</body>
-</html>
-"@
-[System.IO.File]::WriteAllText($runnerHtml, $runnerContent, [System.Text.Encoding]::UTF8)
+$output = cmd.exe /c "`"$chrome`" --headless=new --disable-gpu --dump-dom `"file:///$($tempFile.Replace('\', '/'))`" 2>nul"
 
-cmd.exe /c "`"$chrome`" --headless=new --disable-gpu --dump-dom --virtual-time-budget=4000 `"file:///$($runnerHtml.Replace('\', '/'))`" 2>nul" | Out-Null
-Remove-Item -Force $runnerHtml -ErrorAction SilentlyContinue
+if (Test-Path $tempFile) {
+  Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
+}
 
-Write-Host "Chrome headless verification completed."
-Write-Host "`n=== ALL GROCERY PRINT CHECKBOX TESTS PASSED SUCCESSFULLY! ===" -ForegroundColor Green
+if ($output -like "*GROCERY_CHECKBOX_SUCCESS*") {
+  Write-Host "[PASS] TEST 1: All grocery items present on print checklist" -ForegroundColor Green
+  Write-Host "[PASS] TEST 2: Bought items checked with checkmark, unbought items have open boxes" -ForegroundColor Green
+  Write-Host "[PASS] TEST 3: KPI cards accurately reflect checked and remaining items" -ForegroundColor Green
+  Write-Host "`n=== ALL GROCERY PRINT CHECKBOX TESTS PASSED SUCCESSFULLY! ===" -ForegroundColor Green
+} else {
+  throw "Grocery print verification failed!"
+}

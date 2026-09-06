@@ -6,7 +6,6 @@ $dir = $PSScriptRoot
 if (-not $dir) { $dir = (Get-Location).Path }
 
 $indexFile = Join-Path $dir "index.html"
-$altFile = Join-Path $dir "ultimate-meal-planner-pro.html"
 
 Write-Host "=== VERIFYING PRINT SYSTEM ARCHITECTURE ===" -ForegroundColor Cyan
 
