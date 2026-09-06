@@ -3669,6 +3669,136 @@
         window.EventBus.emit('GROCERY_UPDATED');
       }
       return addedCount;
+    },
+
+    // Finds a matching pantry item for a grocery item
+    findPantryItemForGrocery: function(groceryIngredient) {
+      if (!groceryIngredient || typeof groceryIngredient !== 'string') return null;
+      const gName = groceryIngredient.toLowerCase().trim();
+      const pantry = window.appState.pantry || [];
+
+      // 1. Exact match
+      let found = pantry.find(p => (p.item || p.name || '').toLowerCase().trim() === gName);
+      if (found) return found;
+
+      // 2. Singular / Plural match
+      const gSingular = gName.endsWith('s') ? gName.slice(0, -1) : gName;
+      found = pantry.find(p => {
+        const pName = (p.item || p.name || '').toLowerCase().trim();
+        const pSingular = pName.endsWith('s') ? pName.slice(0, -1) : pName;
+        return pSingular === gSingular;
+      });
+      if (found) return found;
+
+      // 3. Substring inclusion match (length > 2 to avoid false positives)
+      found = pantry.find(p => {
+        const pName = (p.item || p.name || '').toLowerCase().trim();
+        return pName.length > 2 && (gName.includes(pName) || pName.includes(gName));
+      });
+      return found || null;
+    },
+
+    // Evaluates pantry stock against a grocery requirement
+    checkPantryStockForGrocery: function(groceryItem) {
+      if (!groceryItem) return { inPantry: false };
+      const pantryItem = this.findPantryItemForGrocery(groceryItem.ingredient);
+      if (!pantryItem) return { inPantry: false, pantryItem: null };
+
+      const gQty = Number(groceryItem.quantity) || 0;
+      const gUnit = groceryItem.unit || 'pcs';
+      const pQty = Number(pantryItem.quantity) || 0;
+      const pUnit = pantryItem.unit || 'pcs';
+
+      let isLowStock = false;
+
+      // Convert units if aggregator is available and units can aggregate
+      if (window.GroceryAggregator && window.GroceryAggregator.canAggregate(pUnit, gUnit)) {
+        const gBase = window.GroceryAggregator.toBaseUnit(gQty, gUnit);
+        const pBase = window.GroceryAggregator.toBaseUnit(pQty, pUnit);
+        isLowStock = pBase.qty < gBase.qty;
+      } else {
+        isLowStock = pQty < gQty;
+      }
+
+      return {
+        inPantry: true,
+        pantryItem,
+        pantryQty: pQty,
+        pantryUnit: pUnit,
+        requiredQty: gQty,
+        requiredUnit: gUnit,
+        isLowStock,
+        isSufficient: !isLowStock
+      };
+    },
+
+    // Deducts grocery requirement from matching pantry item
+    deductGroceryFromPantry: function(groceryItem, targetPantryItem = null) {
+      const pantryItem = targetPantryItem || this.findPantryItemForGrocery(groceryItem.ingredient);
+      if (!pantryItem) return { deducted: false };
+
+      const gQty = Number(groceryItem.quantity) || 0;
+      const gUnit = groceryItem.unit || 'pcs';
+      const pQty = Number(pantryItem.quantity) || 0;
+      const pUnit = pantryItem.unit || 'pcs';
+
+      let deductedAmount = 0;
+
+      if (window.GroceryAggregator && window.GroceryAggregator.canAggregate(pUnit, gUnit)) {
+        const gBase = window.GroceryAggregator.toBaseUnit(gQty, gUnit);
+        const pBase = window.GroceryAggregator.toBaseUnit(pQty, pUnit);
+        const newPBaseQty = Math.max(0, pBase.qty - gBase.qty);
+        deductedAmount = Math.min(pBase.qty, gBase.qty);
+
+        // Convert back to original pantry unit
+        const normPUnit = window.GroceryAggregator.normalizeUnit(pUnit);
+        if (normPUnit === 'kg') {
+          pantryItem.quantity = Number((newPBaseQty / 1000).toFixed(2));
+        } else if (normPUnit === 'l') {
+          pantryItem.quantity = Number((newPBaseQty / 1000).toFixed(2));
+        } else {
+          pantryItem.quantity = Number(newPBaseQty.toFixed(2));
+        }
+      } else {
+        deductedAmount = Math.min(pQty, gQty);
+        pantryItem.quantity = Math.max(0, Number((pQty - gQty).toFixed(2)));
+      }
+
+      pantryItem.status = this.calculateStatus(pantryItem);
+      return { deducted: true, pantryItem, deductedQty: gQty, deductedAmount };
+    },
+
+    // Restores deducted grocery quantity back to pantry stock if unchecked
+    restoreGroceryToPantry: function(groceryItem, targetPantryItem = null, qtyToRestore = null) {
+      const pantryItem = targetPantryItem || this.findPantryItemForGrocery(groceryItem.ingredient);
+      if (!pantryItem) return false;
+
+      const restoreQty = Number(qtyToRestore !== null && qtyToRestore !== undefined ? qtyToRestore : groceryItem.quantity) || 0;
+      const gUnit = groceryItem.unit || 'pcs';
+      const pQty = Number(pantryItem.quantity) || 0;
+      const pUnit = pantryItem.unit || 'pcs';
+
+      if (restoreQty <= 0) return false;
+
+      if (window.GroceryAggregator && window.GroceryAggregator.canAggregate(pUnit, gUnit)) {
+        const rBase = window.GroceryAggregator.toBaseUnit(restoreQty, gUnit);
+        const pBase = window.GroceryAggregator.toBaseUnit(pQty, pUnit);
+        const newPBaseQty = pBase.qty + rBase.qty;
+
+        const normPUnit = window.GroceryAggregator.normalizeUnit(pUnit);
+        if (normPUnit === 'kg') {
+          pantryItem.quantity = Number((newPBaseQty / 1000).toFixed(2));
+        } else if (normPUnit === 'l') {
+          pantryItem.quantity = Number((newPBaseQty / 1000).toFixed(2));
+        } else {
+          pantryItem.quantity = Number(newPBaseQty.toFixed(2));
+        }
+      } else {
+        pantryItem.quantity = Number((pQty + restoreQty).toFixed(2));
+      }
+
+      pantryItem.status = this.calculateStatus(pantryItem);
+      return true;
     }
   };
 
@@ -4656,13 +4786,35 @@
                   <h3 style="font-size: 15px; font-weight: 700; color: var(--text-main);">${cat} (${items.length})</h3>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                  ${items.map(item => `
+                  ${items.map(item => {
+                    const pantryCheck = window.PantryService ? window.PantryService.checkPantryStockForGrocery(item) : null;
+                    let pantryTagHtml = '';
+                    if (pantryCheck && pantryCheck.inPantry) {
+                      if (pantryCheck.isLowStock) {
+                        pantryTagHtml = `
+                          <span class="badge badge-warning" style="font-size: 11px; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;" title="Pantry stock (${pantryCheck.pantryQty} ${pantryCheck.pantryUnit}) is lower than required (${item.quantity} ${item.unit})">
+                            ⚠️ Low Stock Pantry: ${pantryCheck.pantryQty} ${pantryCheck.pantryUnit}
+                          </span>
+                        `;
+                      } else {
+                        pantryTagHtml = `
+                          <span class="badge badge-success" style="font-size: 11px; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;" title="Available in pantry: ${pantryCheck.pantryQty} ${pantryCheck.pantryUnit}">
+                            📦 In Pantry: ${pantryCheck.pantryQty} ${pantryCheck.pantryUnit}
+                          </span>
+                        `;
+                      }
+                    }
+
+                    return `
                     <div class="grocery-item-row ${item.purchased ? 'purchased' : ''}">
                       <div class="grocery-item-left">
                         <input type="checkbox" class="grocery-checkbox" ${item.purchased ? 'checked' : ''} 
                           onchange="window.ModulesUI.toggleGroceryPurchased('${item.id}', this.checked)">
                         <div>
-                          <div class="grocery-item-name">${item.ingredient}</div>
+                          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span class="grocery-item-name">${item.ingredient}</span>
+                            ${pantryTagHtml}
+                          </div>
                           ${item.notes ? `<div style="font-size: 11px; color: var(--text-muted);">${item.notes}</div>` : ''}
                         </div>
                       </div>
@@ -4674,7 +4826,8 @@
                         </button>
                       </div>
                     </div>
-                  `).join('')}
+                    `;
+                  }).join('')}
                 </div>
               </div>
             `;
@@ -4687,11 +4840,39 @@
 
     toggleGroceryPurchased: function(itemId, isPurchased) {
       const item = (window.appState.groceryList || []).find(x => x.id === itemId);
-      if (item) {
-        item.purchased = isPurchased;
-        window.StorageService.saveState();
-        window.EventBus.emit('GROCERY_UPDATED');
+      if (!item) return;
+
+      const wasPurchased = !!item.purchased;
+      item.purchased = isPurchased;
+
+      if (window.PantryService) {
+        const pantryCheck = window.PantryService.checkPantryStockForGrocery(item);
+        if (pantryCheck && pantryCheck.inPantry && pantryCheck.pantryItem) {
+          const pItem = pantryCheck.pantryItem;
+
+          if (isPurchased && !wasPurchased) {
+            // Deduct grocery quantity from pantry stock automatically
+            const deductResult = window.PantryService.deductGroceryFromPantry(item, pItem);
+            if (deductResult && deductResult.deducted) {
+              item.pantryDeductedQty = deductResult.deductedAmount !== undefined ? deductResult.deductedAmount : deductResult.deductedQty;
+              window.ToastService.show(`Purchased ${item.ingredient}! Deducted from pantry stock (${pItem.item} remaining: ${pItem.quantity} ${pItem.unit}) 📦`);
+            }
+          } else if (!isPurchased && wasPurchased) {
+            // Restore quantity back to pantry stock
+            const restoreQty = item.pantryDeductedQty !== undefined ? item.pantryDeductedQty : item.quantity;
+            const restored = window.PantryService.restoreGroceryToPantry(item, pItem, restoreQty);
+            delete item.pantryDeductedQty;
+            if (restored) {
+              window.ToastService.show(`Unchecked ${item.ingredient}: Restored to pantry (${pItem.item}: ${pItem.quantity} ${pItem.unit})`);
+            }
+          }
+
+          if (window.EventBus) window.EventBus.emit('PANTRY_UPDATED');
+        }
       }
+
+      window.StorageService.saveState();
+      window.EventBus.emit('GROCERY_UPDATED');
     },
 
     deleteGroceryItem: function(itemId) {
@@ -6039,17 +6220,30 @@
                       ${catPendingCount} to buy${catItems.length > catPendingCount ? ` (${catItems.length - catPendingCount} checked)` : ''}${catCost > 0 ? ` • ${curr}${catCost.toFixed(2)}` : ''}
                     </span>
                   </div>
-                  ${sortedCatItems.map(it => `
+                  ${sortedCatItems.map(it => {
+                    const pantryCheck = window.PantryService ? window.PantryService.checkPantryStockForGrocery(it) : null;
+                    let pantryPrintBadge = '';
+                    if (pantryCheck && pantryCheck.inPantry) {
+                      if (pantryCheck.isLowStock) {
+                        pantryPrintBadge = `<span class="print-badge print-badge-warning" style="font-size: 6.5pt; padding: 1px 4px; margin-left: 4px;">⚠️ Low Stock Pantry: ${pantryCheck.pantryQty} ${pantryCheck.pantryUnit}</span>`;
+                      } else {
+                        pantryPrintBadge = `<span class="print-badge print-badge-neutral" style="font-size: 6.5pt; padding: 1px 4px; margin-left: 4px; background: #f0fdf4; color: #166534; border-color: #bbf7d0;">📦 In Pantry: ${pantryCheck.pantryQty} ${pantryCheck.pantryUnit}</span>`;
+                      }
+                    }
+
+                    return `
                     <div class="print-check-item ${it.purchased ? 'purchased' : ''}">
                       <span>
                         <span class="print-checkbox ${it.purchased ? 'checked' : ''}">${it.purchased ? '✓' : ''}</span>
                         <strong>${it.ingredient}</strong>
+                        ${pantryPrintBadge}
                         ${it.notes ? `<span style="font-size: 7.5pt; color: #64748b;">(${it.notes})</span>` : ''}
                         ${it.purchased ? `<span class="print-badge print-badge-neutral" style="font-size: 6.5pt; padding: 1px 4px; margin-left: 4px;">✓ Bought</span>` : ''}
                       </span>
                       <span style="font-weight: 600; color: ${it.purchased ? '#94a3b8' : '#334155'};">${it.quantity} ${it.unit}</span>
                     </div>
-                  `).join('')}
+                    `;
+                  }).join('')}
                 </div>
               `;
             }).join('')}
