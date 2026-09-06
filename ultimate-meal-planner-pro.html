@@ -4678,12 +4678,18 @@
                   <span>${window.appState.profile.currency}${r.estimatedCost ? r.estimatedCost.toFixed(2) : '3.50'}</span>
                 </div>
 
-                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                <div style="display: flex; gap: 6px; margin-top: 12px; align-items: center;">
                   <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="window.ModalService.openRecipeDetailModal('${r.id}')">
                     Details
                   </button>
                   <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="window.ModalService.openScheduleRecipeModal('${r.id}')">
                     + Add to Plan
+                  </button>
+                  <button class="btn-icon btn-sm" onclick="window.ModalService.openEditRecipeModal('${r.id}')" title="Edit Recipe" style="border: 1px solid var(--border-color); color: var(--text-main); width: 32px; height: 32px; flex-shrink: 0;">
+                    ${window.renderIcon('edit')}
+                  </button>
+                  <button class="btn-icon btn-sm text-danger" onclick="window.ModulesUI.deleteRecipe('${r.id}')" title="Delete Recipe" style="border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); width: 32px; height: 32px; flex-shrink: 0;">
+                    ${window.renderIcon('trash-2')}
                   </button>
                 </div>
               </div>
@@ -4709,6 +4715,47 @@
         this.renderRecipes();
         window.ToastService.show(r.favorite ? 'Added to favorites ❤️' : 'Removed from favorites');
       }
+    },
+
+    deleteRecipe: function(recipeId) {
+      const r = (window.appState.recipes || []).find(x => x.id === recipeId);
+      if (!r) return;
+
+      const confirmMsg = `Are you sure you want to delete the recipe "${r.name}"?\n\nThis will permanently remove it from your recipe catalog and favorites collection.`;
+      if (!window.confirm(confirmMsg)) return;
+
+      // 1. Remove from recipes array
+      window.appState.recipes = window.appState.recipes.filter(x => x.id !== recipeId);
+
+      // 2. Remove from favorites if present
+      if (window.appState.favorites && Array.isArray(window.appState.favorites.recipes)) {
+        window.appState.favorites.recipes = window.appState.favorites.recipes.filter(id => id !== recipeId);
+      }
+
+      // 3. Close modal if open
+      if (window.ModalService && typeof window.ModalService.close === 'function') {
+        window.ModalService.close();
+      }
+
+      // 4. Save state
+      window.StorageService.saveState();
+
+      // 5. Emit event
+      window.EventBus.emit('RECIPE_UPDATED');
+
+      // 6. Update sidebar badge
+      const counter = document.getElementById('sidebar-recipe-count');
+      if (counter) counter.textContent = window.appState.recipes.length;
+
+      // 7. Refresh current view
+      if (window.Router && typeof window.Router.refreshCurrentView === 'function') {
+        window.Router.refreshCurrentView();
+      } else {
+        this.renderRecipes();
+      }
+
+      // 8. Toast feedback
+      window.ToastService.show(`Recipe "${r.name}" deleted 🗑️`);
     },
 
     // --------------------------------------------------------------------------
@@ -5599,9 +5646,15 @@
                   <span class="nutri-pill">🔥 ${r.calories} kcal</span>
                   <span class="nutri-pill">🥩 ${r.protein}g P</span>
                 </div>
-                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                <div style="display: flex; gap: 6px; margin-top: 12px; align-items: center;">
                   <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="window.ModalService.openRecipeDetailModal('${r.id}')">View</button>
                   <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="window.ModalService.openScheduleRecipeModal('${r.id}')">+ Plan</button>
+                  <button class="btn-icon btn-sm" onclick="window.ModalService.openEditRecipeModal('${r.id}')" title="Edit Recipe" style="border: 1px solid var(--border-color); color: var(--text-main); width: 32px; height: 32px; flex-shrink: 0;">
+                    ${window.renderIcon('edit')}
+                  </button>
+                  <button class="btn-icon btn-sm text-danger" onclick="window.ModulesUI.deleteRecipe('${r.id}')" title="Delete Recipe" style="border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); width: 32px; height: 32px; flex-shrink: 0;">
+                    ${window.renderIcon('trash-2')}
+                  </button>
                 </div>
               </div>
             </div>
@@ -7665,10 +7718,16 @@
       `;
 
       const footerHtml = `
-        <button class="btn btn-secondary" onclick="window.ExportService.printRecipe('${r.id}')">
+        <button class="btn btn-danger btn-sm" style="margin-right: auto;" onclick="window.ModulesUI.deleteRecipe('${r.id}')">
+          ${window.renderIcon('trash-2')} Delete Recipe
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="window.ModalService.openEditRecipeModal('${r.id}')">
+          ${window.renderIcon('edit')} Edit Recipe
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="window.ExportService.printRecipe('${r.id}')">
           ${window.renderIcon('printer')} Print Recipe
         </button>
-        <button class="btn btn-primary" onclick="window.ModalService.openScheduleRecipeModal('${r.id}')">
+        <button class="btn btn-primary btn-sm" onclick="window.ModalService.openScheduleRecipeModal('${r.id}')">
           + Add to Meal Plan
         </button>
       `;
@@ -7738,95 +7797,400 @@
       window.ToastService.show(`Added ${r.name} to ${slotKey} on ${dateStr}! ✓`);
     },
 
-    openRecipeModal: function() {
+    openEditRecipeModal: function(recipeId) {
+      this.openRecipeModal(recipeId);
+    },
+
+    openRecipeModal: function(recipeId = null) {
+      const isEdit = !!recipeId;
+      const r = isEdit ? (window.appState.recipes || []).find(x => x.id === recipeId) : null;
+      if (isEdit && !r) {
+        window.ToastService.show('Recipe not found');
+        return;
+      }
+
+      const modalTitle = isEdit ? `Edit Recipe: ${r.name}` : 'Create New Recipe';
+      const nameVal = r ? r.name : '';
+      const imageVal = r ? (r.image || '🍲') : '🍲';
+      const mealTypeVal = r ? (r.mealType || 'Dinner') : 'Dinner';
+      const cuisineVal = r ? (r.cuisine || 'Home Cooking') : '';
+      const categoryVal = r ? (r.category || 'Balanced Nutrition') : 'Balanced Nutrition';
+      const servingsVal = r ? (r.servings || 2) : 2;
+      const prepTimeVal = r ? (r.prepTime || 15) : 15;
+      const cookTimeVal = r ? (r.cookTime || 20) : 20;
+      const costVal = r ? (r.estimatedCost ? r.estimatedCost.toFixed(2) : '5.00') : '5.00';
+      const calVal = r ? (r.calories || 450) : 450;
+      const proteinVal = r ? (r.protein || 30) : 30;
+      const carbsVal = r ? (r.carbs || 40) : 40;
+      const fatVal = r ? (r.fat || 15) : 15;
+      const fiberVal = r ? (r.fiber || 6) : 6;
+      const descVal = r ? (r.description || '') : '';
+
+      const emojis = ['🥑', '🥗', '🍲', '🥩', '🐟', '🍳', '🥞', '🥪', '🍝', '🍜', '🍛', '🌯', '🥙', '🍕', '🥣', '🥘'];
+
       const bodyHtml = `
-        <div class="form-group">
-          <label class="form-label">Recipe Name</label>
-          <input type="text" class="form-control" id="new-rec-name" required placeholder="e.g. Honey Glazed Salmon">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Meal Type</label>
-            <select class="form-select" id="new-rec-type">
-              <option value="Breakfast">Breakfast</option>
-              <option value="Lunch">Lunch</option>
-              <option value="Dinner" selected>Dinner</option>
-              <option value="Morning Snack">Morning Snack</option>
-              <option value="Afternoon Snack">Afternoon Snack</option>
-              <option value="Evening Snack">Evening Snack</option>
-            </select>
+        <form id="recipe-editor-form" onsubmit="event.preventDefault(); window.ModalService.saveRecipe(${isEdit ? `'${r.id}'` : ''});">
+          <!-- BASIC INFO -->
+          <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+              <label class="form-label">Recipe Name *</label>
+              <input type="text" class="form-control" id="rec-form-name" required value="${nameVal}" placeholder="e.g. Lemon Herb Roasted Salmon">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label">Icon / Emoji</label>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <input type="text" class="form-control" id="rec-form-image" value="${imageVal}" style="width: 55px; text-align: center; font-size: 20px;">
+                <div style="display: flex; gap: 3px; flex-wrap: wrap; max-width: 170px;">
+                  ${emojis.slice(0, 8).map(e => `
+                    <button type="button" class="btn-icon btn-sm" style="width: 24px; height: 24px; font-size: 14px; padding: 0;" onclick="document.getElementById('rec-form-image').value='${e}'">${e}</button>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Cuisine</label>
-            <input type="text" class="form-control" id="new-rec-cuisine" placeholder="e.g. Mediterranean">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Meal Type</label>
+              <select class="form-select" id="rec-form-mealtype">
+                <option value="Breakfast" ${mealTypeVal === 'Breakfast' ? 'selected' : ''}>Breakfast</option>
+                <option value="Lunch" ${mealTypeVal === 'Lunch' ? 'selected' : ''}>Lunch</option>
+                <option value="Dinner" ${mealTypeVal === 'Dinner' ? 'selected' : ''}>Dinner</option>
+                <option value="Morning Snack" ${mealTypeVal === 'Morning Snack' ? 'selected' : ''}>Morning Snack</option>
+                <option value="Afternoon Snack" ${mealTypeVal === 'Afternoon Snack' ? 'selected' : ''}>Afternoon Snack</option>
+                <option value="Evening Snack" ${mealTypeVal === 'Evening Snack' ? 'selected' : ''}>Evening Snack</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-select" id="rec-form-category">
+                <option value="Balanced Nutrition" ${categoryVal === 'Balanced Nutrition' ? 'selected' : ''}>Balanced Nutrition</option>
+                <option value="High Protein" ${categoryVal === 'High Protein' ? 'selected' : ''}>High Protein</option>
+                <option value="Vegetarian" ${categoryVal === 'Vegetarian' ? 'selected' : ''}>Vegetarian</option>
+                <option value="Low Carb" ${categoryVal === 'Low Carb' ? 'selected' : ''}>Low Carb</option>
+                <option value="Keto" ${categoryVal === 'Keto' ? 'selected' : ''}>Keto</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cuisine</label>
+              <input type="text" class="form-control" id="rec-form-cuisine" value="${cuisineVal}" placeholder="e.g. Mediterranean">
+            </div>
           </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Calories (kcal)</label>
-            <input type="number" class="form-control" id="new-rec-cal" value="500">
+
+          <!-- TIMES, SERVINGS, COST -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Servings</label>
+              <input type="number" class="form-control" id="rec-form-servings" min="1" value="${servingsVal}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Prep Time (mins)</label>
+              <input type="number" class="form-control" id="rec-form-preptime" min="0" value="${prepTimeVal}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cook Time (mins)</label>
+              <input type="number" class="form-control" id="rec-form-cooktime" min="0" value="${cookTimeVal}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Estimated Cost (${window.appState.profile.currency})</label>
+              <input type="number" class="form-control" id="rec-form-cost" step="0.01" min="0" value="${costVal}">
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Protein (g)</label>
-            <input type="number" class="form-control" id="new-rec-protein" value="35">
+
+          <!-- NUTRITION PER SERVING -->
+          <div style="background: var(--bg-card); padding: 12px 14px; border-radius: var(--radius-md); margin-bottom: 16px; border: 1px solid var(--border-color);">
+            <div style="font-size: 12.5px; font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+              <span>⚡ Nutrition per Serving</span>
+            </div>
+            <div class="form-row" style="margin-bottom: 0;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 11px;">Calories (kcal)</label>
+                <input type="number" class="form-control" id="rec-form-cal" value="${calVal}">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 11px;">Protein (g)</label>
+                <input type="number" class="form-control" id="rec-form-protein" value="${proteinVal}">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 11px;">Carbs (g)</label>
+                <input type="number" class="form-control" id="rec-form-carbs" value="${carbsVal}">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 11px;">Fat (g)</label>
+                <input type="number" class="form-control" id="rec-form-fat" value="${fatVal}">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 11px;">Fiber (g)</label>
+                <input type="number" class="form-control" id="rec-form-fiber" value="${fiberVal}">
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="form-row">
+
           <div class="form-group">
-            <label class="form-label">Carbs (g)</label>
-            <input type="number" class="form-control" id="new-rec-carbs" value="45">
+            <label class="form-label">Description</label>
+            <textarea class="form-textarea" id="rec-form-desc" rows="2" placeholder="Brief appetizing description of this recipe...">${descVal}</textarea>
           </div>
-          <div class="form-group">
-            <label class="form-label">Fat (g)</label>
-            <input type="number" class="form-control" id="new-rec-fat" value="18">
+
+          <!-- INGREDIENTS LIST BUILDER -->
+          <div style="margin-top: 18px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <label class="form-label" style="margin-bottom: 0; font-size: 13.5px; font-weight: 700;">
+                🛒 Ingredients (<span id="rec-ing-count">0</span>)
+              </label>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="window.ModalService.addRecipeIngredientRow()">
+                + Add Ingredient
+              </button>
+            </div>
+            <div id="rec-ingredients-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Dynamic rows rendered here -->
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Description</label>
-          <textarea class="form-textarea" id="new-rec-desc" placeholder="Brief description..."></textarea>
-        </div>
+
+          <!-- INSTRUCTIONS BUILDER -->
+          <div style="margin-top: 18px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <label class="form-label" style="margin-bottom: 0; font-size: 13.5px; font-weight: 700;">
+                🍳 Step-by-Step Instructions (<span id="rec-inst-count">0</span>)
+              </label>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="window.ModalService.addRecipeInstructionRow()">
+                + Add Step
+              </button>
+            </div>
+            <div id="rec-instructions-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Dynamic instruction steps rendered here -->
+            </div>
+          </div>
+        </form>
       `;
 
       const footerHtml = `
-        <button class="btn btn-secondary" onclick="window.ModalService.close()">Cancel</button>
-        <button class="btn btn-primary" onclick="window.ModalService.saveNewRecipe()">Create Recipe</button>
+        ${isEdit ? `
+          <button type="button" class="btn btn-danger btn-sm" style="margin-right: auto;" onclick="window.ModulesUI.deleteRecipe('${r.id}')">
+            ${window.renderIcon('trash-2')} Delete Recipe
+          </button>
+        ` : ''}
+        <button type="button" class="btn btn-secondary" onclick="window.ModalService.close()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="window.ModalService.saveRecipe(${isEdit ? `'${r.id}'` : ''})">
+          ${isEdit ? 'Save Changes' : 'Create Recipe'}
+        </button>
       `;
 
-      this.open('Create New Recipe', bodyHtml, footerHtml);
+      this.open(modalTitle, bodyHtml, footerHtml, 'modal-lg');
+
+      // Populate ingredients
+      const ingList = (r && Array.isArray(r.ingredients) && r.ingredients.length > 0)
+        ? r.ingredients
+        : [
+            { name: 'Core Protein', quantity: 200, unit: 'g', category: 'Meat', estimatedCost: 3.00 },
+            { name: 'Fresh Vegetables', quantity: 150, unit: 'g', category: 'Produce', estimatedCost: 1.50 }
+          ];
+      ingList.forEach(ing => {
+        this.addRecipeIngredientRow(ing.name, ing.quantity, ing.unit, ing.category, ing.estimatedCost);
+      });
+
+      // Populate instructions
+      const instList = (r && Array.isArray(r.instructions) && r.instructions.length > 0)
+        ? r.instructions
+        : ['Prepare and season ingredients.', 'Cook thoroughly over medium heat.', 'Serve warm and enjoy!'];
+      instList.forEach(step => {
+        this.addRecipeInstructionRow(step);
+      });
+    },
+
+    addRecipeIngredientRow: function(name = '', qty = 1, unit = 'g', category = 'Produce', cost = 1.00) {
+      const container = document.getElementById('rec-ingredients-list');
+      if (!container) return;
+
+      const row = document.createElement('div');
+      row.className = 'rec-ing-row';
+      row.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+      row.innerHTML = `
+        <input type="number" class="form-control ing-qty" placeholder="Qty" value="${qty}" step="any" style="width: 75px; min-width: 75px;">
+        <input type="text" class="form-control ing-unit" placeholder="Unit" value="${unit}" style="width: 75px; min-width: 75px;">
+        <input type="text" class="form-control ing-name" placeholder="Ingredient name (e.g. Chicken Breast)" value="${name}" style="flex: 2;">
+        <select class="form-select ing-cat" style="flex: 1.2; min-width: 120px;">
+          <option value="Produce" ${category === 'Produce' ? 'selected' : ''}>Produce</option>
+          <option value="Meat" ${category === 'Meat' ? 'selected' : ''}>Meat</option>
+          <option value="Seafood" ${category === 'Seafood' ? 'selected' : ''}>Seafood</option>
+          <option value="Dairy" ${category === 'Dairy' ? 'selected' : ''}>Dairy</option>
+          <option value="Eggs" ${category === 'Eggs' ? 'selected' : ''}>Eggs</option>
+          <option value="Grains" ${category === 'Grains' ? 'selected' : ''}>Grains</option>
+          <option value="Pantry" ${category === 'Pantry' ? 'selected' : ''}>Pantry</option>
+          <option value="Spices" ${category === 'Spices' ? 'selected' : ''}>Spices</option>
+          <option value="Beverages" ${category === 'Beverages' ? 'selected' : ''}>Beverages</option>
+          <option value="Snacks" ${category === 'Snacks' ? 'selected' : ''}>Snacks</option>
+        </select>
+        <button type="button" class="btn-icon btn-sm text-danger" onclick="this.closest('.rec-ing-row').remove(); window.ModalService.updateRecipeCounters();" title="Remove ingredient" style="width: 32px; height: 32px; min-width: 32px; border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger);">
+          ${window.renderIcon('trash-2')}
+        </button>
+      `;
+      container.appendChild(row);
+      window.hydrateIcons(row);
+      this.updateRecipeCounters();
+    },
+
+    addRecipeInstructionRow: function(text = '') {
+      const container = document.getElementById('rec-instructions-list');
+      if (!container) return;
+
+      const count = container.querySelectorAll('.rec-inst-row').length + 1;
+      const row = document.createElement('div');
+      row.className = 'rec-inst-row';
+      row.style.cssText = 'display: flex; gap: 10px; align-items: flex-start;';
+      row.innerHTML = `
+        <span class="inst-num badge badge-secondary" style="margin-top: 6px; min-width: 28px; text-align: center;">${count}</span>
+        <textarea class="form-textarea inst-text" rows="2" placeholder="Describe step..." style="flex: 1; resize: vertical;">${text}</textarea>
+        <button type="button" class="btn-icon btn-sm text-danger" onclick="this.closest('.rec-inst-row').remove(); window.ModalService.renumberRecipeInstructions();" title="Remove step" style="margin-top: 4px; width: 32px; height: 32px; min-width: 32px; border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger);">
+          ${window.renderIcon('trash-2')}
+        </button>
+      `;
+      container.appendChild(row);
+      window.hydrateIcons(row);
+      this.updateRecipeCounters();
+    },
+
+    renumberRecipeInstructions: function() {
+      const rows = document.querySelectorAll('#rec-instructions-list .rec-inst-row');
+      rows.forEach((row, i) => {
+        const badge = row.querySelector('.inst-num');
+        if (badge) badge.textContent = i + 1;
+      });
+      this.updateRecipeCounters();
+    },
+
+    updateRecipeCounters: function() {
+      const ingCount = document.querySelectorAll('#rec-ingredients-list .rec-ing-row').length;
+      const instCount = document.querySelectorAll('#rec-instructions-list .rec-inst-row').length;
+      const ingCountEl = document.getElementById('rec-ing-count');
+      const instCountEl = document.getElementById('rec-inst-count');
+      if (ingCountEl) ingCountEl.textContent = ingCount;
+      if (instCountEl) instCountEl.textContent = instCount;
+    },
+
+    saveRecipe: function(recipeId = null) {
+      const nameInput = document.getElementById('rec-form-name');
+      const name = nameInput ? nameInput.value.trim() : '';
+      if (!name) {
+        window.ToastService.show('Please enter a recipe name');
+        if (nameInput) nameInput.focus();
+        return;
+      }
+
+      // Collect ingredients
+      const ingRows = document.querySelectorAll('#rec-ingredients-list .rec-ing-row');
+      const ingredients = [];
+      ingRows.forEach(row => {
+        const ingName = row.querySelector('.ing-name')?.value?.trim();
+        if (ingName) {
+          ingredients.push({
+            name: ingName,
+            quantity: Number(row.querySelector('.ing-qty')?.value) || 1,
+            unit: row.querySelector('.ing-unit')?.value?.trim() || 'g',
+            category: row.querySelector('.ing-cat')?.value || 'Produce',
+            estimatedCost: 0.75
+          });
+        }
+      });
+
+      // Collect instructions
+      const instRows = document.querySelectorAll('#rec-instructions-list .rec-inst-row');
+      const instructions = [];
+      instRows.forEach(row => {
+        const txt = row.querySelector('.inst-text')?.value?.trim();
+        if (txt) instructions.push(txt);
+      });
+
+      const image = document.getElementById('rec-form-image')?.value?.trim() || '🍲';
+      const mealType = document.getElementById('rec-form-mealtype')?.value || 'Dinner';
+      const category = document.getElementById('rec-form-category')?.value || 'Balanced Nutrition';
+      const cuisine = document.getElementById('rec-form-cuisine')?.value?.trim() || 'Home Cooking';
+      const servings = Math.max(1, Number(document.getElementById('rec-form-servings')?.value) || 2);
+      const prepTime = Math.max(0, Number(document.getElementById('rec-form-preptime')?.value) || 15);
+      const cookTime = Math.max(0, Number(document.getElementById('rec-form-cooktime')?.value) || 15);
+      const estimatedCost = Math.max(0, Number(document.getElementById('rec-form-cost')?.value) || 5.00);
+      const calories = Math.max(0, Number(document.getElementById('rec-form-cal')?.value) || 450);
+      const protein = Math.max(0, Number(document.getElementById('rec-form-protein')?.value) || 30);
+      const carbs = Math.max(0, Number(document.getElementById('rec-form-carbs')?.value) || 40);
+      const fat = Math.max(0, Number(document.getElementById('rec-form-fat')?.value) || 15);
+      const fiber = Math.max(0, Number(document.getElementById('rec-form-fiber')?.value) || 5);
+      const description = document.getElementById('rec-form-desc')?.value?.trim() || `${cuisine} style recipe.`;
+
+      if (recipeId) {
+        // Edit existing recipe
+        const existing = (window.appState.recipes || []).find(x => x.id === recipeId);
+        if (existing) {
+          existing.name = name;
+          existing.image = image;
+          existing.mealType = mealType;
+          existing.category = category;
+          existing.cuisine = cuisine;
+          existing.servings = servings;
+          existing.prepTime = prepTime;
+          existing.cookTime = cookTime;
+          existing.totalTime = prepTime + cookTime;
+          existing.estimatedCost = estimatedCost;
+          existing.calories = calories;
+          existing.protein = protein;
+          existing.carbs = carbs;
+          existing.fat = fat;
+          existing.fiber = fiber;
+          existing.description = description;
+          if (ingredients.length > 0) existing.ingredients = ingredients;
+          if (instructions.length > 0) existing.instructions = instructions;
+        }
+        window.ToastService.show(`Recipe "${name}" updated successfully! ✓`);
+      } else {
+        // Create new recipe
+        const newRec = {
+          id: window.generateId('rec'),
+          name,
+          image,
+          mealType,
+          cuisine,
+          category,
+          servings,
+          prepTime,
+          cookTime,
+          totalTime: prepTime + cookTime,
+          estimatedCost,
+          calories,
+          protein,
+          carbs,
+          fat,
+          fiber,
+          description,
+          favorite: false,
+          ingredients: ingredients.length > 0 ? ingredients : [
+            { name: 'Core Protein', quantity: 200, unit: 'g', category: 'Meat', estimatedCost: 3.00 },
+            { name: 'Fresh Vegetables', quantity: 150, unit: 'g', category: 'Produce', estimatedCost: 2.00 }
+          ],
+          instructions: instructions.length > 0 ? instructions : ['Prepare ingredients.', 'Cook thoroughly.', 'Serve warm.']
+        };
+        window.appState.recipes.push(newRec);
+        window.ToastService.show(`Recipe "${name}" created! 🍳`);
+      }
+
+      window.StorageService.saveState();
+      window.EventBus.emit('RECIPE_UPDATED');
+
+      const counter = document.getElementById('sidebar-recipe-count');
+      if (counter) counter.textContent = window.appState.recipes.length;
+
+      this.close();
+
+      if (window.Router && typeof window.Router.refreshCurrentView === 'function') {
+        window.Router.refreshCurrentView();
+      }
     },
 
     saveNewRecipe: function() {
-      const name = document.getElementById('new-rec-name').value;
-      if (!name) return;
+      this.saveRecipe();
+    },
 
-      const newRec = {
-        id: window.generateId('rec'),
-        name,
-        image: '🍲',
-        mealType: document.getElementById('new-rec-type').value,
-        cuisine: document.getElementById('new-rec-cuisine').value || 'Home Cooking',
-        category: 'Balanced Nutrition',
-        servings: 2,
-        calories: Number(document.getElementById('new-rec-cal').value) || 450,
-        protein: Number(document.getElementById('new-rec-protein').value) || 30,
-        carbs: Number(document.getElementById('new-rec-carbs').value) || 40,
-        fat: Number(document.getElementById('new-rec-fat').value) || 15,
-        prepTime: 15,
-        cookTime: 15,
-        estimatedCost: 6.00,
-        description: document.getElementById('new-rec-desc').value || 'Custom created recipe.',
-        ingredients: [
-          { name: 'Core Protein', quantity: 200, unit: 'g', category: 'Meat', estimatedCost: 3.00 },
-          { name: 'Fresh Vegetables', quantity: 150, unit: 'g', category: 'Produce', estimatedCost: 2.00 }
-        ],
-        instructions: ['Prepare ingredients.', 'Cook on medium heat until ready.', 'Serve warm.']
-      };
-
-      window.appState.recipes.push(newRec);
-      window.StorageService.saveState();
-      window.EventBus.emit('RECIPE_UPDATED');
-      this.close();
-      window.ToastService.show(`Recipe "${name}" created! 🍳`);
+    deleteRecipe: function(recipeId) {
+      if (window.ModulesUI && typeof window.ModulesUI.deleteRecipe === 'function') {
+        window.ModulesUI.deleteRecipe(recipeId);
+      }
     },
 
     openAddGroceryItemModal: function() {
