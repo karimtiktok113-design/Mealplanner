@@ -22,10 +22,11 @@ $views = @(
   @{ hash = "backup"; expected = "Backup & Restore Center" },
   @{ hash = "themes"; expected = "Theme & Appearance Engine" },
   @{ hash = "settings"; expected = "Application Settings" },
-  @{ hash = "help"; expected = "Guide & Documentation" }
+  @{ hash = "help"; expected = "Guide & Documentation" },
+  @{ hash = "author"; expected = "WebCraft Goods Creator Ecosystem" }
 )
 
-Write-Host "=== VERIFYING ALL 18 VIEWS IN REAL HEADLESS CHROME ===" -ForegroundColor Cyan
+Write-Host "=== VERIFYING ALL 19 VIEWS IN REAL HEADLESS CHROME ===" -ForegroundColor Cyan
 
 $passed = 0
 foreach ($v in $views) {
@@ -42,7 +43,7 @@ foreach ($v in $views) {
 
 Write-Host "`nSummary: $passed / $($views.Count) views verified in Chrome engine!" -ForegroundColor Cyan
 if ($passed -eq $views.Count) {
-  Write-Host "ALL 18 VIEWS VERIFIED 100% FUNCTIONAL IN REAL CHROME ENGINE!" -ForegroundColor Green
+  Write-Host "ALL 19 VIEWS VERIFIED 100% FUNCTIONAL IN REAL CHROME ENGINE!" -ForegroundColor Green
 } else {
   Write-Host "Warning: $passed / $($views.Count) verified." -ForegroundColor Yellow
 }

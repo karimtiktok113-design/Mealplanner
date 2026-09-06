@@ -2518,6 +2518,695 @@
         border-radius: var(--radius-md) !important;
       }
     }
+    /* ==========================================================================
+       ABOUT AUTHOR & MORE TOOLS (WEBCRAFT GOODS ECOSYSTEM MODULE)
+       ========================================================================== */
+    .author-module-wrap {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .author-banner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      border: 1px solid var(--primary-border);
+      width: fit-content;
+    }
+
+    /* SECTION 1: AUTHOR HERO GLASSMORPHISM CARD */
+    .author-hero-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 36px;
+      padding: 40px;
+      border-radius: var(--radius-xl);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0, 0, 0, 0.03);
+      overflow: hidden;
+    }
+
+    [data-theme-mode="dark"] .author-hero-card {
+      background: rgba(26, 38, 32, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .author-hero-ambient {
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--primary-glow) 0%, rgba(255,255,255,0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Left Profile Column */
+    .author-profile-col {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding-right: 28px;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .author-avatar-glow {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      padding: 4px;
+      background: linear-gradient(135deg, var(--primary), #a8d5ba, #f1641e);
+      box-shadow: 0 8px 24px var(--primary-glow);
+      margin-bottom: 18px;
+    }
+
+    .author-avatar-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-size: 40px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .author-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .author-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      background: var(--success-light);
+      color: var(--success-text);
+      font-size: 11.5px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .author-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    .author-name-h2 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 0 0 4px 0;
+      letter-spacing: -0.3px;
+    }
+
+    .author-brand-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+
+    .author-role-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 24px;
+    }
+
+    .author-cta-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .btn-etsy-hero {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 13px 20px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #f1641e 0%, #d54907 100%);
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none !important;
+      box-shadow: 0 6px 18px rgba(241, 100, 30, 0.35);
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-etsy-hero:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px rgba(241, 100, 30, 0.45);
+      color: #ffffff !important;
+    }
+
+    .btn-author-support {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 11px 18px;
+      border-radius: var(--radius-lg);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 13px;
+      border: 1px solid var(--border-color);
+      text-decoration: none;
+      transition: all var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .btn-author-support:hover {
+      background: var(--bg-muted);
+      border-color: var(--primary-border);
+      color: var(--primary);
+    }
+
+    /* Right Bio & Ecosystem Column */
+    .author-bio-col {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .author-story-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .author-story-heading {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--primary);
+      margin: 0;
+    }
+
+    .author-story-p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin: 0;
+    }
+
+    /* 3 Brand Pillars */
+    .brand-pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .brand-pillar-card {
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: transform var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .brand-pillar-card:hover {
+      border-color: var(--primary-border);
+      transform: translateY(-2px);
+    }
+
+    .brand-pillar-icon {
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+
+    .brand-pillar-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .brand-pillar-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* Social Media & Support Strip */
+    .author-footer-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+    }
+
+    .author-social-list {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .author-social-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all var(--transition-fast);
+    }
+
+    .author-social-pill:hover {
+      background: var(--primary-light);
+      border-color: var(--primary-border);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .author-copy-store-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .author-copy-store-btn:hover {
+      background: var(--bg-muted);
+      color: var(--text-main);
+    }
+
+    /* SECTION 2: MORE TOOLS SHOWCASE */
+    .tools-showcase-section {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .tools-showcase-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 18px;
+    }
+
+    .tools-title-group h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 0 0 4px 0;
+      letter-spacing: -0.3px;
+    }
+
+    .tools-title-group p {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .tools-filter-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 14px 18px;
+      border-radius: var(--radius-lg);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-xs);
+    }
+
+    .category-pills-list {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .category-pill {
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background: var(--bg-app);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .category-pill:hover {
+      border-color: var(--primary-border);
+      color: var(--text-main);
+    }
+
+    .category-pill.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px var(--primary-glow);
+    }
+
+    .tools-search-box {
+      position: relative;
+      min-width: 220px;
+    }
+
+    .tools-search-box input {
+      width: 100%;
+      padding: 7px 12px 7px 32px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background: var(--bg-app);
+      color: var(--text-main);
+      font-size: 12.5px;
+      outline: none;
+      transition: border-color var(--transition-fast);
+    }
+
+    .tools-search-box input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-glow);
+    }
+
+    .tools-search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      display: flex;
+    }
+
+    /* PRODUCT GRID & CARDS */
+    .author-products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .author-product-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border-radius: var(--radius-lg);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+    }
+
+    .author-product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-xl);
+      border-color: var(--primary-border);
+    }
+
+    .author-product-thumb {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      overflow: hidden;
+      background: var(--bg-muted);
+    }
+
+    .author-product-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .author-product-card:hover .author-product-img {
+      transform: scale(1.06);
+    }
+
+    .author-product-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      background: rgba(17, 24, 20, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .author-product-body {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      gap: 10px;
+    }
+
+    .author-product-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+      line-height: 1.35;
+    }
+
+    .author-product-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin: 0;
+      flex-grow: 1;
+    }
+
+    .author-product-footer {
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .btn-view-product {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      background: var(--primary);
+      color: #ffffff !important;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none !important;
+      transition: all var(--transition-fast);
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-view-product:hover {
+      background: var(--primary-hover);
+      color: #ffffff !important;
+      transform: translateY(-1px);
+    }
+
+    /* SKELETON LOADING */
+    .skeleton-card {
+      border-radius: var(--radius-lg);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      height: 330px;
+      position: relative;
+    }
+
+    .skeleton-thumb {
+      height: 180px;
+      background: linear-gradient(90deg, var(--bg-muted) 25%, var(--border-subtle) 50%, var(--bg-muted) 75%);
+      background-size: 200% 100%;
+      animation: skeletonShimmer 1.5s infinite;
+    }
+
+    .skeleton-body {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .skeleton-line {
+      height: 14px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--bg-muted) 25%, var(--border-subtle) 50%, var(--bg-muted) 75%);
+      background-size: 200% 100%;
+      animation: skeletonShimmer 1.5s infinite;
+    }
+
+    @keyframes skeletonShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* EMPTY STATE */
+    .author-empty-state {
+      grid-column: 1 / -1;
+      padding: 48px 24px;
+      border-radius: var(--radius-lg);
+      background: var(--bg-surface);
+      border: 1px dashed var(--border-color);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .author-empty-icon {
+      font-size: 36px;
+      margin-bottom: 4px;
+    }
+
+    .author-empty-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .author-empty-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin: 0;
+      max-width: 420px;
+    }
+
+    /* RESPONSIVE DESIGN FOR AUTHOR MODULE */
+    @media (max-width: 992px) {
+      .author-hero-card {
+        grid-template-columns: 1fr;
+        gap: 28px;
+        padding: 28px;
+      }
+      .author-profile-col {
+        padding-right: 0;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 28px;
+      }
+      .brand-pillars-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .author-module-wrap {
+        gap: 24px;
+      }
+      .author-hero-card {
+        padding: 20px;
+        border-radius: var(--radius-lg);
+      }
+      .tools-filter-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .tools-search-box {
+        width: 100%;
+      }
+      .author-products-grid {
+        grid-template-columns: 1fr;
+      }
+      .author-footer-strip {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .author-name-h2 {
+        font-size: 20px;
+      }
+      .btn-etsy-hero {
+        padding: 11px 16px;
+        font-size: 13px;
+      }
+      .author-avatar-glow {
+        width: 96px;
+        height: 96px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2671,6 +3360,12 @@
                 <span>Guide & FAQ</span>
               </a>
             </li>
+            <li>
+              <a href="#author" class="nav-link" data-view="author" id="sidebar-author-link">
+                <span class="nav-icon" data-icon="user"></span>
+                <span>About Author</span>
+              </a>
+            </li>
           </ul>
         </div>
       </nav>
@@ -2757,6 +3452,7 @@
       <div id="view-themes" class="page-content module-view" style="display:none;"></div>
       <div id="view-settings" class="page-content module-view" style="display:none;"></div>
       <div id="view-help" class="page-content module-view" style="display:none;"></div>
+      <div id="view-author" class="page-content module-view" style="display:none;"></div>
     </main>
   </div>
 
@@ -2852,7 +3548,12 @@
     'star': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
     'file-text': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
     'upload': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
-    'alert-triangle': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+    'alert-triangle': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    'user': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    'external-link': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
+    'shopping-bag': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+    'mail': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+    'sparkles': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.885L19.798 10.8 13.912 12.715 12 18.6l-1.912-5.885L4.202 10.8l5.886-1.915z"/></svg>'
   };
 
   window.renderIcon = function(name, extraClass = '') {
@@ -6728,6 +7429,157 @@
         window.ModulesUI.selectPlannerDate(dateStr);
       }
       window.ToastService.show(`Viewing meal plan for ${dateStr}`);
+    },
+
+    renderAuthor: function() {
+      if (window.WebcraftAuthorModule) {
+        window.WebcraftAuthorModule.render('view-author');
+      }
+    }
+  };
+
+  // ==============================================================================
+  // WEBCRAFT GOODS — REUSABLE ABOUT AUTHOR & MORE TOOLS MODULE
+  // Designed for standalone portability across all Webcraft Goods dashboards & apps
+  // ==============================================================================
+
+  window.WebcraftAuthorConfig = {
+    authorName: "Karim",
+    brandName: "WebCraft Goods",
+    authorRole: "Digital Product Designer & SaaS Creator",
+    authorBio: "Hi, I'm Karim, the creator behind WebCraft Goods. I design premium digital planners, productivity tools, dashboards, trackers, and web-based templates that help individuals and businesses organize their work, manage their goals, and improve productivity.\n\nMy mission is to create beautiful, practical, and easy-to-use digital products with modern interfaces and powerful features.",
+    etsyStoreUrl: "https://www.etsy.com/shop/WebCraftGoods",
+    supportEmail: "karimfiverr20@gmail.com",
+    avatarUrl: "",
+    brandLogoUrl: "",
+    socialLinks: [
+      { name: "Etsy Shop", url: "https://www.etsy.com/shop/WebCraftGoods", icon: "shopping-bag" },
+      { name: "Pinterest", url: "https://pinterest.com/webcraftgoods", icon: "star" },
+      { name: "Instagram", url: "https://instagram.com/webcraftgoods", icon: "heart" },
+      { name: "Support Email", url: "mailto:karimfiverr20@gmail.com", icon: "mail" }
+    ],
+    productsJsonUrl: "products.json"
+  };
+
+  window.WebcraftAuthorModule = {
+    render: function(containerId = 'view-author') {
+      const container = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
+      if (!container) return;
+
+      const cfg = window.WebcraftAuthorConfig;
+
+      container.innerHTML = `
+        <div class="author-module-wrap">
+          <div class="page-header" style="margin-bottom: 0;">
+            <div class="page-title-group">
+              <div class="author-banner-badge">
+                <span class="nav-icon" data-icon="sparkles"></span>
+                <span>WebCraft Goods Creator Profile</span>
+              </div>
+              <h1 style="margin-top: 8px;">About Author</h1>
+              <p class="page-subtitle">Learn about the creator behind your productivity systems and the vision powering WebCraft Goods.</p>
+            </div>
+          </div>
+
+          <!-- SECTION 1: ABOUT AUTHOR -->
+          <section class="author-hero-card" aria-label="Author Profile">
+            <div class="author-hero-ambient" aria-hidden="true"></div>
+
+            <!-- Profile Col -->
+            <div class="author-profile-col">
+              <div class="author-avatar-glow">
+                <div class="author-avatar-inner">
+                  ${cfg.avatarUrl ? `<img src="${cfg.avatarUrl}" alt="${cfg.authorName}" class="author-avatar-img">` : `K`}
+                </div>
+              </div>
+
+              <div class="author-status-pill">
+                <span class="author-status-dot"></span>
+                <span>Active Creator & Designer</span>
+              </div>
+
+              <h2 class="author-name-h2">${cfg.authorName}</h2>
+              <div class="author-brand-title">${cfg.brandName}</div>
+              <div class="author-role-sub">${cfg.authorRole}</div>
+
+              <div class="author-cta-stack">
+                <a href="${cfg.etsyStoreUrl}" target="_blank" rel="noopener noreferrer" class="btn-etsy-hero" id="author-visit-etsy-btn">
+                  <span class="nav-icon" data-icon="shopping-bag"></span>
+                  <span>Visit Etsy Store</span>
+                  <span class="nav-icon" data-icon="external-link"></span>
+                </a>
+                <a href="mailto:${cfg.supportEmail}?subject=WebCraft%20Goods%20Customer%20Support" class="btn-author-support" id="author-support-btn">
+                  <span class="nav-icon" data-icon="mail"></span>
+                  <span>Customer Support</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Bio & Story Col -->
+            <div class="author-bio-col">
+              <div class="author-story-card">
+                <div class="author-story-heading">Creator Story & Vision</div>
+                <p class="author-story-p">
+                  ${cfg.authorBio.replace(/\n\n/g, '</p><p class="author-story-p">')}
+                </p>
+              </div>
+
+              <!-- Brand Value Pillars -->
+              <div class="brand-pillars-grid">
+                <div class="brand-pillar-card">
+                  <div class="brand-pillar-icon">💎</div>
+                  <h3 class="brand-pillar-title">Meticulous Design</h3>
+                  <p class="brand-pillar-desc">Pixel-perfect aesthetics, modern glassmorphism, and intuitive ergonomics crafted for everyday focus.</p>
+                </div>
+                <div class="brand-pillar-card">
+                  <div class="brand-pillar-icon">🔒</div>
+                  <h3 class="brand-pillar-title">100% Offline & Private</h3>
+                  <p class="brand-pillar-desc">No accounts, no trackers, and zero monthly subscriptions. Your data remains strictly on your device.</p>
+                </div>
+                <div class="brand-pillar-card">
+                  <div class="brand-pillar-icon">🚀</div>
+                  <h3 class="brand-pillar-title">Lifetime Evolution</h3>
+                  <p class="brand-pillar-desc">Continuous enhancements inspired by real user feedback with seamless backup and restore support.</p>
+                </div>
+              </div>
+
+              <!-- Social Media & Support Strip -->
+              <div class="author-footer-strip">
+                <div class="author-social-list">
+                  <span style="font-size: 12px; font-weight: 700; color: var(--text-muted); margin-right: 4px;">Connect:</span>
+                  ${cfg.socialLinks.map(s => `
+                    <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="author-social-pill" title="${s.name}">
+                      <span class="nav-icon" data-icon="${s.icon}"></span>
+                      <span>${s.name}</span>
+                    </a>
+                  `).join('')}
+                </div>
+                <button type="button" class="author-copy-store-btn" onclick="window.WebcraftAuthorModule.copyStoreUrl()">
+                  <span class="nav-icon" data-icon="copy"></span>
+                  <span>Share Store</span>
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      `;
+
+      if (window.hydrateIcons) window.hydrateIcons(container);
+    },
+
+    copyStoreUrl: function() {
+      const url = window.WebcraftAuthorConfig.etsyStoreUrl;
+      navigator.clipboard.writeText(url).then(() => {
+        if (window.ToastService) {
+          window.ToastService.show('Etsy store link copied to clipboard!');
+        } else {
+          alert('Etsy store link copied: ' + url);
+        }
+      }).catch(() => {
+        if (window.ToastService) {
+          window.ToastService.show('Etsy store: ' + url);
+        }
+      });
     }
   };
 
@@ -10057,6 +10909,13 @@
           break;
         case 'help':
           window.renderHelpView();
+          break;
+        case 'author':
+        case 'about-author':
+        case 'more-tools':
+          if (window.WebcraftAuthorModule) {
+            window.WebcraftAuthorModule.render('view-author');
+          }
           break;
         default:
           window.ModulesUI.renderDashboard();
