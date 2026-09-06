@@ -2555,21 +2555,21 @@
               <a href="#recipes" class="nav-link" data-view="recipes">
                 <span class="nav-icon" data-icon="utensils"></span>
                 <span>Recipe Manager</span>
-                <span class="nav-badge" id="sidebar-recipe-count">0</span>
+                <span class="nav-badge" id="sidebar-recipe-count">15</span>
               </a>
             </li>
             <li>
               <a href="#grocery" class="nav-link" data-view="grocery">
                 <span class="nav-icon" data-icon="shopping-cart"></span>
                 <span>Smart Grocery</span>
-                <span class="nav-badge" id="sidebar-grocery-count">0</span>
+                <span class="nav-badge" id="sidebar-grocery-count">10</span>
               </a>
             </li>
             <li>
               <a href="#pantry" class="nav-link" data-view="pantry">
                 <span class="nav-icon" data-icon="package"></span>
                 <span>Pantry Inventory</span>
-                <span class="nav-badge" id="sidebar-pantry-low-count">0</span>
+                <span class="nav-badge" id="sidebar-pantry-count">10</span>
               </a>
             </li>
           </ul>
@@ -4552,9 +4552,56 @@
 
   window.ModulesUI = {
     // --------------------------------------------------------------------------
+    // SIDEBAR BADGE SYNCHRONIZATION
+    // --------------------------------------------------------------------------
+    updateSidebarBadges: function() {
+      if (!window.appState) return;
+
+      // 1. Recipe Manager Badge
+      const recipeCount = Array.isArray(window.appState.recipes) ? window.appState.recipes.length : 0;
+      const recipeBadge = document.getElementById('sidebar-recipe-count');
+      if (recipeBadge) {
+        recipeBadge.textContent = recipeCount;
+        recipeBadge.title = `${recipeCount} saved recipes in collection`;
+      }
+
+      // 2. Smart Grocery Badge
+      const groceryList = Array.isArray(window.appState.groceryList) ? window.appState.groceryList : [];
+      const groceryCount = groceryList.length;
+      const unpurchasedCount = groceryList.filter(g => !g.purchased).length;
+      const groceryBadge = document.getElementById('sidebar-grocery-count');
+      if (groceryBadge) {
+        groceryBadge.textContent = groceryCount;
+        groceryBadge.title = `${groceryCount} total grocery items (${unpurchasedCount} to buy)`;
+      }
+
+      // 3. Pantry Inventory Badge (supports both sidebar-pantry-count and sidebar-pantry-low-count)
+      const pantryList = Array.isArray(window.appState.pantry) ? window.appState.pantry : [];
+      const pantryCount = pantryList.length;
+      const pCountEl = document.getElementById('sidebar-pantry-count');
+      const pLowEl = document.getElementById('sidebar-pantry-low-count');
+
+      let pantryAlertText = '';
+      if (window.PantryService && typeof window.PantryService.getPantryStats === 'function') {
+        const stats = window.PantryService.getPantryStats();
+        pantryAlertText = ` (${stats.lowStock || 0} low, ${stats.expiring || 0} expiring)`;
+      }
+
+      if (pCountEl) {
+        pCountEl.textContent = pantryCount;
+        pCountEl.title = `${pantryCount} pantry items in inventory${pantryAlertText}`;
+      }
+      if (pLowEl) {
+        pLowEl.textContent = pantryCount;
+        pLowEl.title = `${pantryCount} pantry items in inventory${pantryAlertText}`;
+      }
+    },
+
+    // --------------------------------------------------------------------------
     // 1. DASHBOARD MODULE
     // --------------------------------------------------------------------------
     renderDashboard: function() {
+      this.updateSidebarBadges();
       const container = document.getElementById('view-dashboard');
       if (!container) return;
 
@@ -5209,8 +5256,7 @@
       });
 
       // Update sidebar counter
-      const counter = document.getElementById('sidebar-recipe-count');
-      if (counter) counter.textContent = window.appState.recipes.length;
+      this.updateSidebarBadges();
 
       container.innerHTML = `
         <div class="page-header">
@@ -5358,8 +5404,7 @@
       window.EventBus.emit('RECIPE_UPDATED');
 
       // 6. Update sidebar badge
-      const counter = document.getElementById('sidebar-recipe-count');
-      if (counter) counter.textContent = window.appState.recipes.length;
+      this.updateSidebarBadges();
 
       // 7. Refresh current view
       if (window.Router && typeof window.Router.refreshCurrentView === 'function') {
@@ -5395,8 +5440,7 @@
       });
 
       // Update sidebar counter
-      const counter = document.getElementById('sidebar-grocery-count');
-      if (counter) counter.textContent = totalCount - purchasedCount;
+      this.updateSidebarBadges();
 
       container.innerHTML = `
         <div class="page-header">
@@ -5568,8 +5612,7 @@
       });
 
       // Update sidebar badge
-      const counter = document.getElementById('sidebar-pantry-low-count');
-      if (counter) counter.textContent = stats.lowStock + stats.expiring;
+      this.updateSidebarBadges();
 
       container.innerHTML = `
         <div class="page-header">
@@ -9205,8 +9248,9 @@
       window.StorageService.saveState();
       window.EventBus.emit('RECIPE_UPDATED');
 
-      const counter = document.getElementById('sidebar-recipe-count');
-      if (counter) counter.textContent = window.appState.recipes.length;
+      if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') {
+        window.ModulesUI.updateSidebarBadges();
+      }
 
       this.close();
 
@@ -9947,6 +9991,11 @@
       // Call view renderer
       this.renderView(viewId);
 
+      // Dynamically update sidebar counts on navigation
+      if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') {
+        window.ModulesUI.updateSidebarBadges();
+      }
+
       // Close mobile sidebar if open
       const sidebar = document.getElementById('app-sidebar');
       if (sidebar) sidebar.classList.remove('open');
@@ -10016,6 +10065,9 @@
 
     refreshCurrentView: function() {
       this.renderView(this.currentView);
+      if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') {
+        window.ModulesUI.updateSidebarBadges();
+      }
     }
   };
 
@@ -10026,6 +10078,11 @@
     // 1. Load persisted state or seed data
     window.StorageService.loadState();
 
+    // Synchronize sidebar badges immediately with loaded data
+    if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') {
+      window.ModulesUI.updateSidebarBadges();
+    }
+
     // 2. Apply theme and mode
     if (window.appState.theme) {
       document.documentElement.setAttribute('data-theme', window.appState.theme.name || 'sage');
@@ -10035,24 +10092,31 @@
     // 3. Setup reactive synchronization listeners
     window.EventBus.on('MEAL_PLAN_CHANGED', () => {
       window.Router.refreshCurrentView();
+      if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') window.ModulesUI.updateSidebarBadges();
     });
     window.EventBus.on('RECIPE_UPDATED', () => {
       window.Router.refreshCurrentView();
+      if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') window.ModulesUI.updateSidebarBadges();
     });
     window.EventBus.on('GROCERY_UPDATED', () => {
       window.Router.refreshCurrentView();
+      if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') window.ModulesUI.updateSidebarBadges();
     });
     window.EventBus.on('PANTRY_UPDATED', () => {
       window.Router.refreshCurrentView();
+      if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') window.ModulesUI.updateSidebarBadges();
     });
     window.EventBus.on('GOALS_CHANGED', () => {
       window.Router.refreshCurrentView();
+      if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') window.ModulesUI.updateSidebarBadges();
     });
     window.EventBus.on('HYDRATION_CHANGED', () => {
       window.Router.refreshCurrentView();
+      if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') window.ModulesUI.updateSidebarBadges();
     });
     window.EventBus.on('APP_RESET', () => {
       window.Router.navigate('dashboard');
+      if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') window.ModulesUI.updateSidebarBadges();
     });
 
     // 4. Bind Header Controls & Mobile Sidebar Drawer
@@ -10191,6 +10255,9 @@
     // 5. Initialize router with initial view
     const initialView = window.location.hash ? window.location.hash.replace('#', '') : 'dashboard';
     window.Router.navigate(initialView || 'dashboard');
+    if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') {
+      window.ModulesUI.updateSidebarBadges();
+    }
     window.hydrateIcons(document.body);
   });
 
