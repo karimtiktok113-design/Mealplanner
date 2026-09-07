@@ -27,7 +27,7 @@ function Assert-Test([string]$desc, [bool]$condition) {
 Write-Host "`n=== 1. SIDEBAR NAVIGATION & HTML STRUCTURE ===" -ForegroundColor Cyan
 
 # Test 1: #author nav-link exists in sidebar
-$hasAuthorLink = $html -match '<a href="#author" class="nav-link" data-view="author" id="sidebar-author-link">'
+$hasAuthorLink = $html -match '<a\s+href="#author"[^>]*data-view="author"[^>]*id="sidebar-author-link"'
 Assert-Test "Sidebar contains #author nav-link with data-view='author'" $hasAuthorLink
 
 # Test 2: Sidebar item label is "About Author"
@@ -58,19 +58,19 @@ Assert-Test "WebcraftAuthorConfig has Karim and WebCraft Goods" $hasConfig
 $hasEtsyUrl = $html -match 'https://www.etsy.com/shop/WebCraftGoods'
 Assert-Test "Etsy store URL is properly configured" $hasEtsyUrl
 
-Write-Host "`n=== 3. SUPPORT EMAIL (karimfiverr20@gmail.com) VERIFICATION ===" -ForegroundColor Cyan
+Write-Host "`n=== 3. SUPPORT EMAIL (webcraftgoods.support@gmail.com) VERIFICATION ===" -ForegroundColor Cyan
 
-# Test 8: Support email is karimfiverr20@gmail.com
-$hasSupportEmailConfig = $html -match 'supportEmail:\s*"karimfiverr20@gmail\.com"'
-Assert-Test "WebcraftAuthorConfig.supportEmail is set to 'karimfiverr20@gmail.com'" $hasSupportEmailConfig
+# Test 8: Support email is webcraftgoods.support@gmail.com
+$hasSupportEmailConfig = $html -match 'supportEmail:\s*"webcraftgoods\.support@gmail\.com"'
+Assert-Test "WebcraftAuthorConfig.supportEmail is set to 'webcraftgoods.support@gmail.com'" $hasSupportEmailConfig
 
-# Test 9: Customer support button links to karimfiverr20@gmail.com
-$hasSupportMailto = $html -match 'href="mailto:\$\{cfg\.supportEmail\}\?subject=WebCraft%20Goods%20Customer%20Support"' -or $html -match 'mailto:karimfiverr20@gmail\.com'
-Assert-Test "Customer Support button links to 'karimfiverr20@gmail.com'" $hasSupportMailto
+# Test 9: Customer support button links to webcraftgoods.support@gmail.com
+$hasSupportMailto = $html -match 'href="mailto:\$\{cfg\.supportEmail\}\?subject=WebCraft%20Goods%20Customer%20Support"' -or $html -match 'mailto:webcraftgoods\.support@gmail\.com'
+Assert-Test "Customer Support button links to 'webcraftgoods.support@gmail.com'" $hasSupportMailto
 
-# Test 10: Social strip support email links to karimfiverr20@gmail.com
-$hasSocialMailto = $html -match 'mailto:karimfiverr20@gmail\.com'
-Assert-Test "Social strip support email links to 'karimfiverr20@gmail.com'" $hasSocialMailto
+# Test 10: Social strip support email links to webcraftgoods.support@gmail.com
+$hasSocialMailto = $html -match 'mailto:webcraftgoods\.support@gmail\.com'
+Assert-Test "Social strip support email links to 'webcraftgoods.support@gmail.com'" $hasSocialMailto
 
 Write-Host "`n=== 4. REMOVAL OF MORE TOOLS SECTION ===" -ForegroundColor Cyan
 
@@ -91,8 +91,8 @@ Assert-Test "webcraft-author-module.js standalone file exists for portable reuse
 
 if ($hasStandalone) {
     $standaloneContent = [System.IO.File]::ReadAllText($standalonePath, [System.Text.Encoding]::UTF8)
-    $hasEmailInStandalone = $standaloneContent -match 'karimfiverr20@gmail\.com'
-    Assert-Test "webcraft-author-module.js has supportEmail 'karimfiverr20@gmail.com'" $hasEmailInStandalone
+    $hasEmailInStandalone = $standaloneContent -match 'webcraftgoods\.support@gmail\.com'
+    Assert-Test "webcraft-author-module.js has supportEmail 'webcraftgoods.support@gmail.com'" $hasEmailInStandalone
     $hasMoreToolsInStandalone = $standaloneContent -match 'tools-showcase-section'
     Assert-Test "webcraft-author-module.js has More Tools section removed" (-not $hasMoreToolsInStandalone)
 }

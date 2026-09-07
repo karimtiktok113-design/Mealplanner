@@ -525,7 +525,9 @@
       flex-direction: column;
       min-width: 0;
       overflow-y: auto;
+      overflow-x: hidden;
       height: 100vh;
+      max-width: 100%;
     }
 
     /* Top Navigation Header */
@@ -554,7 +556,7 @@
     }
 
     .sidebar-toggle-btn {
-      display: none;
+      display: inline-flex;
       width: 38px;
       height: 38px;
       align-items: center;
@@ -564,11 +566,106 @@
       background: var(--bg-muted);
       border: 1px solid var(--border-color);
       flex-shrink: 0;
+      cursor: pointer;
       transition: all var(--transition-fast);
     }
     .sidebar-toggle-btn:hover {
       background: var(--border-color);
       color: var(--text-main);
+    }
+    body.sidebar-collapsed .sidebar-toggle-btn {
+      background: rgba(var(--primary-rgb, 61, 112, 84), 0.12);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Desktop Retractable / Collapsed Sidebar */
+    @media (min-width: 1025px) {
+      body.sidebar-collapsed .app-sidebar {
+        width: var(--sidebar-collapsed-width, 76px);
+      }
+      body.sidebar-collapsed .sidebar-brand {
+        padding: 0 10px;
+        justify-content: center;
+      }
+      body.sidebar-collapsed .brand-info {
+        display: none !important;
+      }
+      body.sidebar-collapsed .nav-group-title {
+        display: none !important;
+      }
+      body.sidebar-collapsed .sidebar-nav {
+        padding: 16px 8px;
+        gap: 8px;
+      }
+      body.sidebar-collapsed .nav-link {
+        justify-content: center;
+        padding: 11px 0;
+        gap: 0;
+        position: relative;
+      }
+      body.sidebar-collapsed .nav-link span:not(.nav-icon):not(.nav-badge) {
+        display: none !important;
+      }
+      body.sidebar-collapsed .nav-link.active::before {
+        left: 2px;
+        top: 8px;
+        bottom: 8px;
+        width: 4px;
+      }
+      body.sidebar-collapsed .nav-badge {
+        position: absolute;
+        top: 4px;
+        right: 12px;
+        padding: 1px 5px;
+        font-size: 9.5px;
+        line-height: 1.2;
+        min-width: 14px;
+        text-align: center;
+      }
+      body.sidebar-collapsed .quick-backup-strip {
+        padding: 12px 0;
+        justify-content: center;
+      }
+      body.sidebar-collapsed .quick-backup-text {
+        display: none !important;
+      }
+
+      /* Hover Tooltips in Collapsed Mode */
+      body.sidebar-collapsed .nav-link[data-tooltip]:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: calc(100% + 12px);
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--bg-sidebar, #19251f);
+        color: #ffffff;
+        padding: 6px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.28);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        z-index: 1000;
+        pointer-events: none;
+        animation: sidebarTooltipIn 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      body.sidebar-collapsed .nav-link[data-tooltip]:hover::before {
+        content: '';
+        position: absolute;
+        left: calc(100% + 4px);
+        top: 50%;
+        transform: translateY(-50%);
+        border: 5px solid transparent;
+        border-right-color: var(--bg-sidebar, #19251f);
+        z-index: 1001;
+        pointer-events: none;
+      }
+      @keyframes sidebarTooltipIn {
+        from { opacity: 0; transform: translateY(-50%) translateX(-4px); }
+        to { opacity: 1; transform: translateY(-50%) translateX(0); }
+      }
     }
 
     .mobile-header-brand {
@@ -639,6 +736,112 @@
       height: 16px;
       color: var(--text-muted);
       pointer-events: none;
+    }
+
+    /* GLOBAL SEARCH DROPDOWN PALETTE */
+    .global-search-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 420px;
+      max-width: 92vw;
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg, 12px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.08);
+      max-height: 460px;
+      overflow-y: auto;
+      z-index: 10000;
+      padding: 6px 0;
+      backdrop-filter: blur(16px);
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+    }
+    .search-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 8px 14px 4px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .search-result-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 14px;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text-main);
+      border-left: 3px solid transparent;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .search-result-item:hover, .search-result-item.highlighted {
+      background: rgba(var(--primary-rgb, 61, 112, 84), 0.07);
+      border-left-color: var(--primary);
+    }
+    .search-result-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .search-result-icon {
+      font-size: 18px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface-2, rgba(0,0,0,0.04));
+      flex-shrink: 0;
+    }
+    .search-result-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .search-result-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .search-result-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .search-footer-action {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-surface-2, rgba(0,0,0,0.02));
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+    .search-footer-action:hover {
+      background: rgba(var(--primary-rgb, 61, 112, 84), 0.1);
+    }
+    .search-empty-hint {
+      padding: 20px 16px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12.5px;
     }
 
     .header-right {
@@ -1002,22 +1205,31 @@
     /* Metric Summary Strip / Cards */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
       margin-bottom: 24px;
+    }
+
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
     }
 
     .stat-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
-      padding: 18px 20px;
+      padding: 14px 14px;
       box-shadow: var(--shadow-sm);
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
       gap: 6px;
       position: relative;
       overflow: hidden;
+      min-width: 0;
     }
 
     .stat-card::before {
@@ -1031,29 +1243,293 @@
     }
 
     .stat-label {
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 6px;
+    }
+
+    .stat-label span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stat-label svg, .stat-label .nav-icon {
+      flex-shrink: 0;
+      width: 15px;
+      height: 15px;
     }
 
     .stat-value {
-      font-size: 24px;
+      font-size: 21px;
       font-weight: 800;
       color: var(--text-main);
       letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
     }
 
     .stat-subtext {
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--text-secondary);
       display: flex;
       align-items: center;
       gap: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* --------------------------------------------------------------------------
+       DEDICATED 4-CARD METRIC STRIP (Food Budget, Pantry, etc.)
+       -------------------------------------------------------------------------- */
+    .stats-grid-4,
+    #view-budget .stats-grid,
+    #view-pantry .stats-grid {
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 16px !important;
+      margin-bottom: 24px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    @media (max-width: 1100px) {
+      .stats-grid-4,
+      #view-budget .stats-grid,
+      #view-pantry .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 14px !important;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .stats-grid-4,
+      #view-budget .stats-grid,
+      #view-pantry .stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        margin-bottom: 16px !important;
+      }
+    }
+
+    .budget-nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    .budget-nav-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      max-width: 100%;
+    }
+
+    @media (max-width: 640px) {
+      .budget-nav-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .budget-nav-btn-group {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1.1fr 1fr;
+        gap: 6px;
+      }
+      .budget-nav-btn-group .btn {
+        padding: 7px 4px !important;
+        font-size: 11.5px !important;
+        justify-content: center !important;
+        min-width: 0 !important;
+        white-space: nowrap !important;
+        text-overflow: ellipsis !important;
+        overflow: hidden !important;
+      }
+    }
+
+    #view-budget {
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+    }
+
+    #view-budget .card {
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      overflow: hidden;
+    }
+
+    /* Food Budget Stat Cards Refinement */
+    #view-budget .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+      min-width: 0;
+      min-height: 116px;
+      box-sizing: border-box;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    #view-budget .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    #view-budget .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3.5px;
+      background: var(--stat-color, var(--primary));
+      border-top-left-radius: var(--radius-lg);
+      border-top-right-radius: var(--radius-lg);
+    }
+
+    #view-budget .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    #view-budget .stat-label {
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      line-height: 1.25;
+      margin: 0;
+      padding: 0;
+      display: block;
+    }
+
+    #view-budget .stat-label span {
+      display: inline-block;
+      max-width: 100%;
+      word-break: break-word;
+    }
+
+    #view-budget .stat-header .badge {
+      flex-shrink: 0;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2.5px 8px;
+      border-radius: 999px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    #view-budget .stat-header .btn-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface-2, rgba(0, 0, 0, 0.03));
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      transition: all 0.15s ease;
+    }
+
+    #view-budget .stat-header .btn-icon:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    #view-budget .stat-value {
+      font-size: 25px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      margin: 3px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    #view-budget .stat-footer {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      min-width: 0;
+      line-height: 1.3;
+      flex-wrap: wrap;
+    }
+
+    #view-budget .stat-footer span {
+      display: inline-block;
+      max-width: 100%;
+    }
+
+    @media (max-width: 640px) {
+      #view-budget .stat-card {
+        padding: 13px 15px;
+        min-height: 106px;
+        gap: 6px;
+      }
+      #view-budget .stat-value {
+        font-size: 23px;
+      }
+      #view-budget .stat-label {
+        font-size: 10.5px;
+      }
+      #view-budget .stat-header .badge {
+        font-size: 10px;
+        padding: 2.5px 7px;
+      }
+      #view-budget .stat-footer {
+        font-size: 11.5px;
+      }
     }
 
     /* Modal System */
@@ -1467,45 +1943,113 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 10px;
+      padding: 10px 14px;
       border-radius: var(--radius-md);
-      transition: background var(--transition-fast);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      margin-bottom: 8px;
+      gap: 12px;
+      transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+      box-shadow: var(--shadow-xs);
     }
     .grocery-item-row:hover {
       background: var(--bg-muted);
+      border-color: rgba(var(--primary-rgb, 61, 112, 84), 0.3);
     }
 
-    .grocery-item-left {
+    .grocery-item-row.purchased {
+      background: var(--bg-surface-2, rgba(0, 0, 0, 0.02));
+      opacity: 0.65;
+      border-color: var(--border-subtle);
+    }
+
+    .grocery-item-main {
       display: flex;
       align-items: center;
       gap: 12px;
+      flex: 1;
+      min-width: 0;
     }
 
     .grocery-checkbox {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      min-height: 20px;
+      border-radius: 5px;
       cursor: pointer;
       accent-color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .grocery-item-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .grocery-item-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .grocery-item-name {
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 14.5px;
+      font-weight: 700;
       color: var(--text-main);
+      word-break: normal;
+      overflow-wrap: break-word;
+      line-height: 1.3;
     }
     .grocery-item-row.purchased .grocery-item-name {
       text-decoration: line-through;
       color: var(--text-muted);
     }
 
+    .grocery-item-notes {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    .grocery-item-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .grocery-item-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .grocery-item-qty {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 700;
       color: var(--primary);
       background: var(--primary-light);
-      padding: 2px 8px;
+      padding: 3px 9px;
       border-radius: var(--radius-full);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .grocery-item-btns {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .grocery-delete-btn:hover {
+      color: var(--danger) !important;
+      border-color: var(--danger) !important;
     }
 
     /* Pantry Inventory */
@@ -2308,9 +2852,165 @@
       width: 12px;
       height: 12px;
       background: var(--bg-surface, #ffffff);
-      border-right: 1px solid var(--border-color, #cbd5e1);
       border-bottom: 1px solid var(--border-color, #cbd5e1);
     }
+
+    /* SVG LINE & AREA CHART STYLES (TRUE RESPONSIVE & ENHANCED TALL ASPECT RATIO) */
+    .budget-chart-scroll-wrap {
+      width: 100%;
+      overflow: visible;
+      box-sizing: border-box;
+    }
+    .budget-chart-track-container {
+      width: 100%;
+      min-width: 0;
+      position: relative;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 8px 0;
+      box-sizing: border-box;
+    }
+    @media (min-width: 768px) {
+      .budget-chart-track-container {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        padding: 24px 20px;
+      }
+    }
+    .budget-area-chart-svg {
+      width: 100%;
+      height: 440px;
+      min-height: 380px;
+      max-height: 560px;
+      overflow: visible;
+      display: block;
+    }
+    @media (max-width: 768px) {
+      .budget-area-chart-svg {
+        height: 360px;
+        min-height: 320px;
+      }
+    }
+    .budget-chart-hitbox {
+      cursor: pointer;
+      fill: transparent;
+      transition: fill 0.18s ease;
+    }
+    .budget-chart-hitbox:hover, .budget-chart-hitbox.active {
+      fill: rgba(var(--primary-rgb, 61, 112, 84), 0.08);
+    }
+    .budget-axis-cards {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      margin-top: 14px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    @media (min-width: 768px) {
+      .budget-axis-cards {
+        gap: 12px;
+        margin-top: 22px;
+      }
+    }
+    .budget-axis-card {
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 6px 2px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface, #ffffff);
+      border: 1.5px solid var(--border-color);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    @media (min-width: 768px) {
+      .budget-axis-card {
+        padding: 12px 10px;
+        border-radius: 12px;
+      }
+    }
+    .budget-axis-card:hover {
+      border-color: rgba(var(--primary-rgb, 61, 112, 84), 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+    .budget-axis-card.active-week {
+      border-color: var(--primary, #10b981);
+      background: rgba(var(--primary-rgb, 61, 112, 84), 0.07);
+      box-shadow: 0 0 0 1px var(--primary, #10b981), 0 6px 18px rgba(var(--primary-rgb, 61, 112, 84), 0.2);
+    }
+    .budget-point-marker {
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .budget-point-marker:hover {
+      transform: scale(1.35);
+    }
+
+    /* GROCERY PRICE EDITING STYLES */
+    .grocery-price-container {
+      display: inline-flex;
+      align-items: center;
+    }
+    .grocery-price-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-color);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      box-shadow: var(--shadow-xs);
+    }
+    .grocery-price-badge:hover {
+      border-color: var(--primary);
+      background: rgba(var(--primary-rgb, 61, 112, 84), 0.09);
+      color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+    .grocery-price-badge .grocery-price-edit-icon {
+      font-size: 11px;
+      opacity: 0.65;
+      transition: opacity var(--transition-fast);
+    }
+    .grocery-price-badge:hover .grocery-price-edit-icon {
+      opacity: 1;
+    }
+    .grocery-price-inline-edit {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-surface);
+      padding: 2px 5px;
+      border: 1.5px solid var(--primary);
+      border-radius: var(--radius-sm);
+      box-shadow: 0 0 0 2px rgba(var(--primary-rgb, 61, 112, 84), 0.15);
+    }
+    .grocery-price-inline-input {
+      width: 76px;
+      padding: 2px 6px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xs);
+      background: var(--bg-surface);
+      color: var(--text-main);
+    }
+    .grocery-price-inline-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
     @media (max-width: 768px) {
       .budget-chart-track-container {
         padding: 26px 12px 12px;
@@ -2637,18 +3337,83 @@
         margin-bottom: 12px !important;
       }
       .grocery-item-row {
-        padding: 8px 6px !important;
-        flex-wrap: wrap !important;
-        gap: 6px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 12px 14px !important;
+        gap: 10px !important;
+        margin-bottom: 10px !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: var(--radius-md) !important;
+        background: var(--bg-card) !important;
       }
-      .grocery-item-left {
-        gap: 8px !important;
-        flex: 1 !important;
+      .grocery-item-main {
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+        width: 100% !important;
         min-width: 0 !important;
       }
+      .grocery-checkbox {
+        margin-top: 2px !important;
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+        flex-shrink: 0 !important;
+      }
+      .grocery-item-info {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        width: 100% !important;
+      }
+      .grocery-item-title-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        flex-wrap: wrap !important;
+        width: 100% !important;
+      }
       .grocery-item-name {
-        font-size: 13px !important;
-        word-break: break-word !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: var(--text-main) !important;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+        line-height: 1.3 !important;
+      }
+      .grocery-item-actions-bar {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 8px !important;
+        width: 100% !important;
+        padding-top: 8px !important;
+        border-top: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06)) !important;
+        box-sizing: border-box !important;
+      }
+      .grocery-item-meta {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
+        min-width: 0 !important;
+      }
+      .grocery-item-qty {
+        font-size: 12px !important;
+        padding: 3px 8px !important;
+      }
+      .grocery-price-badge {
+        padding: 3px 7px !important;
+        font-size: 12px !important;
+      }
+      .grocery-item-btns {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        flex-shrink: 0 !important;
+      }
+      .grocery-item-btns .btn-icon {
+        width: 32px !important;
+        height: 32px !important;
       }
 
       /* 8. ANALYTICS CALORIE CHART ON MOBILE */
@@ -3480,33 +4245,33 @@
           <div class="nav-group-title">Main</div>
           <ul class="nav-items">
             <li>
-              <a href="#dashboard" class="nav-link active" data-view="dashboard">
+              <a href="#dashboard" class="nav-link active" data-view="dashboard" data-tooltip="Dashboard">
                 <span class="nav-icon" data-icon="layout-dashboard"></span>
                 <span>Dashboard</span>
               </a>
             </li>
             <li>
-              <a href="#meal-planner" class="nav-link" data-view="meal-planner">
+              <a href="#meal-planner" class="nav-link" data-view="meal-planner" data-tooltip="Meal Planner">
                 <span class="nav-icon" data-icon="calendar"></span>
                 <span>Meal Planner</span>
               </a>
             </li>
             <li>
-              <a href="#recipes" class="nav-link" data-view="recipes">
+              <a href="#recipes" class="nav-link" data-view="recipes" data-tooltip="Recipe Manager">
                 <span class="nav-icon" data-icon="utensils"></span>
                 <span>Recipe Manager</span>
                 <span class="nav-badge" id="sidebar-recipe-count">15</span>
               </a>
             </li>
             <li>
-              <a href="#grocery" class="nav-link" data-view="grocery">
+              <a href="#grocery" class="nav-link" data-view="grocery" data-tooltip="Smart Grocery">
                 <span class="nav-icon" data-icon="shopping-cart"></span>
                 <span>Smart Grocery</span>
                 <span class="nav-badge" id="sidebar-grocery-count">10</span>
               </a>
             </li>
             <li>
-              <a href="#pantry" class="nav-link" data-view="pantry">
+              <a href="#pantry" class="nav-link" data-view="pantry" data-tooltip="Pantry Inventory">
                 <span class="nav-icon" data-icon="package"></span>
                 <span>Pantry Inventory</span>
                 <span class="nav-badge" id="sidebar-pantry-count">10</span>
@@ -3520,25 +4285,25 @@
           <div class="nav-group-title">Track</div>
           <ul class="nav-items">
             <li>
-              <a href="#nutrition" class="nav-link" data-view="nutrition">
+              <a href="#nutrition" class="nav-link" data-view="nutrition" data-tooltip="Nutrition & Macros">
                 <span class="nav-icon" data-icon="activity"></span>
                 <span>Nutrition & Macros</span>
               </a>
             </li>
             <li>
-              <a href="#hydration" class="nav-link" data-view="hydration">
+              <a href="#hydration" class="nav-link" data-view="hydration" data-tooltip="Hydration">
                 <span class="nav-icon" data-icon="droplet"></span>
                 <span>Hydration</span>
               </a>
             </li>
             <li>
-              <a href="#goals" class="nav-link" data-view="goals">
+              <a href="#goals" class="nav-link" data-view="goals" data-tooltip="Dietary Goals">
                 <span class="nav-icon" data-icon="target"></span>
                 <span>Dietary Goals</span>
               </a>
             </li>
             <li>
-              <a href="#analytics" class="nav-link" data-view="analytics">
+              <a href="#analytics" class="nav-link" data-view="analytics" data-tooltip="Analytics & Insights">
                 <span class="nav-icon" data-icon="bar-chart-2"></span>
                 <span>Analytics & Insights</span>
               </a>
@@ -3551,25 +4316,25 @@
           <div class="nav-group-title">Plan</div>
           <ul class="nav-items">
             <li>
-              <a href="#meal-prep" class="nav-link" data-view="meal-prep">
+              <a href="#meal-prep" class="nav-link" data-view="meal-prep" data-tooltip="Meal Prep Batching">
                 <span class="nav-icon" data-icon="clock"></span>
                 <span>Meal Prep Batching</span>
               </a>
             </li>
             <li>
-              <a href="#budget" class="nav-link" data-view="budget">
+              <a href="#budget" class="nav-link" data-view="budget" data-tooltip="Food Budget">
                 <span class="nav-icon" data-icon="dollar-sign"></span>
                 <span>Food Budget</span>
               </a>
             </li>
             <li>
-              <a href="#favorites" class="nav-link" data-view="favorites">
+              <a href="#favorites" class="nav-link" data-view="favorites" data-tooltip="Favorites">
                 <span class="nav-icon" data-icon="heart"></span>
                 <span>Favorites</span>
               </a>
             </li>
             <li>
-              <a href="#journal" class="nav-link" data-view="journal">
+              <a href="#journal" class="nav-link" data-view="journal" data-tooltip="Meal Journal">
                 <span class="nav-icon" data-icon="book-open"></span>
                 <span>Meal Journal</span>
               </a>
@@ -3582,37 +4347,37 @@
           <div class="nav-group-title">Tools & System</div>
           <ul class="nav-items">
             <li>
-              <a href="#exports" class="nav-link" data-view="exports">
+              <a href="#exports" class="nav-link" data-view="exports" data-tooltip="Export & Print Center">
                 <span class="nav-icon" data-icon="printer"></span>
                 <span>Export & Print Center</span>
               </a>
             </li>
             <li>
-              <a href="#backup" class="nav-link" data-view="backup">
+              <a href="#backup" class="nav-link" data-view="backup" data-tooltip="Backup & Restore">
                 <span class="nav-icon" data-icon="database"></span>
                 <span>Backup & Restore</span>
               </a>
             </li>
             <li>
-              <a href="#themes" class="nav-link" data-view="themes">
+              <a href="#themes" class="nav-link" data-view="themes" data-tooltip="Theme Engine">
                 <span class="nav-icon" data-icon="palette"></span>
                 <span>Theme Engine</span>
               </a>
             </li>
             <li>
-              <a href="#settings" class="nav-link" data-view="settings">
+              <a href="#settings" class="nav-link" data-view="settings" data-tooltip="Settings">
                 <span class="nav-icon" data-icon="settings"></span>
                 <span>Settings</span>
               </a>
             </li>
             <li>
-              <a href="#help" class="nav-link" data-view="help">
+              <a href="#help" class="nav-link" data-view="help" data-tooltip="Guide & FAQ">
                 <span class="nav-icon" data-icon="help-circle"></span>
                 <span>Guide & FAQ</span>
               </a>
             </li>
             <li>
-              <a href="#author" class="nav-link" data-view="author" id="sidebar-author-link">
+              <a href="#author" class="nav-link" data-view="author" id="sidebar-author-link" data-tooltip="About Author">
                 <span class="nav-icon" data-icon="user"></span>
                 <span>About Author</span>
               </a>
@@ -3654,6 +4419,7 @@
           <div class="global-search-box">
             <span class="global-search-icon" data-icon="search"></span>
             <input type="text" class="global-search-input" id="global-search-input" placeholder="Search recipes, meals, pantry, ingredients..." autocomplete="off">
+            <div class="global-search-dropdown" id="global-search-dropdown" style="display: none;"></div>
           </div>
         </div>
 
@@ -3788,6 +4554,7 @@
     'x': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
     'check': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
     'edit': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+    'edit-2': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>',
     'trash-2': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
     'copy': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
     'repeat': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>',
@@ -4785,6 +5552,67 @@
       }
       window.StorageService.saveState(true);
       window.EventBus.emit('APP_RESET', window.appState);
+    },
+
+    clearAllData: function() {
+      try {
+        localStorage.clear();
+      } catch (e) {
+        console.warn('localStorage.clear() error:', e);
+      }
+
+      const blankProfile = Object.assign({}, DEFAULT_APP_STATE.profile, {
+        name: 'Alex Morgan',
+        currency: '$',
+        unitSystem: 'metric'
+      });
+      const blankGoals = Object.assign({}, DEFAULT_APP_STATE.goals);
+      const blankTheme = Object.assign({}, DEFAULT_APP_STATE.theme);
+
+      window.appState = {
+        profile: blankProfile,
+        goals: blankGoals,
+        theme: blankTheme,
+        recipes: [],
+        mealPlans: {},
+        groceryList: [],
+        pantry: [],
+        hydration: {},
+        budget: {
+          weeklyBudget: 150,
+          monthlyBudget: 600,
+          expenses: []
+        },
+        mealPrep: [],
+        journal: [],
+        favorites: {
+          recipes: [],
+          meals: [],
+          templates: []
+        },
+        metadata: {
+          appName: 'Ultimate Meal Planner Pro',
+          appVersion: '1.0.0',
+          schemaVersion: 1,
+          createdAt: new Date().toISOString(),
+          lastSaved: new Date().toISOString(),
+          cleared: true
+        }
+      };
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(window.appState));
+      } catch (e) {
+        console.error('StorageService clearAllData save error:', e);
+      }
+
+      if (typeof window.updateHeaderProfile === 'function') {
+        window.updateHeaderProfile();
+      }
+      window.StorageService.saveState(true);
+      window.EventBus.emit('APP_RESET', window.appState);
+      window.EventBus.emit('APP_DATA_CLEARED', window.appState);
+      window.EventBus.emit('STATE_SAVED', window.appState);
     }
   };
 
@@ -5837,26 +6665,19 @@
             </div>
           </div>
 
-          <div class="stat-card" style="--stat-color: var(--primary); cursor: pointer;" onclick="window.Router.navigate('budget')" title="Click to view weekly food budget details">
+          <div class="stat-card" style="--stat-color: var(--primary); cursor: pointer;" onclick="window.Router.navigate('budget')" title="Weekly Food Budget (${budgetMetrics.weekInfo.label}): Spent ${window.appState.profile.currency || '$'}${Number(budgetMetrics.totalExpenses).toFixed(2)} of ${window.appState.profile.currency || '$'}${Number(budgetMetrics.weeklyBudget).toFixed(2)}. Click to view details.">
             <div class="stat-label">
-              <span style="display: flex; align-items: center; gap: 6px;">
-                Food Budget
-                <span class="badge ${budgetMetrics.isOverBudget ? 'badge-danger' : 'badge-success'}" style="font-size: 10px; padding: 2px 6px;">
-                  ${budgetMetrics.isOverBudget ? 'Over Budget' : `${budgetMetrics.percentSpent}% Spent`}
-                </span>
+              <span>Food Budget</span>
+              ${window.renderIcon('dollar-sign')}
+            </div>
+            <div class="stat-value">
+              ${window.appState.profile.currency || '$'}${Number(budgetMetrics.totalExpenses).toFixed(2)} <span style="font-size: 13px; font-weight: 500; color: var(--text-muted);">/ ${window.appState.profile.currency || '$'}${Number(budgetMetrics.weeklyBudget).toFixed(0)}</span>
+            </div>
+            <div class="stat-subtext">
+              <span style="color: ${budgetMetrics.isOverBudget ? 'var(--danger)' : 'var(--success)'}; font-weight: 600;">
+                ${budgetMetrics.isOverBudget ? `${window.appState.profile.currency || '$'}${Math.abs(budgetMetrics.remainingWeekly).toFixed(2)} over` : `${window.appState.profile.currency || '$'}${Number(budgetMetrics.remainingWeekly).toFixed(2)} left`}
               </span>
-              <div style="display: flex; align-items: center; gap: 4px;">
-                <span style="font-size: 11px; color: var(--primary); font-weight: 600;">${budgetMetrics.weekInfo.shortLabel}</span>
-                ${window.renderIcon('dollar-sign')}
-              </div>
-            </div>
-            <div class="stat-value" style="color: ${budgetMetrics.isOverBudget ? 'var(--danger)' : 'inherit'};">
-              ${window.appState.profile.currency}${Number(budgetMetrics.remainingWeekly).toFixed(2)}
-              <span style="font-size: 12.5px; font-weight: 500; color: var(--text-muted);">${budgetMetrics.isOverBudget ? 'over' : 'left'}</span>
-            </div>
-            <div class="stat-subtext" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-              <span>Spent: <strong>${window.appState.profile.currency}${Number(budgetMetrics.totalExpenses).toFixed(2)}</strong></span>
-              <span>Target: <strong>${window.appState.profile.currency}${Number(budgetMetrics.weeklyBudget).toFixed(2)}</strong></span>
+              <span style="color: var(--text-muted); font-size: 11px;">(${budgetMetrics.percentSpent}%)</span>
             </div>
           </div>
         </div>
@@ -6377,25 +7198,142 @@
     recipeFilterCategory: 'All',
     recipeSearchQuery: '',
 
+    getFilteredRecipes: function() {
+      const allRecipes = window.appState.recipes || [];
+      const query = (this.recipeSearchQuery || '').trim().toLowerCase();
+      const tokens = query ? query.split(/\s+/).filter(Boolean) : [];
+
+      return allRecipes.filter(r => {
+        if (this.recipeFilterMealType !== 'All' && r.mealType !== this.recipeFilterMealType) return false;
+        if (this.recipeFilterCategory !== 'All' && r.category !== this.recipeFilterCategory) return false;
+        if (tokens.length > 0) {
+          const name = (r.name || '').toLowerCase();
+          const cuisine = (r.cuisine || '').toLowerCase();
+          const desc = (r.description || '').toLowerCase();
+          const tags = (r.tags || []).map(t => t.toLowerCase()).join(' ');
+          const ingredients = (r.ingredients || []).map(i => (i.name || '').toLowerCase()).join(' ');
+          const searchableText = `${name} ${cuisine} ${desc} ${tags} ${ingredients}`;
+
+          const matchesAll = tokens.every(token => searchableText.includes(token));
+          if (!matchesAll) return false;
+        }
+        return true;
+      });
+    },
+
+    updateRecipesGrid: function() {
+      const grid = document.getElementById('recipes-grid-container');
+      const countEl = document.getElementById('recipe-count-indicator');
+      const allRecipes = window.appState.recipes || [];
+      const filtered = this.getFilteredRecipes();
+
+      if (countEl) {
+        countEl.textContent = `Showing ${filtered.length} of ${allRecipes.length} recipes`;
+      }
+
+      if (!grid) return;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 48px 24px; text-align: center; background: var(--bg-surface); border: 1px dashed var(--border-color); border-radius: var(--radius-lg);">
+            <div style="font-size: 38px; margin-bottom: 12px;">🔍</div>
+            <h3 style="font-size: 17px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">No recipes found matching your search</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+              No results found for "<strong>${window.escapeHtml(this.recipeSearchQuery || '')}</strong>". Try searching for different ingredients, meal types, or cuisines.
+            </p>
+            <button class="btn btn-secondary btn-sm" onclick="window.ModulesUI.clearRecipeSearch();">
+              Clear Search & Reset Filters
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(r => `
+        <div class="recipe-card">
+          <div class="recipe-card-img-wrap">
+            ${window.renderRecipeImage(r.image, r.name, 'md')}
+            <button class="recipe-favorite-btn ${r.favorite ? 'active' : ''}" onclick="window.ModulesUI.toggleFavoriteRecipe('${r.id}')" title="Favorite">
+              ${window.renderIcon('heart')}
+            </button>
+          </div>
+
+          <div class="recipe-card-body">
+            <div>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                <span class="badge badge-primary">${r.mealType || 'Meal'}</span>
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">${r.cuisine || 'Classic'}</span>
+              </div>
+              <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">${r.name}</h3>
+              <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                ${r.description || 'Nutrient dense recipe.'}
+              </p>
+            </div>
+
+            <div class="recipe-nutrition-tags">
+              <span class="nutri-pill">🔥 ${r.calories || 0} kcal</span>
+              <span class="nutri-pill">🥩 ${r.protein || 0}g P</span>
+              <span class="nutri-pill">🌾 ${r.carbs || 0}g C</span>
+              <span class="nutri-pill">🥑 ${r.fat || 0}g F</span>
+            </div>
+
+            <div class="recipe-meta-strip" style="margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border-color); justify-content: space-between;">
+              <span>⏱ ${r.prepTime + r.cookTime} mins</span>
+              <span>${window.appState.profile.currency}${r.estimatedCost ? r.estimatedCost.toFixed(2) : '3.50'}</span>
+            </div>
+
+            <div style="display: flex; gap: 6px; margin-top: 12px; align-items: center;">
+              <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="window.ModalService.openRecipeDetailModal('${r.id}')">
+                Details
+              </button>
+              <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="window.ModalService.openScheduleRecipeModal('${r.id}')">
+                + Add to Plan
+              </button>
+              <button class="btn-icon btn-sm" onclick="window.ModalService.openEditRecipeModal('${r.id}')" title="Edit Recipe" style="border: 1px solid var(--border-color); color: var(--text-main); width: 32px; height: 32px; flex-shrink: 0;">
+                ${window.renderIcon('edit')}
+              </button>
+              <button class="btn-icon btn-sm text-danger" onclick="window.ModulesUI.deleteRecipe('${r.id}')" title="Delete Recipe" style="border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); width: 32px; height: 32px; flex-shrink: 0;">
+                ${window.renderIcon('trash-2')}
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      window.hydrateIcons(grid);
+    },
+
+    onRecipeSearchInput: function(val) {
+      this.recipeSearchQuery = val;
+      const headerSearch = document.getElementById('global-search-input');
+      if (headerSearch && headerSearch.value !== val) {
+        headerSearch.value = val;
+      }
+      this.updateRecipesGrid();
+    },
+
+    clearRecipeSearch: function() {
+      this.recipeSearchQuery = '';
+      this.recipeFilterMealType = 'All';
+      this.recipeFilterCategory = 'All';
+      const input = document.getElementById('recipe-search-input');
+      if (input) input.value = '';
+      const headerSearch = document.getElementById('global-search-input');
+      if (headerSearch) headerSearch.value = '';
+      const mealSelect = document.getElementById('recipe-filter-mealtype');
+      if (mealSelect) mealSelect.value = 'All';
+      const catSelect = document.getElementById('recipe-filter-category');
+      if (catSelect) catSelect.value = 'All';
+      this.updateRecipesGrid();
+    },
+
     renderRecipes: function() {
       const container = document.getElementById('view-recipes');
       if (!container) return;
 
-      const recipes = (window.appState.recipes || []).filter(r => {
-        if (this.recipeFilterMealType !== 'All' && r.mealType !== this.recipeFilterMealType) return false;
-        if (this.recipeFilterCategory !== 'All' && r.category !== this.recipeFilterCategory) return false;
-        if (this.recipeSearchQuery) {
-          const q = this.recipeSearchQuery.toLowerCase();
-          const matchName = r.name.toLowerCase().includes(q);
-          const matchCuisine = (r.cuisine || '').toLowerCase().includes(q);
-          const matchTags = (r.tags || []).some(t => t.toLowerCase().includes(q));
-          if (!matchName && !matchCuisine && !matchTags) return false;
-        }
-        return true;
-      });
-
-      // Update sidebar counter
       this.updateSidebarBadges();
+
+      const allRecipes = window.appState.recipes || [];
 
       container.innerHTML = `
         <div class="page-header">
@@ -6415,89 +7353,55 @@
 
         <!-- SEARCH & FILTER STRIP -->
         <div class="card" style="margin-bottom: 24px; padding: 16px;">
-          <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
-            <input type="text" class="form-control" style="max-width: 280px;" placeholder="Filter by title, cuisine, tag..." 
-              value="${this.recipeSearchQuery}" oninput="window.ModulesUI.recipeSearchQuery = this.value; window.ModulesUI.renderRecipes();">
+          <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; flex: 1;">
+              <div style="position: relative; max-width: 320px; width: 100%;">
+                <input type="text" id="recipe-search-input" class="form-control" style="padding-left: 36px;" placeholder="Search title, ingredients, tags..." 
+                  value="${window.escapeHtml(this.recipeSearchQuery || '')}" oninput="window.ModulesUI.onRecipeSearchInput(this.value);">
+                <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;">
+                  ${window.renderIcon('search')}
+                </span>
+                ${this.recipeSearchQuery ? `
+                  <button type="button" onclick="window.ModulesUI.clearRecipeSearch();" title="Clear Search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 2px;">
+                    ✕
+                  </button>
+                ` : ''}
+              </div>
 
-            <select class="form-select" style="max-width: 170px;" onchange="window.ModulesUI.recipeFilterMealType = this.value; window.ModulesUI.renderRecipes();">
-              <option value="All" ${this.recipeFilterMealType === 'All' ? 'selected' : ''}>All Meal Types</option>
-              <option value="Breakfast" ${this.recipeFilterMealType === 'Breakfast' ? 'selected' : ''}>Breakfast</option>
-              <option value="Lunch" ${this.recipeFilterMealType === 'Lunch' ? 'selected' : ''}>Lunch</option>
-              <option value="Dinner" ${this.recipeFilterMealType === 'Dinner' ? 'selected' : ''}>Dinner</option>
-              <option value="Morning Snack" ${this.recipeFilterMealType === 'Morning Snack' ? 'selected' : ''}>Morning Snack</option>
-              <option value="Afternoon Snack" ${this.recipeFilterMealType === 'Afternoon Snack' ? 'selected' : ''}>Afternoon Snack</option>
-              <option value="Evening Snack" ${this.recipeFilterMealType === 'Evening Snack' ? 'selected' : ''}>Evening Snack</option>
-            </select>
+              <select id="recipe-filter-mealtype" class="form-select" style="max-width: 170px;" onchange="window.ModulesUI.recipeFilterMealType = this.value; window.ModulesUI.updateRecipesGrid();">
+                <option value="All" ${this.recipeFilterMealType === 'All' ? 'selected' : ''}>All Meal Types</option>
+                <option value="Breakfast" ${this.recipeFilterMealType === 'Breakfast' ? 'selected' : ''}>Breakfast</option>
+                <option value="Lunch" ${this.recipeFilterMealType === 'Lunch' ? 'selected' : ''}>Lunch</option>
+                <option value="Dinner" ${this.recipeFilterMealType === 'Dinner' ? 'selected' : ''}>Dinner</option>
+                <option value="Morning Snack" ${this.recipeFilterMealType === 'Morning Snack' ? 'selected' : ''}>Morning Snack</option>
+                <option value="Afternoon Snack" ${this.recipeFilterMealType === 'Afternoon Snack' ? 'selected' : ''}>Afternoon Snack</option>
+                <option value="Evening Snack" ${this.recipeFilterMealType === 'Evening Snack' ? 'selected' : ''}>Evening Snack</option>
+              </select>
 
-            <select class="form-select" style="max-width: 170px;" onchange="window.ModulesUI.recipeFilterCategory = this.value; window.ModulesUI.renderRecipes();">
-              <option value="All" ${this.recipeFilterCategory === 'All' ? 'selected' : ''}>All Categories</option>
-              <option value="High Protein" ${this.recipeFilterCategory === 'High Protein' ? 'selected' : ''}>High Protein</option>
-              <option value="Balanced Nutrition" ${this.recipeFilterCategory === 'Balanced Nutrition' ? 'selected' : ''}>Balanced</option>
-              <option value="Vegetarian" ${this.recipeFilterCategory === 'Vegetarian' ? 'selected' : ''}>Vegetarian</option>
-            </select>
+              <select id="recipe-filter-category" class="form-select" style="max-width: 170px;" onchange="window.ModulesUI.recipeFilterCategory = this.value; window.ModulesUI.updateRecipesGrid();">
+                <option value="All" ${this.recipeFilterCategory === 'All' ? 'selected' : ''}>All Categories</option>
+                <option value="High Protein" ${this.recipeFilterCategory === 'High Protein' ? 'selected' : ''}>High Protein</option>
+                <option value="Balanced Nutrition" ${this.recipeFilterCategory === 'Balanced Nutrition' ? 'selected' : ''}>Balanced</option>
+                <option value="Vegetarian" ${this.recipeFilterCategory === 'Vegetarian' ? 'selected' : ''}>Vegetarian</option>
+              </select>
 
-            <button class="btn btn-secondary btn-sm" onclick="window.ModulesUI.recipeFilterMealType = 'All'; window.ModulesUI.recipeFilterCategory = 'All'; window.ModulesUI.recipeSearchQuery = ''; window.ModulesUI.renderRecipes();">
-              Reset Filters
-            </button>
+              <button class="btn btn-secondary btn-sm" onclick="window.ModulesUI.clearRecipeSearch();">
+                Reset Filters
+              </button>
+            </div>
+
+            <div id="recipe-count-indicator" style="font-size: 12.5px; font-weight: 600; color: var(--text-muted);">
+              Showing ${allRecipes.length} of ${allRecipes.length} recipes
+            </div>
           </div>
         </div>
 
         <!-- RECIPES GRID -->
-        <div class="recipes-grid">
-          ${recipes.map(r => `
-            <div class="recipe-card">
-              <div class="recipe-card-img-wrap">
-                ${window.renderRecipeImage(r.image, r.name, 'md')}
-                <button class="recipe-favorite-btn ${r.favorite ? 'active' : ''}" onclick="window.ModulesUI.toggleFavoriteRecipe('${r.id}')" title="Favorite">
-                  ${window.renderIcon('heart')}
-                </button>
-              </div>
-
-              <div class="recipe-card-body">
-                <div>
-                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                    <span class="badge badge-primary">${r.mealType || 'Meal'}</span>
-                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">${r.cuisine || 'Classic'}</span>
-                  </div>
-                  <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">${r.name}</h3>
-                  <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                    ${r.description || 'Nutrient dense recipe.'}
-                  </p>
-                </div>
-
-                <div class="recipe-nutrition-tags">
-                  <span class="nutri-pill">🔥 ${r.calories || 0} kcal</span>
-                  <span class="nutri-pill">🥩 ${r.protein || 0}g P</span>
-                  <span class="nutri-pill">🌾 ${r.carbs || 0}g C</span>
-                  <span class="nutri-pill">🥑 ${r.fat || 0}g F</span>
-                </div>
-
-                <div class="recipe-meta-strip" style="margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border-color); justify-content: space-between;">
-                  <span>⏱ ${r.prepTime + r.cookTime} mins</span>
-                  <span>${window.appState.profile.currency}${r.estimatedCost ? r.estimatedCost.toFixed(2) : '3.50'}</span>
-                </div>
-
-                <div style="display: flex; gap: 6px; margin-top: 12px; align-items: center;">
-                  <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="window.ModalService.openRecipeDetailModal('${r.id}')">
-                    Details
-                  </button>
-                  <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="window.ModalService.openScheduleRecipeModal('${r.id}')">
-                    + Add to Plan
-                  </button>
-                  <button class="btn-icon btn-sm" onclick="window.ModalService.openEditRecipeModal('${r.id}')" title="Edit Recipe" style="border: 1px solid var(--border-color); color: var(--text-main); width: 32px; height: 32px; flex-shrink: 0;">
-                    ${window.renderIcon('edit')}
-                  </button>
-                  <button class="btn-icon btn-sm text-danger" onclick="window.ModulesUI.deleteRecipe('${r.id}')" title="Delete Recipe" style="border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); width: 32px; height: 32px; flex-shrink: 0;">
-                    ${window.renderIcon('trash-2')}
-                  </button>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
+        <div class="recipes-grid" id="recipes-grid-container"></div>
       `;
 
       window.hydrateIcons(container);
+      this.updateRecipesGrid();
     },
 
     toggleFavoriteRecipe: function(recipeId) {
@@ -6650,24 +7554,43 @@
                     }
 
                     return `
-                    <div class="grocery-item-row ${item.purchased ? 'purchased' : ''}">
-                      <div class="grocery-item-left">
+                    <div class="grocery-item-row ${item.purchased ? 'purchased' : ''}" data-item-id="${item.id}">
+                      <div class="grocery-item-main">
                         <input type="checkbox" class="grocery-checkbox" ${item.purchased ? 'checked' : ''} 
-                          onchange="window.ModulesUI.toggleGroceryPurchased('${item.id}', this.checked)">
-                        <div>
-                          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                          onchange="window.ModulesUI.toggleGroceryPurchased('${item.id}', this.checked)"
+                          aria-label="Mark ${item.ingredient} as purchased">
+                        <div class="grocery-item-info">
+                          <div class="grocery-item-title-row">
                             <span class="grocery-item-name">${item.ingredient}</span>
                             ${pantryTagHtml}
                           </div>
-                          ${item.notes ? `<div style="font-size: 11px; color: var(--text-muted);">${item.notes}</div>` : ''}
+                          ${item.notes ? `<div class="grocery-item-notes">${item.notes}</div>` : ''}
                         </div>
                       </div>
-                      <div style="display: flex; align-items: center; gap: 12px;">
-                        <span class="grocery-item-qty">${item.quantity} ${item.unit}</span>
-                        <span style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">${window.appState.profile.currency}${Number(item.estimatedPrice || 0).toFixed(2)}</span>
-                        <button class="btn-icon btn-sm" onclick="window.ModulesUI.deleteGroceryItem('${item.id}')" title="Delete">
-                          ${window.renderIcon('trash-2')}
-                        </button>
+
+                      <div class="grocery-item-actions-bar">
+                        <div class="grocery-item-meta">
+                          <span class="grocery-item-qty">${item.quantity} ${item.unit}</span>
+                          
+                          <!-- INTERACTIVE GROCERY PRICE BADGE -->
+                          <div class="grocery-price-container" id="grocery-price-container-${item.id}">
+                            <button type="button" class="grocery-price-badge" onclick="window.ModulesUI.openQuickEditGroceryPrice('${item.id}')" title="Click to edit price">
+                              <span class="grocery-price-val">${window.appState.profile.currency}${Number(item.estimatedPrice || 0).toFixed(2)}</span>
+                              <span class="grocery-price-edit-icon" title="Edit price">✏️</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div class="grocery-item-btns">
+                          <!-- EDIT ITEM MODAL BUTTON -->
+                          <button class="btn-icon btn-sm grocery-edit-btn" onclick="window.ModalService.openEditGroceryModal('${item.id}')" title="Edit Item Details & Price">
+                            ${window.renderIcon('edit-2')}
+                          </button>
+
+                          <button class="btn-icon btn-sm grocery-delete-btn" onclick="window.ModulesUI.deleteGroceryItem('${item.id}')" title="Delete">
+                            ${window.renderIcon('trash-2')}
+                          </button>
+                        </div>
                       </div>
                     </div>
                     `;
@@ -6680,6 +7603,55 @@
       `;
 
       window.hydrateIcons(container);
+    },
+
+    openQuickEditGroceryPrice: function(itemId) {
+      const item = (window.appState.groceryList || []).find(x => x.id === itemId);
+      if (!item) return;
+      const container = document.getElementById(`grocery-price-container-${itemId}`);
+      if (!container) return;
+
+      const curr = (window.appState.profile && window.appState.profile.currency) || '$';
+      container.innerHTML = `
+        <div class="grocery-price-inline-edit">
+          <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">${curr}</span>
+          <input type="number" class="grocery-price-inline-input" id="inline-price-${item.id}" value="${Number(item.estimatedPrice || 0).toFixed(2)}" step="0.01" min="0"
+            onkeydown="if(event.key==='Enter'){window.ModulesUI.saveQuickEditGroceryPrice('${item.id}');}else if(event.key==='Escape'){window.ModulesUI.cancelQuickEditGroceryPrice('${item.id}');}">
+          <button class="btn btn-primary btn-xs" style="padding: 2px 6px; font-size: 11px;" onclick="window.ModulesUI.saveQuickEditGroceryPrice('${item.id}')" title="Save Price">✓</button>
+          <button class="btn btn-secondary btn-xs" style="padding: 2px 6px; font-size: 11px;" onclick="window.ModulesUI.cancelQuickEditGroceryPrice('${item.id}')" title="Cancel">✕</button>
+        </div>
+      `;
+      const input = document.getElementById(`inline-price-${item.id}`);
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    },
+
+    saveQuickEditGroceryPrice: function(itemId) {
+      const input = document.getElementById(`inline-price-${itemId}`);
+      if (!input) return;
+      const val = parseFloat(input.value);
+      if (isNaN(val) || val < 0) {
+        window.ToastService.show('Please enter a valid price ($0.00 or higher).', 'warning');
+        return;
+      }
+      const item = (window.appState.groceryList || []).find(x => x.id === itemId);
+      if (!item) return;
+
+      const newPrice = Number(val.toFixed(2));
+      item.estimatedPrice = newPrice;
+      item.actualPrice = newPrice;
+
+      window.StorageService.saveState();
+      if (window.EventBus) window.EventBus.emit('GROCERY_UPDATED');
+      this.renderGrocery();
+      const curr = (window.appState.profile && window.appState.profile.currency) || '$';
+      window.ToastService.show(`Updated ${item.ingredient} price to ${curr}${newPrice.toFixed(2)}! 🏷️`);
+    },
+
+    cancelQuickEditGroceryPrice: function(itemId) {
+      this.renderGrocery();
     },
 
     toggleGroceryPurchased: function(itemId, isPurchased) {
@@ -6773,7 +7745,7 @@
         </div>
 
         <!-- STATS STRIP -->
-        <div class="stats-grid">
+        <div class="stats-grid stats-grid-4">
           <div class="stat-card" style="--stat-color: var(--primary);">
             <div class="stat-label"><span>Total Items</span></div>
             <div class="stat-value">${stats.total}</div>
@@ -7143,32 +8115,6 @@
       const allExpenses = budget.expenses || [];
       const curr = (window.appState && window.appState.profile && window.appState.profile.currency) || '$';
 
-      // Chart month and year
-      if (!window.budgetChartYear || !window.budgetChartMonth) {
-        const parts = window.budgetSelectedWeekStart.split('-');
-        window.budgetChartYear = Number(parts[0]) || new Date().getFullYear();
-        window.budgetChartMonth = Number(parts[1]) || (new Date().getMonth() + 1);
-      }
-
-      const chartYear = window.budgetChartYear;
-      const chartMonth = window.budgetChartMonth;
-      const chartMonthDate = new Date(chartYear, chartMonth - 1, 1);
-      const monthName = chartMonthDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-
-      // Monthly breakdown
-      const monthlyWeeks = window.CalculationEngine.getMonthlyWeeklyBreakdown(chartYear, chartMonth);
-
-      // Monthly aggregate metrics for header overview
-      const totalMonthBudget = monthlyWeeks.reduce((acc, w) => acc + w.weeklyBudget, 0);
-      const totalMonthExpenses = monthlyWeeks.reduce((acc, w) => acc + w.totalExpenses, 0);
-      const totalMonthRemaining = totalMonthBudget - totalMonthExpenses;
-      const monthUsagePercent = totalMonthBudget > 0 ? Math.round((totalMonthExpenses / totalMonthBudget) * 100) : 0;
-
-      // Scaling for bars
-      const maxInMonth = Math.max(100, ...monthlyWeeks.map(w => Math.max(w.weeklyBudget, w.totalExpenses, 0)));
-      const maxScale = Math.max(maxInMonth * 1.18, 120);
-      const chartTrackHeight = 190;
-
       // Filter for table
       const filterMode = window.budgetExpenseFilterMode || 'week';
       const displayedExpenses = filterMode === 'week' ? metrics.weeklyExpenses : allExpenses;
@@ -7196,9 +8142,9 @@
         </div>
 
         <!-- WEEK NAVIGATION CONTROL STRIP -->
-        <div class="card" style="margin-bottom: 20px; padding: 14px 18px;">
+        <div class="card" style="margin-bottom: 20px; padding: 14px 18px; max-width: 100%; box-sizing: border-box;">
           <div class="budget-nav-bar">
-            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <div class="budget-nav-btn-group">
               <button class="btn btn-secondary btn-sm" onclick="window.ModulesUI.navigateBudgetWeek(-1)" title="Previous Calendar Week">
                 ${window.renderIcon('chevron-left')} Previous Week
               </button>
@@ -7211,7 +8157,7 @@
             </div>
 
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-              <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <span style="font-size: 14.5px; font-weight: 800; color: var(--text-main);">
                   📅 ${metrics.weekInfo.label}
                 </span>
@@ -7227,63 +8173,67 @@
         </div>
 
         <!-- 4 TOP STATS CARDS -->
-        <div class="stats-grid">
-          <div class="stat-card" style="cursor: pointer; position: relative;" onclick="window.ModalService.openEditBudgetModal()" title="Click to customize weekly budget for this week">
-            <div class="stat-header" style="display: flex; justify-content: space-between; align-items: center;">
-              <div class="stat-label"><span>Weekly Budget Target</span></div>
-              <button class="btn-icon btn-sm" style="width: 24px; height: 24px;" title="Edit Weekly Budget" onclick="event.stopPropagation(); window.ModalService.openEditBudgetModal();">
+        <div class="stats-grid stats-grid-4 budget-stats-grid">
+          <div class="stat-card" style="--stat-color: var(--primary); cursor: pointer; position: relative;" onclick="window.ModalService.openEditBudgetModal()" title="Click to customize weekly budget for this week">
+            <div class="stat-header">
+              <div class="stat-label"><span>Weekly Target</span></div>
+              <button class="btn-icon btn-sm" style="width: 24px; height: 24px; border-radius: 5px; flex-shrink: 0;" title="Edit Weekly Budget" onclick="event.stopPropagation(); window.ModalService.openEditBudgetModal();">
                 ${window.renderIcon('edit')}
               </button>
             </div>
             <div class="stat-value">${curr}${metrics.weeklyBudget.toFixed(2)}</div>
-            <div class="stat-footer" style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+            <div class="stat-footer">
               <span>For: <strong>${metrics.weekInfo.shortLabel}</strong></span>
-              <span style="color: var(--primary); font-weight: 600;">Edit &rarr;</span>
+              <span style="color: var(--primary); font-weight: 600; flex-shrink: 0; cursor: pointer;">Edit &rarr;</span>
             </div>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="stat-card" style="--stat-color: ${metrics.isOverBudget ? 'var(--danger)' : 'var(--primary)'};">
+            <div class="stat-header">
               <div class="stat-label"><span>Weekly Spent</span></div>
-              <span class="badge ${metrics.isOverBudget ? 'badge-danger' : 'badge-primary'}">${metrics.percentSpent}% Used</span>
+              <span class="badge ${metrics.isOverBudget ? 'badge-danger' : 'badge-primary'}" style="flex-shrink: 0;">${metrics.percentSpent}% Used</span>
             </div>
             <div class="stat-value" style="color: ${metrics.isOverBudget ? 'var(--danger)' : 'var(--text-main)'};">${curr}${metrics.totalExpenses.toFixed(2)}</div>
-            <div class="stat-footer" style="font-size: 12px; color: var(--text-muted);">
-              <span>${metrics.transactionCount} receipts in this week</span>
+            <div class="stat-footer">
+              <span>${metrics.transactionCount} ${metrics.transactionCount === 1 ? 'receipt' : 'receipts'} in this week</span>
             </div>
           </div>
 
           <div class="stat-card" style="--stat-color: ${metrics.remainingWeekly >= 0 ? 'var(--success)' : 'var(--danger)'};">
-            <div class="stat-header" style="display: flex; justify-content: space-between; align-items: center;">
-              <div class="stat-label"><span>Remaining Allowance</span></div>
-              <span class="badge ${metrics.remainingWeekly < 0 ? 'badge-danger' : (metrics.remainingWeekly < 25 ? 'badge-warning' : 'badge-success')}">
+            <div class="stat-header">
+              <div class="stat-label"><span>Remaining Budget</span></div>
+              <span class="badge ${metrics.remainingWeekly < 0 ? 'badge-danger' : (metrics.remainingWeekly < 25 ? 'badge-warning' : 'badge-success')}" style="flex-shrink: 0;">
                 ${metrics.remainingWeekly < 0 ? 'Over Budget' : (metrics.remainingWeekly < 25 ? 'Low Balance' : 'On Track')}
               </span>
             </div>
             <div class="stat-value" style="color: ${metrics.remainingWeekly >= 0 ? 'var(--success)' : 'var(--danger)'};">${curr}${metrics.remainingWeekly.toFixed(2)}</div>
-            <div class="stat-footer" style="font-size: 12px; color: var(--text-muted);">
-              <span>Daily allowance: ${curr}${(metrics.weeklyBudget / 7).toFixed(2)}/day</span>
+            <div class="stat-footer">
+              <span>Daily allowance: <strong>${curr}${(metrics.weeklyBudget / 7).toFixed(2)}/day</strong></span>
             </div>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-header" style="display: flex; justify-content: space-between; align-items: center;">
-              <div class="stat-label"><span>Planned Grocery Cart</span></div>
-              <span class="badge badge-info">${curr}${metrics.groceryEstimatedTotal.toFixed(2)}</span>
+          <div class="stat-card" style="--stat-color: #0284c7;">
+            <div class="stat-header">
+              <div class="stat-label"><span>Planned Grocery</span></div>
+              <span class="badge ${metrics.groceryEstimatedTotal <= metrics.remainingWeekly ? 'badge-info' : 'badge-warning'}" style="flex-shrink: 0;">
+                ${metrics.groceryEstimatedTotal <= metrics.remainingWeekly ? 'In Budget' : 'Exceeds'}
+              </span>
             </div>
-            <div class="stat-value" style="font-size: 22px;">${curr}${metrics.groceryEstimatedTotal.toFixed(2)}</div>
-            <div class="stat-footer" style="font-size: 12px; color: var(--text-muted);">
-              <span>${metrics.groceryEstimatedTotal <= metrics.remainingWeekly ? 'Fits in weekly balance' : 'Exceeds remaining allowance'}</span>
+            <div class="stat-value">${curr}${metrics.groceryEstimatedTotal.toFixed(2)}</div>
+            <div class="stat-footer">
+              <span style="color: ${metrics.groceryEstimatedTotal <= metrics.remainingWeekly ? 'var(--text-muted)' : 'var(--danger)'};">
+                ${metrics.groceryEstimatedTotal <= metrics.remainingWeekly ? '✓ Fits in weekly balance' : '⚠ Exceeds allowance'}
+              </span>
             </div>
           </div>
         </div>
 
         <!-- WEEKLY BUDGET PROGRESS & FAST EDIT BAR -->
-        <div class="card" style="margin-bottom: 24px; padding: 18px 20px;">
+        <div class="card" style="margin-bottom: 24px; padding: 18px 20px; max-width: 100%; box-sizing: border-box;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-            <div>
+            <div style="max-width: 100%;">
               <span style="font-weight: 700; font-size: 15px;">Weekly Budget Utilization Tracker</span>
-              <span style="margin-left: 10px; font-size: 13px; color: var(--text-secondary);">
+              <span style="margin-left: 10px; font-size: 13px; color: var(--text-secondary); display: inline-block;">
                 Spent <strong>${curr}${metrics.totalExpenses.toFixed(2)}</strong> of <strong>${curr}${metrics.weeklyBudget.toFixed(2)}</strong> for <strong>${metrics.weekInfo.shortLabel}</strong>
               </span>
             </div>
@@ -7298,7 +8248,7 @@
             <div style="width: ${Math.min(100, metrics.percentSpent)}%; height: 100%; background: ${metrics.remainingWeekly < 0 ? 'var(--danger, #ef4444)' : (metrics.percentSpent > 85 ? 'var(--warning, #f59e0b)' : 'var(--primary, #10b981)')}; border-radius: 999px; transition: width 0.3s ease;"></div>
           </div>
 
-          <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--text-muted);">
+          <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--text-muted); flex-wrap: wrap; gap: 6px;">
             <span>${curr}0.00</span>
             <span style="font-weight: 600; color: var(--text-main);">${metrics.percentSpent}% Consumed (${curr}${metrics.remainingWeekly.toFixed(2)} remaining)</span>
             <span>Target Cap: ${curr}${metrics.weeklyBudget.toFixed(2)}</span>
@@ -7316,7 +8266,7 @@
               <button class="btn btn-sm ${metrics.weeklyBudget === 300 ? 'btn-primary' : 'btn-secondary'}" onclick="window.ModulesUI.quickSetWeeklyBudget(300)" style="padding: 4px 9px; font-size: 12px;">${curr}300</button>
             </div>
 
-            <form onsubmit="event.preventDefault(); window.ModulesUI.quickSaveCustomBudget();" style="display: flex; align-items: center; gap: 8px;">
+            <form onsubmit="event.preventDefault(); window.ModulesUI.quickSaveCustomBudget();" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 100%;">
               <label for="budget-inline-input" style="font-size: 12.5px; font-weight: 600; color: var(--text-secondary);">Edit Target (${curr}):</label>
               <input type="number" id="budget-inline-input" class="form-control" value="${metrics.weeklyBudget.toFixed(2)}" min="5" step="1" style="width: 105px; padding: 4px 8px; font-size: 13px; height: 32px;" required>
               <button type="submit" class="btn btn-primary btn-sm" style="height: 32px; padding: 4px 12px; font-size: 12px;">Save Budget</button>
@@ -7324,154 +8274,33 @@
           </div>
         </div>
 
-        <!-- 5. INTERACTIVE MONTHLY WEEKLY COMPARISON BAR CHART -->
-        <div class="card budget-chart-card">
-          <div class="budget-chart-header">
-            <div>
+        <!-- 5. CENTRALIZED FINANCIAL ANALYTICS BANNER -->
+        <div class="card" id="budget-analytics-hub-card" style="margin-bottom: 20px; padding: 18px 22px; background: linear-gradient(135deg, rgba(var(--primary-rgb, 61, 112, 84), 0.05) 0%, rgba(99, 102, 241, 0.06) 100%); border: 1px solid var(--border-color); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; max-width: 100%; box-sizing: border-box;">
+          <div style="display: flex; align-items: center; gap: 14px; max-width: 100%;">
+            <div style="width: 46px; height: 46px; border-radius: var(--radius-md); background: rgba(99, 102, 241, 0.12); color: #4f46e5; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">
+              📊
+            </div>
+            <div style="min-width: 0;">
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <h3 class="card-title" style="margin: 0;">Monthly Overview: Weekly Budget vs. Weekly Expenses</h3>
-                <span class="badge badge-primary" style="font-size: 11px;">Interactive Comparison</span>
+                <h3 style="margin: 0; font-size: 15.5px; font-weight: 700; color: var(--text-main);">Monthly Budget vs. Expense Trends</h3>
+                <span class="badge badge-primary" style="font-size: 10.5px;">Centralized in Analytics</span>
               </div>
-              <p style="font-size: 12.5px; color: var(--text-muted); margin: 4px 0 0 0;">
-                Track and compare weekly grocery targets vs actual food spending. Hover over any week to inspect detailed metrics, or click to switch active week.
+              <p style="margin: 4px 0 0 0; font-size: 12.5px; color: var(--text-muted);">
+                The full-scale interactive Monthly Line & Area Graph is now integrated in <strong>Analytics & Insights</strong> for complete nutritional and financial intelligence.
               </p>
             </div>
-
-            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-              <!-- Month Navigator -->
-              <div style="display: flex; align-items: center; gap: 4px; background: var(--bg-surface-2, #f1f5f9); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 3px 8px;">
-                <button class="btn-icon btn-sm" onclick="window.ModulesUI.navigateBudgetMonth(-1)" title="Previous Month">
-                  ${window.renderIcon('chevron-left')}
-                </button>
-                <span style="font-size: 13px; font-weight: 700; color: var(--text-main); min-width: 135px; text-align: center;">
-                  ${monthName}
-                </span>
-                <button class="btn-icon btn-sm" onclick="window.ModulesUI.navigateBudgetMonth(1)" title="Next Month">
-                  ${window.renderIcon('chevron-right')}
-                </button>
-              </div>
-
-              <!-- Month KPI summary badges -->
-              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <span class="badge" style="background: rgba(79, 70, 229, 0.1); color: #4f46e5; border: 1px solid rgba(79, 70, 229, 0.25); font-size: 11.5px; padding: 4px 8px;">
-                  Target: <strong>${curr}${totalMonthBudget.toFixed(0)}</strong>
-                </span>
-                <span class="badge" style="background: ${totalMonthRemaining < 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)'}; color: ${totalMonthRemaining < 0 ? 'var(--danger)' : 'var(--success)'}; border: 1px solid ${totalMonthRemaining < 0 ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.25)'}; font-size: 11.5px; padding: 4px 8px;">
-                  Spent: <strong>${curr}${totalMonthExpenses.toFixed(2)}</strong> (${monthUsagePercent}%)
-                </span>
-              </div>
-            </div>
           </div>
-
-          <!-- Chart Legend Strip -->
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 8px 14px; background: var(--bg-surface-2, rgba(0,0,0,0.02)); border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap; gap: 8px;">
-            <div class="budget-chart-legend">
-              <span class="budget-legend-item">
-                <span class="budget-legend-dot" style="background: linear-gradient(180deg, #818cf8 0%, #4f46e5 100%);"></span>
-                <strong>Weekly Target Budget</strong>
-              </span>
-              <span class="budget-legend-item">
-                <span class="budget-legend-dot" style="background: linear-gradient(180deg, #34d399 0%, #059669 100%);"></span>
-                <strong>Weekly Expenses (On Track)</strong>
-              </span>
-              <span class="budget-legend-item">
-                <span class="budget-legend-dot" style="background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);"></span>
-                <strong>Over Budget (Exceeded)</strong>
-              </span>
-            </div>
-            <div style="font-size: 11.5px; color: var(--text-muted);">
-              💡 Click any week bar to view & manage its expenses
-            </div>
-          </div>
-
-          <div class="budget-chart-scroll-wrap">
-            <div class="budget-chart-track-container" id="budget-chart-container">
-              <!-- Floating Tooltip -->
-              <div id="budget-chart-tooltip" class="budget-chart-tooltip"></div>
-
-              <!-- Grid reference lines -->
-              <div class="budget-chart-grid-line" style="bottom: 58px;">
-                <span class="budget-chart-grid-label">${curr}0</span>
-              </div>
-              <div class="budget-chart-grid-line" style="bottom: ${Math.round(chartTrackHeight * 0.33) + 58}px;">
-                <span class="budget-chart-grid-label">${curr}${Math.round(maxScale * 0.33)}</span>
-              </div>
-              <div class="budget-chart-grid-line" style="bottom: ${Math.round(chartTrackHeight * 0.66) + 58}px;">
-                <span class="budget-chart-grid-label">${curr}${Math.round(maxScale * 0.66)}</span>
-              </div>
-              <div class="budget-chart-grid-line" style="bottom: ${Math.round(chartTrackHeight) + 58}px;">
-                <span class="budget-chart-grid-label">${curr}${Math.round(maxScale)}</span>
-              </div>
-
-              <!-- Category Columns -->
-              <div class="budget-chart-columns">
-                ${monthlyWeeks.map(w => {
-                  const budgetHeight = Math.max(8, Math.round((w.weeklyBudget / maxScale) * chartTrackHeight));
-                  const expenseHeight = w.totalExpenses > 0 ? Math.max(8, Math.round((w.totalExpenses / maxScale) * chartTrackHeight)) : 3;
-
-                  let expenseBarClass = 'bar-spent-normal';
-                  if (w.isOverBudget) {
-                    expenseBarClass = 'bar-spent-danger';
-                  } else if (w.percentSpent > 85) {
-                    expenseBarClass = 'bar-spent-warn';
-                  }
-
-                  return `
-                    <div class="budget-week-column ${w.isSelectedWeek ? 'active-week' : ''}" 
-                         onclick="window.ModulesUI.selectBudgetWeek('${w.weekKey}')"
-                         onmouseenter="window.ModulesUI.showBudgetChartTooltip(event, '${w.weekKey}')"
-                         onmouseleave="window.ModulesUI.hideBudgetChartTooltip()"
-                         title="Click to view & select Week ${w.weekNumber}">
-                      
-                      <!-- Week status badge -->
-                      <div style="margin-bottom: 8px; font-size: 10.5px; min-height: 18px; display: flex; align-items: center; justify-content: center;">
-                        ${w.isSelectedWeek 
-                          ? '<span class="badge badge-primary" style="font-size: 10px; padding: 2px 8px; border-radius: 999px;">✓ Active Week</span>' 
-                          : (w.isOverBudget 
-                              ? '<span class="badge badge-danger" style="font-size: 10px; padding: 2px 7px; border-radius: 999px;">⚠️ Over</span>' 
-                              : (w.totalExpenses > 0 
-                                  ? '<span style="font-weight: 700; color: var(--text-secondary); font-size: 11px;">' + curr + Math.round(w.totalExpenses) + '</span>' 
-                                  : '<span style="color: var(--text-muted); font-size: 10px;">$0</span>'))}
-                      </div>
-
-                      <!-- Comparison Bars Pair -->
-                      <div class="budget-bars-pair">
-                        <!-- Budget Target Bar -->
-                        <div class="budget-single-bar bar-target" style="height: ${budgetHeight}px;" title="Weekly Target: ${curr}${w.weeklyBudget.toFixed(2)}">
-                          <span class="budget-bar-val-badge">${curr}${Math.round(w.weeklyBudget)}</span>
-                        </div>
-                        <!-- Actual Expenses Bar -->
-                        <div class="budget-single-bar ${expenseBarClass}" style="height: ${expenseHeight}px;" title="Weekly Expenses: ${curr}${w.totalExpenses.toFixed(2)}">
-                          <span class="budget-bar-val-badge" style="color: ${w.isOverBudget ? 'var(--danger)' : 'var(--text-main)'};">
-                            ${w.totalExpenses > 0 ? curr + Math.round(w.totalExpenses) : curr + '0'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <!-- Week labels -->
-                      <div class="budget-week-labels">
-                        <span class="budget-week-title">Week ${w.weekNumber}</span>
-                        <span class="budget-week-sublabel">${w.shortLabel}</span>
-                        <span style="font-size: 11px; margin-top: 2px; color: ${w.isOverBudget ? 'var(--danger)' : (w.totalExpenses > 0 ? 'var(--success)' : 'var(--text-muted)')}; font-weight: 600;">
-                          ${w.totalExpenses > 0 
-                            ? (w.isOverBudget ? 'Over by ' + curr + Math.abs(w.remainingBudget).toFixed(0) : curr + Math.round(w.remainingBudget) + ' left') 
-                            : 'Full budget left'}
-                        </span>
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-          </div>
+          <button class="btn btn-secondary btn-sm" onclick="window.Router.navigate('analytics')" style="font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+            ${window.renderIcon('bar-chart-2')} View Expense Line Graph &rarr;
+          </button>
         </div>
 
         <!-- LOGGED EXPENSES SECTION -->
-        <div class="card">
+        <div class="card" style="max-width: 100%; box-sizing: border-box; overflow: hidden;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
               <h3 class="card-title" style="margin: 0;">Logged Grocery Receipts</h3>
-              <div style="display: flex; gap: 4px; background: var(--bg-surface-2, #f1f5f9); padding: 2px 4px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+              <div style="display: flex; gap: 4px; background: var(--bg-surface-2, #f1f5f9); padding: 2px 4px; border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap;">
                 <button class="btn btn-sm ${filterMode === 'week' ? 'btn-primary' : 'btn-secondary'}" 
                         onclick="window.ModulesUI.setBudgetExpenseFilter('week')"
                         style="padding: 3px 10px; font-size: 12px;">
@@ -7485,7 +8314,7 @@
               </div>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
               <span style="font-size: 12.5px; color: var(--text-muted);">
                 ${filterMode === 'week' 
                   ? 'Showing ' + metrics.transactionCount + ' receipts (' + curr + metrics.totalExpenses.toFixed(2) + ')' 
@@ -7513,8 +8342,8 @@
               </button>
             </div>
           ` : `
-            <div style="overflow-x: auto;">
-              <table style="width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 580px;">
+            <div style="overflow-x: auto; width: 100%; max-width: 100%; -webkit-overflow-scrolling: touch; box-sizing: border-box;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 520px;">
                 <thead>
                   <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
                     <th style="padding: 10px;">Date</th>
@@ -7589,7 +8418,11 @@
       window.budgetChartYear = Number(parts[0]);
       window.budgetChartMonth = Number(parts[1]);
 
-      this.renderBudget();
+      if (window.Router && window.Router.currentView === 'analytics') {
+        this.renderAnalytics();
+      } else {
+        this.renderBudget();
+      }
       if (typeof this.renderDashboard === 'function') this.renderDashboard();
       if (window.EventBus) window.EventBus.emit('BUDGET_UPDATED', window.appState.budget);
     },
@@ -7611,7 +8444,22 @@
       }
       window.budgetChartYear = y;
       window.budgetChartMonth = m;
-      this.renderBudget();
+      if (window.Router && window.Router.currentView === 'analytics') {
+        this.renderAnalytics();
+      } else {
+        this.renderBudget();
+      }
+    },
+
+    resetBudgetMonth: function() {
+      const d = new Date();
+      window.budgetChartYear = d.getFullYear();
+      window.budgetChartMonth = d.getMonth() + 1;
+      if (window.Router && window.Router.currentView === 'analytics') {
+        this.renderAnalytics();
+      } else {
+        this.renderBudget();
+      }
     },
 
     setBudgetExpenseFilter: function(mode) {
@@ -7733,6 +8581,293 @@
       if (typeof this.renderDashboard === 'function') this.renderDashboard();
       if (window.EventBus) window.EventBus.emit('BUDGET_UPDATED', window.appState.budget);
       window.ToastService.show('Expense deleted successfully.');
+    },
+
+    renderBudgetTrendAreaChart: function(isAnalyticsView = true) {
+      const curr = (window.appState && window.appState.profile && window.appState.profile.currency) || '$';
+      if (!window.budgetChartYear || !window.budgetChartMonth) {
+        const d = new Date();
+        window.budgetChartYear = d.getFullYear();
+        window.budgetChartMonth = d.getMonth() + 1;
+      }
+      const chartYear = window.budgetChartYear;
+      const chartMonth = window.budgetChartMonth;
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const monthLabel = `${monthNames[chartMonth - 1]} ${chartYear}`;
+
+      // Monthly breakdown
+      const monthlyWeeks = window.CalculationEngine.getMonthlyWeeklyBreakdown(chartYear, chartMonth);
+
+      // Monthly aggregate metrics
+      const totalMonthBudget = monthlyWeeks.reduce((acc, w) => acc + w.weeklyBudget, 0);
+      const totalMonthExpenses = monthlyWeeks.reduce((acc, w) => acc + w.totalExpenses, 0);
+      const totalMonthRemaining = totalMonthBudget - totalMonthExpenses;
+      const monthUsagePercent = totalMonthBudget > 0 ? Math.round((totalMonthExpenses / totalMonthBudget) * 100) : 0;
+
+      // Scaling for Line & Area chart with generous headroom so curves have steep, dynamic slopes
+      const maxInMonth = Math.max(100, ...monthlyWeeks.map(w => Math.max(w.weeklyBudget, w.totalExpenses, 0)));
+      const rawTargetMax = Math.max(maxInMonth * 1.35, 120);
+      const step = rawTargetMax > 500 ? 100 : (rawTargetMax > 200 ? 50 : 25);
+      const maxScale = Math.ceil(rawTargetMax / step) * step;
+
+      // Determine if running on mobile viewport
+      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
+      // SVG Coordinate Calculations for Line & Area Graph (Taller, true responsive & uncompressed)
+      const svgW = isMobile ? 400 : 920;
+      const svgH = isMobile ? 380 : 440;
+      const padTop = isMobile ? 44 : 48;
+      const padBottom = isMobile ? 325 : 370;
+      const padLeft = isMobile ? 36 : 68;
+      const padRight = isMobile ? 16 : 50;
+      const chartW = svgW - padLeft - padRight;
+      const chartH = padBottom - padTop;
+      const N = monthlyWeeks.length;
+
+      const ptsBudget = [];
+      const ptsExpenses = [];
+
+      monthlyWeeks.forEach((w, idx) => {
+        const x = N > 1 ? padLeft + (idx * (chartW / (N - 1))) : (svgW / 2);
+        const yBudget = padBottom - Math.min(chartH, Math.max(0, (w.weeklyBudget / maxScale) * chartH));
+        const yExpense = padBottom - Math.min(chartH, Math.max(0, (w.totalExpenses / maxScale) * chartH));
+        ptsBudget.push({ x: Math.round(x), y: Math.round(yBudget), w });
+        ptsExpenses.push({ x: Math.round(x), y: Math.round(yExpense), w });
+      });
+
+      function buildSmoothPath(points) {
+        if (points.length === 0) return '';
+        if (points.length === 1) return `M ${points[0].x - 30},${points[0].y} L ${points[0].x + 30},${points[0].y}`;
+        let d = `M ${points[0].x},${points[0].y}`;
+        for (let i = 0; i < points.length - 1; i++) {
+          const p0 = points[i === 0 ? i : i - 1];
+          const p1 = points[i];
+          const p2 = points[i + 1];
+          const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
+          const cp1x = p1.x + (p2.x - p0.x) / 6;
+          const cp1y = p1.y + (p2.y - p0.y) / 6;
+          const cp2x = p2.x - (p3.x - p1.x) / 6;
+          const cp2y = p2.y - (p3.y - p1.y) / 6;
+          d += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+        }
+        return d;
+      }
+
+      function buildAreaPath(points, baseline) {
+        if (points.length === 0) return '';
+        const line = buildSmoothPath(points);
+        return `${line} L ${points[points.length - 1].x},${baseline} L ${points[0].x},${baseline} Z`;
+      }
+
+      const budgetLinePath = buildSmoothPath(ptsBudget);
+      const budgetAreaPath = buildAreaPath(ptsBudget, padBottom);
+      const expenseLinePath = buildSmoothPath(ptsExpenses);
+      const expenseAreaPath = buildAreaPath(ptsExpenses, padBottom);
+      const hasAnyOverBudget = monthlyWeeks.some(w => w.isOverBudget);
+
+      const gridLevels = [
+        { ratio: 0, val: 0 },
+        { ratio: 0.25, val: Math.round(maxScale * 0.25) },
+        { ratio: 0.50, val: Math.round(maxScale * 0.50) },
+        { ratio: 0.75, val: Math.round(maxScale * 0.75) },
+        { ratio: 1.00, val: Math.round(maxScale) }
+      ];
+
+      return `
+        <!-- CARD: MONTHLY FOOD BUDGET & EXPENSE TRENDS (LINE / AREA GRAPH) -->
+        <div class="card" style="position: relative; margin-top: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h3 class="card-title" style="margin-bottom: 2px;">Monthly Food Budget vs. Expenses Trend</h3>
+                <span class="badge badge-primary" style="font-size: 11px; padding: 2px 8px;">Financial Analytics</span>
+              </div>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Weekly budget limits vs. actual grocery expenditures across the month</p>
+            </div>
+
+            <!-- Month Switcher & Quick Navigation -->
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <div style="display: inline-flex; align-items: center; background: var(--bg-surface-2, rgba(0,0,0,0.03)); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2px 4px;">
+                <button class="btn-icon btn-sm" onclick="window.ModulesUI.navigateBudgetMonth(-1)" title="Previous Month">
+                  ${window.renderIcon('chevron-left')}
+                </button>
+                <span style="font-size: 12.5px; font-weight: 800; color: var(--text-main); min-width: 125px; text-align: center; padding: 0 4px;">
+                  ${monthLabel}
+                </span>
+                <button class="btn-icon btn-sm" onclick="window.ModulesUI.navigateBudgetMonth(1)" title="Next Month">
+                  ${window.renderIcon('chevron-right')}
+                </button>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="window.ModulesUI.resetBudgetMonth()" style="font-size: 11px; padding: 4px 9px;">
+                Current Month
+              </button>
+              <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                <span class="badge" style="background: rgba(79, 70, 229, 0.1); color: #4f46e5; border: 1px solid rgba(79, 70, 229, 0.25); font-size: 11.5px; padding: 4px 8px;">
+                  Target: <strong>${curr}${totalMonthBudget.toFixed(0)}</strong>
+                </span>
+                <span class="badge" style="background: ${totalMonthRemaining < 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)'}; color: ${totalMonthRemaining < 0 ? 'var(--danger)' : 'var(--success)'}; border: 1px solid ${totalMonthRemaining < 0 ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.25)'}; font-size: 11.5px; padding: 4px 8px;">
+                  Spent: <strong>${curr}${totalMonthExpenses.toFixed(2)}</strong> (${monthUsagePercent}%)
+                </span>
+                <button class="btn btn-secondary btn-sm" onclick="window.Router.navigate('budget')" title="Open Budget & Log Receipts" style="padding: 4px 10px; font-size: 11.5px; display: inline-flex; align-items: center; gap: 4px;">
+                  ${window.renderIcon('wallet')} Manage Budget
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart Legend Strip -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 8px 14px; background: var(--bg-surface-2, rgba(0,0,0,0.02)); border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap; gap: 8px;">
+            <div class="budget-chart-legend">
+              <span class="budget-legend-item">
+                <span class="budget-legend-dot" style="background: #6366f1; width: 14px; height: 3px; border-radius: 2px;"></span>
+                <strong>Target Budget Curve</strong>
+              </span>
+              <span class="budget-legend-item">
+                <span class="budget-legend-dot" style="background: #10b981; width: 14px; height: 3px; border-radius: 2px;"></span>
+                <strong>Actual Expenses Area (On Track)</strong>
+              </span>
+              <span class="budget-legend-item">
+                <span class="budget-legend-dot" style="background: #ef4444; width: 14px; height: 3px; border-radius: 2px;"></span>
+                <strong>Over Budget Area</strong>
+              </span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-muted);">
+              💡 Click any week point, curve area, or card to inspect its details and filter expenses
+            </div>
+          </div>
+
+          <div class="budget-chart-scroll-wrap">
+            <div class="budget-chart-track-container" id="budget-chart-container">
+              <!-- Floating Tooltip -->
+              <div id="budget-chart-tooltip" class="budget-chart-tooltip"></div>
+
+              <!-- SVG LINE & AREA GRAPH (TRUE RESPONSIVE) -->
+              <svg class="budget-area-chart-svg" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="budget-area-grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#818cf8" stop-opacity="0.32" />
+                    <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.01" />
+                  </linearGradient>
+                  <linearGradient id="expense-area-grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#34d399" stop-opacity="0.40" />
+                    <stop offset="100%" stop-color="#059669" stop-opacity="0.02" />
+                  </linearGradient>
+                  <linearGradient id="expense-danger-grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#f87171" stop-opacity="0.45" />
+                    <stop offset="100%" stop-color="#dc2626" stop-opacity="0.02" />
+                  </linearGradient>
+                </defs>
+
+                <!-- Horizontal Grid Reference Lines with Clean Labels -->
+                <g class="budget-grid-lines">
+                  ${gridLevels.map(gl => {
+                    const yPos = Math.round(padBottom - chartH * gl.ratio);
+                    return `
+                      <line x1="${padLeft - 8}" y1="${yPos}" x2="${svgW - padRight + (isMobile ? 6 : 14)}" y2="${yPos}" stroke="var(--border-color)" stroke-dasharray="4,4" opacity="0.65" />
+                      <text x="${padLeft - (isMobile ? 8 : 14)}" y="${yPos + 4}" text-anchor="end" font-size="${isMobile ? 10 : 11}" font-weight="700" fill="var(--text-muted)">${curr}${gl.val}</text>
+                    `;
+                  }).join('')}
+                </g>
+
+                <!-- Active Week Highlight Guide Beams -->
+                ${ptsExpenses.map(p => {
+                  const sliceW = chartW / Math.max(1, N - 1);
+                  return p.w.isSelectedWeek ? `
+                    <rect x="${p.x - sliceW/2}" y="${padTop - 28}" width="${sliceW}" height="${padBottom - padTop + 40}" rx="${isMobile ? 8 : 12}" fill="rgba(var(--primary-rgb, 61, 112, 84), 0.08)" stroke="var(--primary)" stroke-width="1.5" stroke-dasharray="4,4" pointer-events="none" />
+                  ` : '';
+                }).join('')}
+
+                <!-- Target Budget Area & Line (Indigo) -->
+                <path class="chart-area-budget" d="${budgetAreaPath}" fill="url(#budget-area-grad)" />
+                <path class="chart-line-budget" d="${budgetLinePath}" fill="none" stroke="#6366f1" stroke-width="${isMobile ? 2 : 2.5}" stroke-dasharray="6,4" />
+
+                <!-- Actual Expenses Area & Line (Emerald or Rose if Over) -->
+                <path class="chart-area-expense" d="${expenseAreaPath}" fill="url(${hasAnyOverBudget ? '#expense-danger-grad' : '#expense-area-grad'})" />
+                <path class="chart-line-expense" d="${expenseLinePath}" fill="none" stroke="${hasAnyOverBudget ? '#ef4444' : '#10b981'}" stroke-width="${isMobile ? 3 : 3.5}" />
+
+                <!-- Vertical Reference Line to Data Points -->
+                ${ptsExpenses.map(p => `
+                  <line x1="${p.x}" y1="${padTop - 12}" x2="${p.x}" y2="${padBottom}" stroke="var(--border-color)" stroke-dasharray="3,3" opacity="0.45" pointer-events="none" />
+                `).join('')}
+
+                <!-- Budget Target Markers -->
+                ${ptsBudget.map(p => `
+                  <circle cx="${p.x}" cy="${p.y}" r="${isMobile ? 4 : 5}" fill="#ffffff" stroke="#6366f1" stroke-width="${isMobile ? 2 : 2.5}" class="budget-point-marker" pointer-events="none" />
+                `).join('')}
+
+                <!-- Expenses Markers -->
+                ${ptsExpenses.map(p => `
+                  <circle cx="${p.x}" cy="${p.y}" r="${isMobile ? 6 : 7}" fill="${p.w.isOverBudget ? '#ef4444' : '#10b981'}" stroke="#ffffff" stroke-width="${isMobile ? 2 : 2.5}" class="budget-point-marker" pointer-events="none" />
+                `).join('')}
+
+                <!-- Floating Value Badges Above Points (Responsive & Non-colliding) -->
+                ${ptsExpenses.map(p => {
+                  const targetPt = ptsBudget.find(b => b.w.weekKey === p.w.weekKey);
+                  const topY = Math.min(p.y, targetPt ? targetPt.y : p.y);
+                  const badgeY = Math.max(isMobile ? 18 : 20, topY - (isMobile ? 16 : 18));
+                  const bW = isMobile ? 48 : 88;
+                  const bH = isMobile ? 18 : 20;
+                  const bText = isMobile 
+                    ? (p.w.totalExpenses > 0 ? curr + Math.round(p.w.totalExpenses) : curr + '0')
+                    : (p.w.totalExpenses > 0 ? curr + Math.round(p.w.totalExpenses) : curr + '0') + ' / ' + curr + Math.round(p.w.weeklyBudget);
+                  return `
+                    <g transform="translate(${p.x}, ${badgeY})" pointer-events="none">
+                      <rect x="${-bW/2}" y="${-bH/2 - 2}" width="${bW}" height="${bH}" rx="4" fill="var(--bg-surface, #ffffff)" stroke="var(--border-color)" stroke-width="1.2" opacity="0.97" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.08))" />
+                      <text x="0" y="2" text-anchor="middle" font-size="${isMobile ? 9 : 10}" font-weight="800" fill="var(--text-main)">
+                        ${bText}
+                      </text>
+                    </g>
+                  `;
+                }).join('')}
+
+                <!-- Interactive Hitbox Rectangles (for hover tooltips & click) -->
+                ${monthlyWeeks.map((w, idx) => {
+                  const sliceW = chartW / Math.max(1, N - 1);
+                  const leftX = N > 1 ? padLeft + (idx * (chartW / (N - 1))) - (sliceW / 2) : 0;
+                  return `
+                    <rect x="${leftX}" y="0" width="${N > 1 ? sliceW : svgW}" height="${svgH}" class="budget-chart-hitbox ${w.isSelectedWeek ? 'active' : ''}" 
+                          onclick="window.ModulesUI.selectBudgetWeek('${w.weekKey}')"
+                          onmouseenter="window.ModulesUI.showBudgetChartTooltip(event, '${w.weekKey}')"
+                          onmouseleave="window.ModulesUI.hideBudgetChartTooltip()" />
+                  `;
+                }).join('')}
+              </svg>
+
+              <!-- Bottom Week Selector Cards (True Responsive 5-Column Grid) -->
+              <div class="budget-axis-cards">
+                ${monthlyWeeks.map(w => `
+                  <div class="budget-axis-card budget-week-column ${w.isSelectedWeek ? 'active-week' : ''}" 
+                       onclick="window.ModulesUI.selectBudgetWeek('${w.weekKey}')"
+                       onmouseenter="window.ModulesUI.showBudgetChartTooltip(event, '${w.weekKey}')"
+                       onmouseleave="window.ModulesUI.hideBudgetChartTooltip()"
+                       title="Click to select Week ${w.weekNumber}">
+                    <div style="font-size: ${isMobile ? '11.5px' : '13px'}; font-weight: 800; color: var(--text-main); margin-bottom: 2px;">
+                      ${isMobile ? 'W' + w.weekNumber : 'Week ' + w.weekNumber}
+                    </div>
+                    <div style="font-size: ${isMobile ? '9.5px' : '11px'}; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      ${isMobile ? (w.shortLabel.includes('–') ? w.shortLabel.split('–')[0].trim() : w.shortLabel) : w.shortLabel}
+                    </div>
+                    <div>
+                      ${w.isSelectedWeek 
+                        ? '<span class="badge badge-primary" style="font-size: ' + (isMobile ? '9px' : '10px') + '; padding: 1px 5px;">✓ Active</span>' 
+                        : (w.isOverBudget 
+                            ? '<span class="badge badge-danger" style="font-size: ' + (isMobile ? '9px' : '10px') + '; padding: 1px 4px;">⚠️ Over</span>' 
+                            : (w.totalExpenses > 0 
+                                ? '<span class="badge badge-success" style="font-size: ' + (isMobile ? '9px' : '10px') + '; padding: 1px 4px;">' + curr + Math.round(w.remainingBudget) + (isMobile ? '' : ' left') + '</span>' 
+                                : '<span class="badge badge-muted" style="font-size: ' + (isMobile ? '9px' : '10px') + '; padding: 1px 4px;">$0</span>'))}
+                    </div>
+                    <div style="font-size: ${isMobile ? '9.5px' : '11px'}; margin-top: 5px; color: var(--text-secondary); font-weight: 700;">
+                      ${isMobile 
+                        ? curr + w.totalExpenses.toFixed(0) + '<span style="font-weight: 500; font-size: 8.5px; color: var(--text-muted);">/' + curr + w.weeklyBudget.toFixed(0) + '</span>'
+                        : 'Spent: <strong>' + curr + w.totalExpenses.toFixed(0) + '</strong> of ' + curr + w.weeklyBudget.toFixed(0)}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
     },
 
     // --------------------------------------------------------------------------
@@ -8218,6 +9353,8 @@
             </div>
           </div>
         </div>
+
+        ${this.renderBudgetTrendAreaChart(true)}
       `;
 
       window.hydrateIcons(container);
@@ -8302,14 +9439,14 @@
     authorRole: "Digital Product Designer & SaaS Creator",
     authorBio: "Hi, I'm Karim, the creator behind WebCraft Goods. I design premium digital planners, productivity tools, dashboards, trackers, and web-based templates that help individuals and businesses organize their work, manage their goals, and improve productivity.\n\nMy mission is to create beautiful, practical, and easy-to-use digital products with modern interfaces and powerful features.",
     etsyStoreUrl: "https://www.etsy.com/shop/WebCraftGoods",
-    supportEmail: "karimfiverr20@gmail.com",
-    avatarUrl: "",
+    supportEmail: "webcraftgoods.support@gmail.com",
+    avatarUrl: "data:image/jpeg;base64,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",
     brandLogoUrl: "",
     socialLinks: [
       { name: "Etsy Shop", url: "https://www.etsy.com/shop/WebCraftGoods", icon: "shopping-bag" },
       { name: "Pinterest", url: "https://pinterest.com/webcraftgoods", icon: "star" },
       { name: "Instagram", url: "https://instagram.com/webcraftgoods", icon: "heart" },
-      { name: "Support Email", url: "mailto:karimfiverr20@gmail.com", icon: "mail" }
+      { name: "Support Email", url: "mailto:webcraftgoods.support@gmail.com", icon: "mail" }
     ],
     productsJsonUrl: "products.json"
   };
@@ -8433,6 +9570,18 @@
           window.ToastService.show('Etsy store: ' + url);
         }
       });
+    }
+  };
+
+  // Global convenience bindings
+  window.onRecipeSearchInput = function(val) {
+    if (window.ModulesUI && typeof window.ModulesUI.onRecipeSearchInput === 'function') {
+      window.ModulesUI.onRecipeSearchInput(val);
+    }
+  };
+  window.clearRecipeSearch = function() {
+    if (window.ModulesUI && typeof window.ModulesUI.clearRecipeSearch === 'function') {
+      window.ModulesUI.clearRecipeSearch();
     }
   };
 
@@ -9831,11 +10980,85 @@
             Reset Application Data
           </button>
         </div>
+
+        <div class="card" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.02);">
+          <h3 class="card-title" style="color: var(--danger); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            ${window.renderIcon('trash-2')} Danger Zone: Clear All Website Data
+          </h3>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 18px;">
+            Permanently erases all saved recipes, meal plans, grocery checklists, pantry inventory, budget expenses, and offline cache. Returns the application to an entirely clean, blank slate.
+          </p>
+          <button id="clear-all-data-btn" class="btn btn-danger" onclick="window.confirmClearAllWebsiteData()" style="display: inline-flex; align-items: center; gap: 6px;">
+            ${window.renderIcon('trash-2')} Clear All Website Data
+          </button>
+        </div>
       </div>
     `;
 
     window.hydrateIcons(container);
   };
+
+  window.confirmClearAllWebsiteData = function() {
+    const doClear = function() {
+      // Call StorageService.clearAllData() which completely wipes state & localStorage
+      window.StorageService.clearAllData();
+
+      // Reset search queries and filters in ModulesUI
+      if (window.ModulesUI) {
+        window.ModulesUI.recipeSearchQuery = '';
+        window.ModulesUI.activeMealTypeFilter = 'all';
+        window.ModulesUI.activeCuisineFilter = 'all';
+        if (typeof window.ModulesUI.updateSidebarBadges === 'function') {
+          window.ModulesUI.updateSidebarBadges();
+        }
+      }
+      if (typeof window.updateHeaderProfile === 'function') {
+        window.updateHeaderProfile();
+      }
+
+      // Force navigation to dashboard
+      if (window.Router && typeof window.Router.navigate === 'function') {
+        window.Router.navigate('dashboard');
+      }
+
+      // Provide immediate user feedback
+      if (window.ToastService && typeof window.ToastService.show === 'function') {
+        window.ToastService.show('All website data has been completely cleared. Blank slate ready.');
+      }
+    };
+
+    if (window.ModalService && typeof window.ModalService.open === 'function') {
+      const bodyHtml = `
+        <div style="text-align: center; padding: 12px 6px;">
+          <div style="font-size: 44px; margin-bottom: 12px;">⚠️</div>
+          <h4 style="font-size: 16px; font-weight: 800; color: var(--danger); margin-bottom: 8px;">PERMANENT ACTION: CLEAR ALL DATA</h4>
+          <p style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            Are you sure you want to clear <strong>ALL website data</strong>?<br>
+            This will permanently erase all saved recipes, meal plans, pantry inventory, grocery lists, logged grocery receipts, and local storage.
+          </p>
+          <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: var(--radius-md); padding: 10px 14px; font-size: 12px; color: var(--danger); font-weight: 600;">
+            This action cannot be undone. All modules will return to an entirely clean, blank slate.
+          </div>
+        </div>
+      `;
+      const footerHtml = `
+        <button class="btn btn-secondary" onclick="window.ModalService.close()">Cancel</button>
+        <button class="btn btn-danger" onclick="window.ModalService.close(); window.__executeClearAllWebsiteData();">
+          Yes, Clear All Data
+        </button>
+      `;
+      window.__executeClearAllWebsiteData = doClear;
+      window.ModalService.open('Clear All Website Data', bodyHtml, footerHtml);
+    } else {
+      const confirmed = window.confirm(
+        '⚠️ PERMANENT ACTION:\n\nAre you sure you want to clear ALL website data?\n\nThis will completely erase all your custom recipes, meal plans, pantry inventory, grocery lists, logged grocery receipts, and local storage. This action cannot be undone.'
+      );
+      if (confirmed) {
+        doClear();
+      }
+    }
+  };
+  window.clearAllWebsiteData = window.confirmClearAllWebsiteData;
 
   // ----------------------------------------------------------------------------
   // 4. SETTINGS & HELP VIEWS
@@ -11094,6 +12317,94 @@
       window.ToastService.show(`Added ${name} to grocery list! 🛒`);
     },
 
+    openEditGroceryModal: function(itemId) {
+      const item = (window.appState.groceryList || []).find(g => g.id === itemId);
+      if (!item) {
+        window.ToastService.show('Grocery item not found.', 'warning');
+        return;
+      }
+
+      const categories = ['Produce', 'Meat', 'Seafood', 'Dairy', 'Eggs', 'Grains', 'Pantry', 'Frozen', 'Beverages', 'Snacks', 'Spices', 'Other'];
+      const catOptions = categories.map(c => `<option value="${c}" ${item.category === c ? 'selected' : ''}>${c}</option>`).join('');
+      const currPrice = item.estimatedPrice != null ? item.estimatedPrice : (item.actualPrice || 0);
+
+      const bodyHtml = `
+        <div class="form-group">
+          <label class="form-label">Item Name</label>
+          <input type="text" class="form-control" id="edit-groc-name" required value="${window.escapeHtml ? window.escapeHtml(item.ingredient || '') : (item.ingredient || '')}" placeholder="e.g. Extra Virgin Olive Oil">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Quantity</label>
+            <input type="number" class="form-control" id="edit-groc-qty" value="${item.quantity != null ? item.quantity : 1}" step="any">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Unit</label>
+            <input type="text" class="form-control" id="edit-groc-unit" value="${window.escapeHtml ? window.escapeHtml(item.unit || '') : (item.unit || 'pcs')}">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select" id="edit-groc-cat">
+              ${catOptions}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Item Price (${(window.appState.profile && window.appState.profile.currency) || '$'})</label>
+            <input type="number" class="form-control" id="edit-groc-price" value="${Number(currPrice || 0).toFixed(2)}" step="0.01" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes (Optional)</label>
+          <input type="text" class="form-control" id="edit-groc-notes" value="${window.escapeHtml ? window.escapeHtml(item.notes || '') : (item.notes || '')}" placeholder="e.g. Organic, brand preference...">
+        </div>
+      `;
+
+      const footerHtml = `
+        <button class="btn btn-secondary" onclick="window.ModalService.close()">Cancel</button>
+        <button class="btn btn-primary" onclick="window.ModalService.saveEditGroceryItem('${item.id}')">Save Changes</button>
+      `;
+
+      this.open('Edit Grocery Item', bodyHtml, footerHtml);
+    },
+
+    saveEditGroceryItem: function(itemId) {
+      const item = (window.appState.groceryList || []).find(g => g.id === itemId);
+      if (!item) return;
+
+      const nameInput = document.getElementById('edit-groc-name');
+      if (!nameInput || !nameInput.value.trim()) {
+        window.ToastService.show('Please enter an item name.', 'warning');
+        return;
+      }
+
+      const priceInput = document.getElementById('edit-groc-price');
+      const priceVal = priceInput ? parseFloat(priceInput.value) : 0;
+      const finalPrice = isNaN(priceVal) || priceVal < 0 ? 0 : Number(priceVal.toFixed(2));
+
+      item.ingredient = nameInput.value.trim();
+      item.quantity = Number(document.getElementById('edit-groc-qty').value) || 1;
+      item.unit = document.getElementById('edit-groc-unit').value.trim() || 'pcs';
+      item.category = document.getElementById('edit-groc-cat').value;
+      item.estimatedPrice = finalPrice;
+      item.actualPrice = finalPrice;
+      
+      const notesInput = document.getElementById('edit-groc-notes');
+      if (notesInput) {
+        item.notes = notesInput.value.trim();
+      }
+
+      window.StorageService.saveState();
+      if (window.EventBus) window.EventBus.emit('GROCERY_UPDATED');
+      if (window.ModulesUI && typeof window.ModulesUI.renderGrocery === 'function') {
+        window.ModulesUI.renderGrocery();
+      }
+      this.close();
+      const curr = (window.appState.profile && window.appState.profile.currency) || '$';
+      window.ToastService.show(`Updated ${item.ingredient} (${curr}${finalPrice.toFixed(2)})! 🛒`);
+    },
+
     openAddPantryModal: function() {
       const bodyHtml = `
         <div class="form-group">
@@ -12071,32 +13382,62 @@
       }
     });
 
-    // 4. Bind Header Controls & Mobile Sidebar Drawer
-    const toggleMobileSidebar = (forceState) => {
+    // 4. Bind Header Controls & Unified Sidebar (Retractable Desktop & Mobile Drawer)
+    const toggleSidebar = (forceState) => {
+      const isDesktop = window.innerWidth > 1024;
       const sb = document.getElementById('app-sidebar');
       const backdrop = document.getElementById('sidebar-backdrop');
-      if (!sb) return;
-      const willOpen = forceState !== undefined ? forceState : !sb.classList.contains('open');
-      if (willOpen) {
-        sb.classList.add('open');
-        if (backdrop) backdrop.classList.add('active');
-        document.body.classList.add('sidebar-drawer-open');
-      } else {
-        sb.classList.remove('open');
+
+      if (isDesktop) {
+        // Retractable desktop sidebar mode
+        const willCollapse = forceState !== undefined 
+          ? !forceState 
+          : !document.body.classList.contains('sidebar-collapsed');
+
+        if (willCollapse) {
+          document.body.classList.add('sidebar-collapsed');
+          try { localStorage.setItem('meal_planner_sidebar_collapsed', 'true'); } catch(e) {}
+        } else {
+          document.body.classList.remove('sidebar-collapsed');
+          try { localStorage.setItem('meal_planner_sidebar_collapsed', 'false'); } catch(e) {}
+        }
+        // Ensure mobile drawer state is clean
+        if (sb) sb.classList.remove('open');
         if (backdrop) backdrop.classList.remove('active');
         document.body.classList.remove('sidebar-drawer-open');
+      } else {
+        // Mobile drawer overlay
+        if (!sb) return;
+        const willOpen = forceState !== undefined ? forceState : !sb.classList.contains('open');
+        if (willOpen) {
+          sb.classList.add('open');
+          if (backdrop) backdrop.classList.add('active');
+          document.body.classList.add('sidebar-drawer-open');
+        } else {
+          sb.classList.remove('open');
+          if (backdrop) backdrop.classList.remove('active');
+          document.body.classList.remove('sidebar-drawer-open');
+        }
       }
     };
-    window.toggleMobileSidebar = toggleMobileSidebar;
+    window.toggleSidebar = toggleSidebar;
+    window.toggleMobileSidebar = toggleSidebar; // backwards compatibility
+
+    // Restore desktop retractable state if saved
+    try {
+      if (window.innerWidth > 1024 && localStorage.getItem('meal_planner_sidebar_collapsed') === 'true') {
+        document.body.classList.add('sidebar-collapsed');
+      }
+    } catch(e) {}
 
     const toggleBtn = document.getElementById('sidebar-toggle-btn');
     if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => toggleMobileSidebar());
+      toggleBtn.addEventListener('click', () => toggleSidebar());
     }
 
     const sidebarBackdrop = document.getElementById('sidebar-backdrop');
     if (sidebarBackdrop) {
-      sidebarBackdrop.addEventListener('click', () => toggleMobileSidebar(false));
+      sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
     }
 
     const themeToggleBtn = document.getElementById('theme-mode-toggle-btn');
@@ -12153,14 +13494,174 @@
       if (e.key === 'Escape') window.ModalService.close();
     });
 
-    // Global search input
+    // Global search setup
     const searchInput = document.getElementById('global-search-input');
-    if (searchInput) {
+    const searchDropdown = document.getElementById('global-search-dropdown');
+
+    if (searchInput && searchDropdown) {
+      const renderSearchResults = (query) => {
+        const q = (query || '').trim().toLowerCase();
+        if (!q) {
+          searchDropdown.style.display = 'none';
+          searchDropdown.innerHTML = '';
+          return;
+        }
+
+        const tokens = q.split(/\s+/).filter(Boolean);
+        const recipes = window.appState.recipes || [];
+        const pantry = window.appState.pantry || [];
+        const mealPlans = window.appState.mealPlans || {};
+
+        // 1. Search recipes
+        const matchedRecipes = recipes.filter(r => {
+          const text = `${r.name} ${r.cuisine || ''} ${r.description || ''} ${(r.tags || []).join(' ')} ${(r.ingredients || []).map(i => i.name).join(' ')}`.toLowerCase();
+          return tokens.every(t => text.includes(t));
+        }).slice(0, 5);
+
+        // 2. Search pantry
+        const matchedPantry = pantry.filter(p => {
+          const text = `${p.item} ${p.category || ''}`.toLowerCase();
+          return tokens.every(t => text.includes(t));
+        }).slice(0, 3);
+
+        // 3. Search planned meals
+        const matchedMeals = [];
+        Object.keys(mealPlans).forEach(dateStr => {
+          const day = mealPlans[dateStr];
+          Object.keys(day).forEach(slotKey => {
+            const meal = day[slotKey];
+            if (meal && meal.name) {
+              const text = `${meal.name} ${slotKey} ${dateStr}`.toLowerCase();
+              if (tokens.every(t => text.includes(t)) && matchedMeals.length < 3) {
+                matchedMeals.push({ ...meal, dateStr, slotKey });
+              }
+            }
+          });
+        });
+
+        const totalMatches = matchedRecipes.length + matchedPantry.length + matchedMeals.length;
+
+        if (totalMatches === 0) {
+          searchDropdown.innerHTML = `
+            <div class="search-empty-hint">
+              <span>🔍 No recipes, pantry items, or planned meals matching "<strong>${window.escapeHtml(query)}</strong>"</span>
+            </div>
+            <div class="search-footer-action" onclick="window.ModulesUI.recipeSearchQuery = '${window.escapeHtml(query)}'; window.Router.navigate('recipes'); document.getElementById('global-search-dropdown').style.display = 'none';">
+              <span>Search in Recipe Catalog &rarr;</span>
+            </div>
+          `;
+          searchDropdown.style.display = 'block';
+          return;
+        }
+
+        let html = '';
+
+        // Recipes section
+        if (matchedRecipes.length > 0) {
+          html += `<div class="search-section-title">Recipes (${matchedRecipes.length})</div>`;
+          html += matchedRecipes.map(r => `
+            <div class="search-result-item" onclick="window.ModalService.openRecipeDetailModal('${r.id}'); document.getElementById('global-search-dropdown').style.display='none';">
+              <div class="search-result-left">
+                <div class="search-result-icon">🍲</div>
+                <div class="search-result-info">
+                  <span class="search-result-name">${window.escapeHtml(r.name)}</span>
+                  <span class="search-result-sub">${r.mealType} • ${r.calories} kcal • ${r.cuisine || 'Classic'}</span>
+                </div>
+              </div>
+              <span class="badge badge-primary" style="font-size: 10px;">${r.category || 'Recipe'}</span>
+            </div>
+          `).join('');
+        }
+
+        // Pantry section
+        if (matchedPantry.length > 0) {
+          html += `<div class="search-section-title">Pantry Stock (${matchedPantry.length})</div>`;
+          html += matchedPantry.map(p => `
+            <div class="search-result-item" onclick="window.Router.navigate('pantry'); document.getElementById('global-search-dropdown').style.display='none';">
+              <div class="search-result-left">
+                <div class="search-result-icon">🥫</div>
+                <div class="search-result-info">
+                  <span class="search-result-name">${window.escapeHtml(p.item)}</span>
+                  <span class="search-result-sub">${p.quantity} ${p.unit} • ${p.category}</span>
+                </div>
+              </div>
+              <span class="badge ${p.status === 'In Stock' ? 'badge-success' : (p.status === 'Low Stock' ? 'badge-warning' : 'badge-danger')}" style="font-size: 10px;">${p.status}</span>
+            </div>
+          `).join('');
+        }
+
+        // Planned meals section
+        if (matchedMeals.length > 0) {
+          html += `<div class="search-section-title">Planned Meals (${matchedMeals.length})</div>`;
+          html += matchedMeals.map(m => `
+            <div class="search-result-item" onclick="window.Router.navigate('meal-planner'); document.getElementById('global-search-dropdown').style.display='none';">
+              <div class="search-result-left">
+                <div class="search-result-icon">📅</div>
+                <div class="search-result-info">
+                  <span class="search-result-name">${window.escapeHtml(m.name)}</span>
+                  <span class="search-result-sub">${m.dateStr} • ${m.slotKey}</span>
+                </div>
+              </div>
+              <span class="badge badge-info" style="font-size: 10px;">Scheduled</span>
+            </div>
+          `).join('');
+        }
+
+        // Action footer
+        html += `
+          <div class="search-footer-action" onclick="window.ModulesUI.recipeSearchQuery = '${window.escapeHtml(query)}'; window.Router.navigate('recipes'); document.getElementById('global-search-dropdown').style.display = 'none';">
+            <span>View all matching recipes in Recipe Manager</span>
+            <span>&rarr;</span>
+          </div>
+        `;
+
+        searchDropdown.innerHTML = html;
+        searchDropdown.style.display = 'block';
+      };
+
       searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        if (query.length > 1) {
+        const query = e.target.value;
+        renderSearchResults(query);
+
+        // If user is currently on the recipes page, sync the query live!
+        if (window.Router && window.Router.currentView === 'recipes') {
+          window.ModulesUI.recipeSearchQuery = query;
+          const recipeInput = document.getElementById('recipe-search-input');
+          if (recipeInput && recipeInput.value !== query) {
+            recipeInput.value = query;
+          }
+          window.ModulesUI.updateRecipesGrid();
+        }
+      });
+
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const query = searchInput.value.trim();
+          searchDropdown.style.display = 'none';
           window.ModulesUI.recipeSearchQuery = query;
           window.Router.navigate('recipes');
+          const recipeInput = document.getElementById('recipe-search-input');
+          if (recipeInput) {
+            recipeInput.value = query;
+            recipeInput.focus();
+          }
+        } else if (e.key === 'Escape') {
+          searchDropdown.style.display = 'none';
+        }
+      });
+
+      searchInput.addEventListener('focus', () => {
+        if (searchInput.value.trim()) {
+          renderSearchResults(searchInput.value);
+        }
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        const box = document.querySelector('.global-search-box');
+        if (box && !box.contains(e.target)) {
+          searchDropdown.style.display = 'none';
         }
       });
     }
@@ -12202,6 +13703,16 @@
 
     window.addEventListener('afterprint', () => {
       window.ExportService._isCustomPrintActive = false;
+    });
+
+    // Auto re-render analytics chart on orientation/viewport change for true responsive adaptation
+    window.addEventListener('resize', () => {
+      if (window.Router && window.Router.currentView === 'analytics' && window.ModulesUI && typeof window.ModulesUI.renderAnalytics === 'function') {
+        clearTimeout(window._analyticsResizeTimer);
+        window._analyticsResizeTimer = setTimeout(() => {
+          window.ModulesUI.renderAnalytics();
+        }, 150);
+      }
     });
 
     // 5. Initialize router with initial view
