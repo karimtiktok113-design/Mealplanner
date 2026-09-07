@@ -4471,6 +4471,11 @@
           if (parsed && parsed.metadata && parsed.metadata.appName === 'Ultimate Meal Planner Pro') {
             // Merge loaded state onto default schema to protect against missing keys
             window.appState = Object.assign({}, DEFAULT_APP_STATE, parsed);
+            if (!window.appState.profile) {
+              window.appState.profile = JSON.parse(JSON.stringify(DEFAULT_APP_STATE.profile));
+            } else {
+              window.appState.profile = Object.assign({}, DEFAULT_APP_STATE.profile, parsed.profile || {});
+            }
             if (!window.appState.budget) {
               window.appState.budget = JSON.parse(JSON.stringify(DEFAULT_APP_STATE.budget));
             } else {
@@ -4495,6 +4500,9 @@
                 }
               });
             }
+            if (typeof window.updateHeaderProfile === 'function') {
+              window.updateHeaderProfile();
+            }
             return true;
           }
         }
@@ -4502,12 +4510,18 @@
         console.warn('Unable to parse saved state, using clean seed dataset:', e);
       }
       window.appState = JSON.parse(JSON.stringify(DEFAULT_APP_STATE));
+      if (typeof window.updateHeaderProfile === 'function') {
+        window.updateHeaderProfile();
+      }
       return false;
     },
 
     resetToFactory: function() {
       localStorage.removeItem(STORAGE_KEY);
       window.appState = JSON.parse(JSON.stringify(DEFAULT_APP_STATE));
+      if (typeof window.updateHeaderProfile === 'function') {
+        window.updateHeaderProfile();
+      }
       window.StorageService.saveState(true);
       window.EventBus.emit('APP_RESET', window.appState);
     }
@@ -8734,6 +8748,9 @@
 
           if (confirm(`Restore Backup from ${new Date(backupDate).toLocaleString()}?\n\nContains: ${recipeCount} recipes, ${pantryCount} pantry items.\n\nClick OK to replace current active state.`)) {
             window.appState = parsed;
+            if (typeof window.updateHeaderProfile === 'function') {
+              window.updateHeaderProfile();
+            }
             window.StorageService.saveState(true);
             window.Router.refreshCurrentView();
             window.ToastService.show('✓ Backup restored successfully!');
@@ -8984,11 +9001,30 @@
   // ----------------------------------------------------------------------------
   // 4. SETTINGS & HELP VIEWS
   // ----------------------------------------------------------------------------
+  // Helper to synchronize header badge user avatar and name with active state
+  window.updateHeaderProfile = function() {
+    const profile = (window.appState && window.appState.profile) || {};
+    const name = (profile.name || '').trim() || 'Alex Morgan';
+    const hName = document.getElementById('header-user-name');
+    const hAvatar = document.getElementById('header-user-avatar');
+    if (hName) hName.textContent = name;
+    if (hAvatar) {
+      const parts = name.split(/\s+/).filter(Boolean);
+      let initials = 'AM';
+      if (parts.length > 1) {
+        initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      } else if (parts.length === 1 && parts[0].length > 0) {
+        initials = parts[0].slice(0, 2).toUpperCase();
+      }
+      hAvatar.textContent = initials;
+    }
+  };
+
   window.renderSettingsView = function() {
     const container = document.getElementById('view-settings');
     if (!container) return;
 
-    const prof = window.appState.profile;
+    const prof = (window.appState && window.appState.profile) || { name: 'Alex Morgan', currency: '$', unitSystem: 'metric' };
 
     container.innerHTML = `
       <div class="page-header">
@@ -9002,13 +9038,13 @@
         <form onsubmit="event.preventDefault(); window.saveSettingsForm();">
           <div class="form-group">
             <label class="form-label">Your Name</label>
-            <input type="text" class="form-control" id="settings-name" value="${prof.name}" required>
+            <input type="text" class="form-control" id="settings-name" value="${prof.name || ''}" required placeholder="Enter your full name">
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Currency Symbol</label>
-              <input type="text" class="form-control" id="settings-currency" value="${prof.currency}" required>
+              <input type="text" class="form-control" id="settings-currency" value="${prof.currency || '$'}" required>
             </div>
             <div class="form-group">
               <label class="form-label">Unit System</label>
@@ -9020,7 +9056,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Weekly Food Budget (${prof.currency})</label>
+            <label class="form-label">Weekly Food Budget (${prof.currency || '$'})</label>
             <div style="display: flex; gap: 8px; align-items: center;">
               <input type="number" class="form-control" id="settings-weekly-budget" value="${(window.appState.budget && Number(window.appState.budget.weeklyBudget)) || 150}" min="5" step="1" required style="max-width: 240px;">
               <button type="button" class="btn btn-secondary btn-sm" onclick="window.ModalService.openEditBudgetModal()" title="Open Detailed Budget Calculator">
@@ -9035,13 +9071,47 @@
       </div>
     `;
 
+    // Live preview update in header when user is typing their name
+    const nameInput = container.querySelector('#settings-name');
+    if (nameInput) {
+      nameInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        const hName = document.getElementById('header-user-name');
+        const hAvatar = document.getElementById('header-user-avatar');
+        if (hName) hName.textContent = val || 'Alex Morgan';
+        if (hAvatar) {
+          const parts = (val || 'Alex Morgan').split(/\s+/).filter(Boolean);
+          let initials = 'AM';
+          if (parts.length > 1) {
+            initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+          } else if (parts.length === 1 && parts[0].length > 0) {
+            initials = parts[0].slice(0, 2).toUpperCase();
+          }
+          hAvatar.textContent = initials;
+        }
+      });
+    }
+
     window.hydrateIcons(container);
   };
 
   window.saveSettingsForm = function() {
-    window.appState.profile.name = document.getElementById('settings-name').value;
-    window.appState.profile.currency = document.getElementById('settings-currency').value;
-    window.appState.profile.unitSystem = document.getElementById('settings-units').value;
+    if (!window.appState.profile) {
+      window.appState.profile = { name: 'Alex Morgan', currency: '$', unitSystem: 'metric' };
+    }
+    const nameInput = document.getElementById('settings-name');
+    const currencyInput = document.getElementById('settings-currency');
+    const unitInput = document.getElementById('settings-units');
+
+    if (nameInput && nameInput.value.trim()) {
+      window.appState.profile.name = nameInput.value.trim();
+    }
+    if (currencyInput) {
+      window.appState.profile.currency = currencyInput.value.trim();
+    }
+    if (unitInput) {
+      window.appState.profile.unitSystem = unitInput.value;
+    }
 
     const budgetInput = document.getElementById('settings-weekly-budget');
     if (budgetInput) {
@@ -9055,15 +9125,10 @@
     }
     
     // Update header avatar and name
-    const hName = document.getElementById('header-user-name');
-    const hAvatar = document.getElementById('header-user-avatar');
-    if (hName) hName.textContent = window.appState.profile.name;
-    if (hAvatar) {
-      const parts = window.appState.profile.name.split(' ');
-      hAvatar.textContent = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].slice(0, 2).toUpperCase();
-    }
+    window.updateHeaderProfile();
 
     window.StorageService.saveState();
+    if (window.EventBus) window.EventBus.emit('PROFILE_UPDATED', window.appState.profile);
     window.ToastService.show('Settings saved successfully!');
   };
 
@@ -10937,6 +11002,11 @@
     // 1. Load persisted state or seed data
     window.StorageService.loadState();
 
+    // Synchronize header user profile badge immediately
+    if (typeof window.updateHeaderProfile === 'function') {
+      window.updateHeaderProfile();
+    }
+
     // Synchronize sidebar badges immediately with loaded data
     if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') {
       window.ModulesUI.updateSidebarBadges();
@@ -10974,8 +11044,12 @@
       if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') window.ModulesUI.updateSidebarBadges();
     });
     window.EventBus.on('APP_RESET', () => {
+      if (typeof window.updateHeaderProfile === 'function') window.updateHeaderProfile();
       window.Router.navigate('dashboard');
       if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') window.ModulesUI.updateSidebarBadges();
+    });
+    window.EventBus.on('PROFILE_UPDATED', () => {
+      if (typeof window.updateHeaderProfile === 'function') window.updateHeaderProfile();
     });
 
     // 4. Bind Header Controls & Mobile Sidebar Drawer
