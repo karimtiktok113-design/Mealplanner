@@ -2091,6 +2091,257 @@
     }
 
     /* ==========================================================================
+       6B. FOOD BUDGET WEEKLY SYSTEM & COMPARISON CHART
+       ========================================================================== */
+    .budget-nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .budget-chart-card {
+      position: relative;
+      margin-bottom: 24px;
+    }
+    .budget-chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .budget-chart-legend {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .budget-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .budget-legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+    .budget-chart-scroll-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      padding-bottom: 4px;
+    }
+    .budget-chart-track-container {
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      background: var(--bg-surface-2, rgba(0,0,0,0.02));
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg, 12px);
+      padding: 34px 18px 16px;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+    .budget-chart-grid-line {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      border-top: 1px dashed var(--border-color);
+      pointer-events: none;
+      opacity: 0.65;
+      z-index: 1;
+    }
+    .budget-chart-grid-label {
+      position: absolute;
+      left: 14px;
+      top: -16px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--bg-surface-2, #ffffff);
+      padding: 0 4px;
+      border-radius: 3px;
+    }
+    .budget-chart-columns {
+      display: flex;
+      align-items: flex-end;
+      justify-content: stretch;
+      gap: 16px;
+      height: 270px;
+      position: relative;
+      z-index: 4;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .budget-week-column {
+      flex: 1 1 0;
+      min-width: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      position: relative;
+      padding: 10px 8px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid transparent;
+      background: var(--bg-surface, #ffffff);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      box-sizing: border-box;
+    }
+    .budget-week-column:hover {
+      background: rgba(var(--primary-rgb, 61, 112, 84), 0.05);
+      border-color: rgba(var(--primary-rgb, 61, 112, 84), 0.35);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.12);
+    }
+    .budget-week-column.active-week {
+      background: rgba(var(--primary-rgb, 61, 112, 84), 0.08);
+      border-color: var(--primary, #10b981);
+      box-shadow: 0 0 0 1px var(--primary, #10b981), 0 10px 25px -4px rgba(var(--primary-rgb, 61, 112, 84), 0.25);
+    }
+    .budget-bars-pair {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      height: 190px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .budget-single-bar {
+      flex: 0 1 48px;
+      width: 100%;
+      max-width: 52px;
+      min-width: 14px;
+      border-radius: 8px 8px 2px 2px;
+      transition: height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+    }
+    .budget-single-bar.bar-target {
+      background: linear-gradient(180deg, #818cf8 0%, #4f46e5 100%);
+    }
+    .budget-single-bar.bar-spent-normal {
+      background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+    }
+    .budget-single-bar.bar-spent-warn {
+      background: linear-gradient(180deg, #fcd34d 0%, #d97706 100%);
+    }
+    .budget-single-bar.bar-spent-danger {
+      background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+    }
+    .budget-bar-val-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+      position: absolute;
+      top: -24px;
+      white-space: nowrap;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      pointer-events: none;
+      letter-spacing: -0.2px;
+    }
+    .budget-week-labels {
+      text-align: center;
+      width: 100%;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .budget-week-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+    .budget-week-sublabel {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .budget-chart-tooltip {
+      position: absolute;
+      background: var(--bg-surface, #ffffff);
+      color: var(--text-main, #0f172a);
+      border: 1px solid var(--border-color, #cbd5e1);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18), 0 10px 10px rgba(0, 0, 0, 0.12);
+      border-radius: var(--radius-lg, 12px);
+      padding: 14px 16px;
+      pointer-events: none;
+      display: none;
+      z-index: 9999;
+      min-width: 240px;
+      max-width: 320px;
+      font-size: 12px;
+      line-height: 1.4;
+      transform: translate(-50%, -100%);
+      margin-top: -12px;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .budget-chart-tooltip::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 12px;
+      height: 12px;
+      background: var(--bg-surface, #ffffff);
+      border-right: 1px solid var(--border-color, #cbd5e1);
+      border-bottom: 1px solid var(--border-color, #cbd5e1);
+    }
+    @media (max-width: 768px) {
+      .budget-chart-track-container {
+        padding: 26px 12px 12px;
+      }
+      .budget-chart-columns {
+        gap: 8px;
+        height: 240px;
+      }
+      .budget-bars-pair {
+        height: 160px;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      .budget-single-bar {
+        max-width: 30px;
+        min-width: 10px;
+      }
+      .budget-bar-val-badge {
+        font-size: 9.5px;
+        padding: 1px 3px;
+        top: -20px;
+      }
+      .budget-week-title {
+        font-size: 11.5px;
+      }
+      .budget-week-sublabel {
+        font-size: 10px;
+      }
+    }
+
+    /* ==========================================================================
        7. RESPONSIVE MEDIA QUERIES & MOBILE ARCHITECTURE (Zero Horizontal Sliding)
        ========================================================================== */
     @media (max-width: 1024px) {
@@ -3605,6 +3856,16 @@
     return `<span class="recipe-emoji ${extraClass}" style="font-size: ${fontSize}; user-select: none; display: inline-flex; align-items: center; justify-content: center;">${imageSrc || '🍲'}</span>`;
   };
 
+  window.escapeHtml = function(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
   // Helper ID generator
   window.generateId = function(prefix = 'id') {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
@@ -4692,19 +4953,168 @@
       };
     },
 
-    // Budget metrics
-    calculateBudgetMetrics: function() {
+    // Week boundary determination (Monday - Sunday)
+    getWeekBoundaries: function(dateInput = new Date()) {
+      let d;
+      if (typeof dateInput === 'string') {
+        const clean = dateInput.split('T')[0];
+        const parts = clean.split('-');
+        if (parts.length === 3) {
+          d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        } else {
+          d = new Date(dateInput);
+        }
+      } else {
+        d = new Date(dateInput);
+      }
+      if (isNaN(d.getTime())) d = new Date();
+
+      // Monday is start of calendar week
+      const day = d.getDay();
+      const diffToMonday = d.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(d.getFullYear(), d.getMonth(), diffToMonday);
+      monday.setHours(0, 0, 0, 0);
+
+      const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
+      sunday.setHours(23, 59, 59, 999);
+
+      const startISO = window.formatDateISO(monday);
+      const endISO = window.formatDateISO(sunday);
+
+      const todayMonday = window.getMonday(new Date());
+      const currentStartISO = window.formatDateISO(todayMonday);
+      const isCurrentWeek = startISO === currentStartISO;
+
+      const startMonthName = monday.toLocaleDateString(undefined, { month: 'short' });
+      const endMonthName = sunday.toLocaleDateString(undefined, { month: 'short' });
+      const startDay = monday.getDate();
+      const endDay = sunday.getDate();
+      const year = sunday.getFullYear();
+
+      let label;
+      if (monday.getFullYear() !== sunday.getFullYear()) {
+        label = `${startDay} ${startMonthName} ${monday.getFullYear()} – ${endDay} ${endMonthName} ${year}`;
+      } else if (startMonthName !== endMonthName) {
+        label = `${startDay} ${startMonthName} – ${endDay} ${endMonthName} ${year}`;
+      } else {
+        label = `${startDay} – ${endDay} ${startMonthName} ${year}`;
+      }
+
+      let shortLabel;
+      if (startMonthName !== endMonthName) {
+        shortLabel = `${startDay} ${startMonthName} – ${endDay} ${endMonthName}`;
+      } else {
+        shortLabel = `${startDay} – ${endDay} ${startMonthName}`;
+      }
+
+      return {
+        startDate: startISO,
+        endDate: endISO,
+        weekKey: startISO,
+        mondayDate: monday,
+        sundayDate: sunday,
+        label,
+        shortLabel,
+        isCurrentWeek,
+        year: monday.getFullYear(),
+        month: monday.getMonth() + 1
+      };
+    },
+
+    // Gets specific or default budget for a given weekKey (Monday ISO)
+    getWeeklyBudgetForWeek: function(weekKey) {
+      const budget = (window.appState && window.appState.budget) || {};
+      if (budget.weeklyBudgets && budget.weeklyBudgets[weekKey] !== undefined && !isNaN(Number(budget.weeklyBudgets[weekKey]))) {
+        return Number(budget.weeklyBudgets[weekKey]);
+      }
+      return Number(budget.weeklyBudget) || 150;
+    },
+
+    // Filters expenses that fall strictly within [startDate, endDate] of a weekKey
+    getExpensesForWeek: function(weekKey, expenses = null) {
+      const weekInfo = this.getWeekBoundaries(weekKey);
+      const list = expenses || (window.appState && window.appState.budget && window.appState.budget.expenses) || [];
+      return list.filter(exp => {
+        const expDate = (exp.date || '').split('T')[0];
+        return expDate >= weekInfo.startDate && expDate <= weekInfo.endDate;
+      });
+    },
+
+    // Generates all weeks overlapping the specified year and month (1-12)
+    getMonthlyWeeklyBreakdown: function(year, month) {
+      const breakdown = [];
+      const firstOfMonth = new Date(year, month - 1, 1);
+      const lastOfMonth = new Date(year, month, 0);
+
+      const startMonday = this.getWeekBoundaries(firstOfMonth).mondayDate;
+      const endSunday = this.getWeekBoundaries(lastOfMonth).sundayDate;
+
+      let curMonday = new Date(startMonday);
+      let weekIndex = 1;
+      const selectedWeekKey = window.budgetSelectedWeekStart || this.getWeekBoundaries(new Date()).weekKey;
+
+      while (curMonday <= endSunday) {
+        const weekInfo = this.getWeekBoundaries(curMonday);
+        const weeklyBudget = this.getWeeklyBudgetForWeek(weekInfo.weekKey);
+        const weeklyExpenses = this.getExpensesForWeek(weekInfo.weekKey);
+        let totalExpenses = 0;
+        weeklyExpenses.forEach(exp => {
+          totalExpenses += Number(exp.amount) || 0;
+        });
+
+        const remaining = Number((weeklyBudget - totalExpenses).toFixed(2));
+        const percentSpent = weeklyBudget > 0 ? Number(((totalExpenses / weeklyBudget) * 100).toFixed(1)) : 0;
+
+        breakdown.push({
+          weekNumber: weekIndex++,
+          weekKey: weekInfo.weekKey,
+          startDate: weekInfo.startDate,
+          endDate: weekInfo.endDate,
+          label: weekInfo.label,
+          shortLabel: weekInfo.shortLabel,
+          weeklyBudget: weeklyBudget,
+          budget: weeklyBudget,
+          totalExpenses: Number(totalExpenses.toFixed(2)),
+          expenses: Number(totalExpenses.toFixed(2)),
+          remainingBudget: remaining,
+          remaining: remaining,
+          percentSpent: percentSpent,
+          isOverBudget: totalExpenses > weeklyBudget,
+          transactionCount: weeklyExpenses.length,
+          isCurrentWeek: weekInfo.isCurrentWeek,
+          isSelectedWeek: weekInfo.weekKey === selectedWeekKey
+        });
+
+        curMonday.setDate(curMonday.getDate() + 7);
+      }
+
+      return breakdown;
+    },
+
+    // Centralized week-by-week Budget metrics calculation
+    calculateBudgetMetrics: function(targetDateOrWeekKey = null) {
       const budget = window.appState.budget || { weeklyBudget: 150, monthlyBudget: 600, expenses: [] };
-      const expenses = budget.expenses || [];
+      const allExpenses = budget.expenses || [];
+
+      // Determine active target week
+      const target = targetDateOrWeekKey || window.budgetSelectedWeekStart || window.formatDateISO(window.getMonday(new Date()));
+      const weekInfo = this.getWeekBoundaries(target);
+      const weeklyExpenses = this.getExpensesForWeek(weekInfo.weekKey, allExpenses);
 
       let totalExpenses = 0;
       const categorySpending = {};
 
-      expenses.forEach(exp => {
+      weeklyExpenses.forEach(exp => {
         const amt = Number(exp.amount) || 0;
         totalExpenses += amt;
         const cat = exp.category || 'Other';
         categorySpending[cat] = (categorySpending[cat] || 0) + amt;
+      });
+
+      // Total of all historical expenses across all time
+      let allTimeExpenses = 0;
+      allExpenses.forEach(exp => {
+        allTimeExpenses += Number(exp.amount) || 0;
       });
 
       // Also compute estimated grocery total
@@ -4717,17 +5127,25 @@
         }
       });
 
-      const weekly = Number(budget.weeklyBudget) || 150;
+      const weekly = this.getWeeklyBudgetForWeek(weekInfo.weekKey);
       const monthly = Number(budget.monthlyBudget) || Number((weekly * 4.33).toFixed(2));
       const remainingWeekly = Number((weekly - totalExpenses).toFixed(2));
-      const percentSpent = weekly > 0 ? Math.min(999, Math.round((totalExpenses / weekly) * 100)) : 0;
+      const percentSpent = weekly > 0 ? Number(((totalExpenses / weekly) * 100).toFixed(1)) : 0;
+      const isOverBudget = totalExpenses > weekly;
 
       return {
-        weeklyBudget: weekly,
+        weeklyBudget: Number(weekly.toFixed(2)),
         monthlyBudget: monthly,
         totalExpenses: Number(totalExpenses.toFixed(2)),
         remainingWeekly: remainingWeekly,
-        percentSpent: percentSpent,
+        percentSpent: Math.round(percentSpent),
+        percentSpentExact: percentSpent,
+        isOverBudget: isOverBudget,
+        transactionCount: weeklyExpenses.length,
+        weekInfo: weekInfo,
+        weeklyExpenses: weeklyExpenses,
+        allTimeExpensesTotal: Number(allTimeExpenses.toFixed(2)),
+        allExpensesCount: allExpenses.length,
         groceryEstimatedTotal: Number(groceryEstimatedTotal.toFixed(2)),
         groceryActualTotal: Number(groceryActualTotal.toFixed(2)),
         categorySpending
@@ -5419,20 +5837,26 @@
             </div>
           </div>
 
-          <div class="stat-card" style="--stat-color: var(--primary); cursor: pointer;" onclick="window.ModalService.openEditBudgetModal()" title="Click to customize food budget">
+          <div class="stat-card" style="--stat-color: var(--primary); cursor: pointer;" onclick="window.Router.navigate('budget')" title="Click to view weekly food budget details">
             <div class="stat-label">
-              <span>Food Budget</span>
+              <span style="display: flex; align-items: center; gap: 6px;">
+                Food Budget
+                <span class="badge ${budgetMetrics.isOverBudget ? 'badge-danger' : 'badge-success'}" style="font-size: 10px; padding: 2px 6px;">
+                  ${budgetMetrics.isOverBudget ? 'Over Budget' : `${budgetMetrics.percentSpent}% Spent`}
+                </span>
+              </span>
               <div style="display: flex; align-items: center; gap: 4px;">
-                <span style="font-size: 11px; color: var(--primary); font-weight: 600;">Edit</span>
+                <span style="font-size: 11px; color: var(--primary); font-weight: 600;">${budgetMetrics.weekInfo.shortLabel}</span>
                 ${window.renderIcon('dollar-sign')}
               </div>
             </div>
-            <div class="stat-value">${window.appState.profile.currency}${budgetMetrics.remainingWeekly} <span style="font-size: 13px; font-weight: 500; color: var(--text-muted);">remaining</span></div>
-            <div class="stat-subtext" style="display: flex; justify-content: space-between;">
-              <span>Budget: ${window.appState.profile.currency}${budgetMetrics.weeklyBudget}/wk</span>
-              <span style="color: ${budgetMetrics.remainingWeekly >= 0 ? 'var(--success)' : 'var(--danger)'}; font-weight: 600;">
-                ${budgetMetrics.remainingWeekly >= 0 ? 'On Track' : 'Over Limit'}
-              </span>
+            <div class="stat-value" style="color: ${budgetMetrics.isOverBudget ? 'var(--danger)' : 'inherit'};">
+              ${window.appState.profile.currency}${Number(budgetMetrics.remainingWeekly).toFixed(2)}
+              <span style="font-size: 12.5px; font-weight: 500; color: var(--text-muted);">${budgetMetrics.isOverBudget ? 'over' : 'left'}</span>
+            </div>
+            <div class="stat-subtext" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+              <span>Spent: <strong>${window.appState.profile.currency}${Number(budgetMetrics.totalExpenses).toFixed(2)}</strong></span>
+              <span>Target: <strong>${window.appState.profile.currency}${Number(budgetMetrics.weeklyBudget).toFixed(2)}</strong></span>
             </div>
           </div>
         </div>
@@ -6709,19 +7133,58 @@
       const container = document.getElementById('view-budget');
       if (!container) return;
 
-      const metrics = window.CalculationEngine.calculateBudgetMetrics();
+      // Initialize selected week start if not set
+      if (!window.budgetSelectedWeekStart) {
+        window.budgetSelectedWeekStart = window.formatDateISO(window.getMonday(new Date()));
+      }
+
+      const metrics = window.CalculationEngine.calculateBudgetMetrics(window.budgetSelectedWeekStart);
       const budget = window.appState.budget || { weeklyBudget: 150, monthlyBudget: 600, expenses: [] };
+      const allExpenses = budget.expenses || [];
       const curr = (window.appState && window.appState.profile && window.appState.profile.currency) || '$';
+
+      // Chart month and year
+      if (!window.budgetChartYear || !window.budgetChartMonth) {
+        const parts = window.budgetSelectedWeekStart.split('-');
+        window.budgetChartYear = Number(parts[0]) || new Date().getFullYear();
+        window.budgetChartMonth = Number(parts[1]) || (new Date().getMonth() + 1);
+      }
+
+      const chartYear = window.budgetChartYear;
+      const chartMonth = window.budgetChartMonth;
+      const chartMonthDate = new Date(chartYear, chartMonth - 1, 1);
+      const monthName = chartMonthDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+      // Monthly breakdown
+      const monthlyWeeks = window.CalculationEngine.getMonthlyWeeklyBreakdown(chartYear, chartMonth);
+
+      // Monthly aggregate metrics for header overview
+      const totalMonthBudget = monthlyWeeks.reduce((acc, w) => acc + w.weeklyBudget, 0);
+      const totalMonthExpenses = monthlyWeeks.reduce((acc, w) => acc + w.totalExpenses, 0);
+      const totalMonthRemaining = totalMonthBudget - totalMonthExpenses;
+      const monthUsagePercent = totalMonthBudget > 0 ? Math.round((totalMonthExpenses / totalMonthBudget) * 100) : 0;
+
+      // Scaling for bars
+      const maxInMonth = Math.max(100, ...monthlyWeeks.map(w => Math.max(w.weeklyBudget, w.totalExpenses, 0)));
+      const maxScale = Math.max(maxInMonth * 1.18, 120);
+      const chartTrackHeight = 190;
+
+      // Filter for table
+      const filterMode = window.budgetExpenseFilterMode || 'week';
+      const displayedExpenses = filterMode === 'week' ? metrics.weeklyExpenses : allExpenses;
+
+      // Sort descending by date
+      const sortedExpenses = [...displayedExpenses].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
       container.innerHTML = `
         <div class="page-header">
           <div class="page-title-group">
             <h1>Food Budget</h1>
-            <p class="page-subtitle">Set weekly spending limits, track grocery expenditures, and monitor financial allowances.</p>
+            <p class="page-subtitle">Track weekly grocery allowances, analyze week-by-week spending trends, and manage receipts.</p>
           </div>
           <div class="page-actions">
             <button class="btn btn-secondary btn-sm" onclick="window.ModalService.openEditBudgetModal()">
-              ${window.renderIcon('edit')} Customize Budget
+              ${window.renderIcon('edit')} Customize Target
             </button>
             <button class="btn btn-secondary btn-sm" onclick="window.ExportService.printBudgetReport()">
               ${window.renderIcon('printer')} Print Finance Report
@@ -6732,8 +7195,40 @@
           </div>
         </div>
 
+        <!-- WEEK NAVIGATION CONTROL STRIP -->
+        <div class="card" style="margin-bottom: 20px; padding: 14px 18px;">
+          <div class="budget-nav-bar">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-secondary btn-sm" onclick="window.ModulesUI.navigateBudgetWeek(-1)" title="Previous Calendar Week">
+                ${window.renderIcon('chevron-left')} Previous Week
+              </button>
+              <button class="btn ${metrics.weekInfo.isCurrentWeek ? 'btn-primary' : 'btn-secondary'} btn-sm" onclick="window.ModulesUI.navigateBudgetWeek(0)" title="Jump to Current Week">
+                Current Week
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="window.ModulesUI.navigateBudgetWeek(1)" title="Next Calendar Week">
+                Next Week ${window.renderIcon('chevron-right')}
+              </button>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14.5px; font-weight: 800; color: var(--text-main);">
+                  📅 ${metrics.weekInfo.label}
+                </span>
+                <span class="badge ${metrics.weekInfo.isCurrentWeek ? 'badge-primary' : 'badge-muted'}">
+                  ${metrics.weekInfo.isCurrentWeek ? 'Active / Current Week' : 'Historical Week'}
+                </span>
+                ${metrics.isOverBudget 
+                  ? '<span class="badge badge-danger">Exceeded by ' + curr + Math.abs(metrics.remainingWeekly).toFixed(2) + '</span>' 
+                  : '<span class="badge badge-success">On Budget</span>'}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 TOP STATS CARDS -->
         <div class="stats-grid">
-          <div class="stat-card" style="cursor: pointer; position: relative;" onclick="window.ModalService.openEditBudgetModal()" title="Click to customize weekly budget">
+          <div class="stat-card" style="cursor: pointer; position: relative;" onclick="window.ModalService.openEditBudgetModal()" title="Click to customize weekly budget for this week">
             <div class="stat-header" style="display: flex; justify-content: space-between; align-items: center;">
               <div class="stat-label"><span>Weekly Budget Target</span></div>
               <button class="btn-icon btn-sm" style="width: 24px; height: 24px;" title="Edit Weekly Budget" onclick="event.stopPropagation(); window.ModalService.openEditBudgetModal();">
@@ -6742,19 +7237,19 @@
             </div>
             <div class="stat-value">${curr}${metrics.weeklyBudget.toFixed(2)}</div>
             <div class="stat-footer" style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
-              <span>Monthly: ${curr}${metrics.monthlyBudget.toFixed(2)}</span>
-              <span style="color: var(--primary); font-weight: 600;">Edit Target &rarr;</span>
+              <span>For: <strong>${metrics.weekInfo.shortLabel}</strong></span>
+              <span style="color: var(--primary); font-weight: 600;">Edit &rarr;</span>
             </div>
           </div>
 
           <div class="stat-card">
             <div class="stat-header" style="display: flex; justify-content: space-between; align-items: center;">
               <div class="stat-label"><span>Weekly Spent</span></div>
-              <span class="badge ${metrics.totalExpenses > metrics.weeklyBudget ? 'badge-danger' : 'badge-primary'}">${metrics.percentSpent}% Used</span>
+              <span class="badge ${metrics.isOverBudget ? 'badge-danger' : 'badge-primary'}">${metrics.percentSpent}% Used</span>
             </div>
-            <div class="stat-value">${curr}${metrics.totalExpenses.toFixed(2)}</div>
+            <div class="stat-value" style="color: ${metrics.isOverBudget ? 'var(--danger)' : 'var(--text-main)'};">${curr}${metrics.totalExpenses.toFixed(2)}</div>
             <div class="stat-footer" style="font-size: 12px; color: var(--text-muted);">
-              <span>Across ${(budget.expenses || []).length} logged receipts</span>
+              <span>${metrics.transactionCount} receipts in this week</span>
             </div>
           </div>
 
@@ -6765,7 +7260,7 @@
                 ${metrics.remainingWeekly < 0 ? 'Over Budget' : (metrics.remainingWeekly < 25 ? 'Low Balance' : 'On Track')}
               </span>
             </div>
-            <div class="stat-value">${curr}${metrics.remainingWeekly.toFixed(2)}</div>
+            <div class="stat-value" style="color: ${metrics.remainingWeekly >= 0 ? 'var(--success)' : 'var(--danger)'};">${curr}${metrics.remainingWeekly.toFixed(2)}</div>
             <div class="stat-footer" style="font-size: 12px; color: var(--text-muted);">
               <span>Daily allowance: ${curr}${(metrics.weeklyBudget / 7).toFixed(2)}/day</span>
             </div>
@@ -6778,7 +7273,7 @@
             </div>
             <div class="stat-value" style="font-size: 22px;">${curr}${metrics.groceryEstimatedTotal.toFixed(2)}</div>
             <div class="stat-footer" style="font-size: 12px; color: var(--text-muted);">
-              <span>${metrics.groceryEstimatedTotal <= metrics.remainingWeekly ? 'Fits in remaining budget' : 'Exceeds remaining funds'}</span>
+              <span>${metrics.groceryEstimatedTotal <= metrics.remainingWeekly ? 'Fits in weekly balance' : 'Exceeds remaining allowance'}</span>
             </div>
           </div>
         </div>
@@ -6789,12 +7284,12 @@
             <div>
               <span style="font-weight: 700; font-size: 15px;">Weekly Budget Utilization Tracker</span>
               <span style="margin-left: 10px; font-size: 13px; color: var(--text-secondary);">
-                Spent <strong>${curr}${metrics.totalExpenses.toFixed(2)}</strong> of <strong>${curr}${metrics.weeklyBudget.toFixed(2)}</strong> weekly limit
+                Spent <strong>${curr}${metrics.totalExpenses.toFixed(2)}</strong> of <strong>${curr}${metrics.weeklyBudget.toFixed(2)}</strong> for <strong>${metrics.weekInfo.shortLabel}</strong>
               </span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <button class="btn btn-secondary btn-sm" onclick="window.ModalService.openEditBudgetModal()">
-                ${window.renderIcon('edit')} Customize Weekly Limit
+                ${window.renderIcon('edit')} Customize Target
               </button>
             </div>
           </div>
@@ -6804,7 +7299,7 @@
           </div>
 
           <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--text-muted);">
-            <span>$0.00</span>
+            <span>${curr}0.00</span>
             <span style="font-weight: 600; color: var(--text-main);">${metrics.percentSpent}% Consumed (${curr}${metrics.remainingWeekly.toFixed(2)} remaining)</span>
             <span>Target Cap: ${curr}${metrics.weeklyBudget.toFixed(2)}</span>
           </div>
@@ -6817,6 +7312,7 @@
               <button class="btn btn-sm ${metrics.weeklyBudget === 120 ? 'btn-primary' : 'btn-secondary'}" onclick="window.ModulesUI.quickSetWeeklyBudget(120)" style="padding: 4px 9px; font-size: 12px;">${curr}120</button>
               <button class="btn btn-sm ${metrics.weeklyBudget === 150 ? 'btn-primary' : 'btn-secondary'}" onclick="window.ModulesUI.quickSetWeeklyBudget(150)" style="padding: 4px 9px; font-size: 12px;">${curr}150</button>
               <button class="btn btn-sm ${metrics.weeklyBudget === 200 ? 'btn-primary' : 'btn-secondary'}" onclick="window.ModulesUI.quickSetWeeklyBudget(200)" style="padding: 4px 9px; font-size: 12px;">${curr}200</button>
+              <button class="btn btn-sm ${metrics.weeklyBudget === 250 ? 'btn-primary' : 'btn-secondary'}" onclick="window.ModulesUI.quickSetWeeklyBudget(250)" style="padding: 4px 9px; font-size: 12px;">${curr}250</button>
               <button class="btn btn-sm ${metrics.weeklyBudget === 300 ? 'btn-primary' : 'btn-secondary'}" onclick="window.ModulesUI.quickSetWeeklyBudget(300)" style="padding: 4px 9px; font-size: 12px;">${curr}300</button>
             </div>
 
@@ -6828,52 +7324,392 @@
           </div>
         </div>
 
-        <!-- RECENT EXPENSES TABLE -->
-        <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 class="card-title" style="margin: 0;">Logged Grocery Receipts</h3>
-            <span style="font-size: 12px; color: var(--text-muted);">${(budget.expenses || []).length} receipts logged</span>
+        <!-- 5. INTERACTIVE MONTHLY WEEKLY COMPARISON BAR CHART -->
+        <div class="card budget-chart-card">
+          <div class="budget-chart-header">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <h3 class="card-title" style="margin: 0;">Monthly Overview: Weekly Budget vs. Weekly Expenses</h3>
+                <span class="badge badge-primary" style="font-size: 11px;">Interactive Comparison</span>
+              </div>
+              <p style="font-size: 12.5px; color: var(--text-muted); margin: 4px 0 0 0;">
+                Track and compare weekly grocery targets vs actual food spending. Hover over any week to inspect detailed metrics, or click to switch active week.
+              </p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <!-- Month Navigator -->
+              <div style="display: flex; align-items: center; gap: 4px; background: var(--bg-surface-2, #f1f5f9); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 3px 8px;">
+                <button class="btn-icon btn-sm" onclick="window.ModulesUI.navigateBudgetMonth(-1)" title="Previous Month">
+                  ${window.renderIcon('chevron-left')}
+                </button>
+                <span style="font-size: 13px; font-weight: 700; color: var(--text-main); min-width: 135px; text-align: center;">
+                  ${monthName}
+                </span>
+                <button class="btn-icon btn-sm" onclick="window.ModulesUI.navigateBudgetMonth(1)" title="Next Month">
+                  ${window.renderIcon('chevron-right')}
+                </button>
+              </div>
+
+              <!-- Month KPI summary badges -->
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <span class="badge" style="background: rgba(79, 70, 229, 0.1); color: #4f46e5; border: 1px solid rgba(79, 70, 229, 0.25); font-size: 11.5px; padding: 4px 8px;">
+                  Target: <strong>${curr}${totalMonthBudget.toFixed(0)}</strong>
+                </span>
+                <span class="badge" style="background: ${totalMonthRemaining < 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)'}; color: ${totalMonthRemaining < 0 ? 'var(--danger)' : 'var(--success)'}; border: 1px solid ${totalMonthRemaining < 0 ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.25)'}; font-size: 11.5px; padding: 4px 8px;">
+                  Spent: <strong>${curr}${totalMonthExpenses.toFixed(2)}</strong> (${monthUsagePercent}%)
+                </span>
+              </div>
+            </div>
           </div>
-          <table style="width: 100%; border-collapse: collapse; font-size: 13.5px;">
-            <thead>
-              <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
-                <th style="padding: 10px;">Date</th>
-                <th style="padding: 10px;">Store</th>
-                <th style="padding: 10px;">Category</th>
-                <th style="padding: 10px;">Notes</th>
-                <th style="padding: 10px; text-align: right;">Amount</th>
-                <th style="padding: 10px; text-align: right;">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${(budget.expenses || []).map(exp => `
-                <tr style="border-bottom: 1px solid var(--border-color);">
-                  <td style="padding: 10px;">${exp.date}</td>
-                  <td style="padding: 10px; font-weight: 600;">${exp.store}</td>
-                  <td style="padding: 10px;"><span class="badge badge-muted">${exp.category}</span></td>
-                  <td style="padding: 10px; color: var(--text-secondary);">${exp.notes || '-'}</td>
-                  <td style="padding: 10px; text-align: right; font-weight: 700;">${curr}${Number(exp.amount).toFixed(2)}</td>
-                  <td style="padding: 10px; text-align: right;">
-                    <button class="btn-icon btn-sm" onclick="window.ModulesUI.deleteExpense('${exp.id}')" title="Delete Receipt">
-                      ${window.renderIcon('trash-2')}
-                    </button>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
+
+          <!-- Chart Legend Strip -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 8px 14px; background: var(--bg-surface-2, rgba(0,0,0,0.02)); border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap; gap: 8px;">
+            <div class="budget-chart-legend">
+              <span class="budget-legend-item">
+                <span class="budget-legend-dot" style="background: linear-gradient(180deg, #818cf8 0%, #4f46e5 100%);"></span>
+                <strong>Weekly Target Budget</strong>
+              </span>
+              <span class="budget-legend-item">
+                <span class="budget-legend-dot" style="background: linear-gradient(180deg, #34d399 0%, #059669 100%);"></span>
+                <strong>Weekly Expenses (On Track)</strong>
+              </span>
+              <span class="budget-legend-item">
+                <span class="budget-legend-dot" style="background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);"></span>
+                <strong>Over Budget (Exceeded)</strong>
+              </span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-muted);">
+              💡 Click any week bar to view & manage its expenses
+            </div>
+          </div>
+
+          <div class="budget-chart-scroll-wrap">
+            <div class="budget-chart-track-container" id="budget-chart-container">
+              <!-- Floating Tooltip -->
+              <div id="budget-chart-tooltip" class="budget-chart-tooltip"></div>
+
+              <!-- Grid reference lines -->
+              <div class="budget-chart-grid-line" style="bottom: 58px;">
+                <span class="budget-chart-grid-label">${curr}0</span>
+              </div>
+              <div class="budget-chart-grid-line" style="bottom: ${Math.round(chartTrackHeight * 0.33) + 58}px;">
+                <span class="budget-chart-grid-label">${curr}${Math.round(maxScale * 0.33)}</span>
+              </div>
+              <div class="budget-chart-grid-line" style="bottom: ${Math.round(chartTrackHeight * 0.66) + 58}px;">
+                <span class="budget-chart-grid-label">${curr}${Math.round(maxScale * 0.66)}</span>
+              </div>
+              <div class="budget-chart-grid-line" style="bottom: ${Math.round(chartTrackHeight) + 58}px;">
+                <span class="budget-chart-grid-label">${curr}${Math.round(maxScale)}</span>
+              </div>
+
+              <!-- Category Columns -->
+              <div class="budget-chart-columns">
+                ${monthlyWeeks.map(w => {
+                  const budgetHeight = Math.max(8, Math.round((w.weeklyBudget / maxScale) * chartTrackHeight));
+                  const expenseHeight = w.totalExpenses > 0 ? Math.max(8, Math.round((w.totalExpenses / maxScale) * chartTrackHeight)) : 3;
+
+                  let expenseBarClass = 'bar-spent-normal';
+                  if (w.isOverBudget) {
+                    expenseBarClass = 'bar-spent-danger';
+                  } else if (w.percentSpent > 85) {
+                    expenseBarClass = 'bar-spent-warn';
+                  }
+
+                  return `
+                    <div class="budget-week-column ${w.isSelectedWeek ? 'active-week' : ''}" 
+                         onclick="window.ModulesUI.selectBudgetWeek('${w.weekKey}')"
+                         onmouseenter="window.ModulesUI.showBudgetChartTooltip(event, '${w.weekKey}')"
+                         onmouseleave="window.ModulesUI.hideBudgetChartTooltip()"
+                         title="Click to view & select Week ${w.weekNumber}">
+                      
+                      <!-- Week status badge -->
+                      <div style="margin-bottom: 8px; font-size: 10.5px; min-height: 18px; display: flex; align-items: center; justify-content: center;">
+                        ${w.isSelectedWeek 
+                          ? '<span class="badge badge-primary" style="font-size: 10px; padding: 2px 8px; border-radius: 999px;">✓ Active Week</span>' 
+                          : (w.isOverBudget 
+                              ? '<span class="badge badge-danger" style="font-size: 10px; padding: 2px 7px; border-radius: 999px;">⚠️ Over</span>' 
+                              : (w.totalExpenses > 0 
+                                  ? '<span style="font-weight: 700; color: var(--text-secondary); font-size: 11px;">' + curr + Math.round(w.totalExpenses) + '</span>' 
+                                  : '<span style="color: var(--text-muted); font-size: 10px;">$0</span>'))}
+                      </div>
+
+                      <!-- Comparison Bars Pair -->
+                      <div class="budget-bars-pair">
+                        <!-- Budget Target Bar -->
+                        <div class="budget-single-bar bar-target" style="height: ${budgetHeight}px;" title="Weekly Target: ${curr}${w.weeklyBudget.toFixed(2)}">
+                          <span class="budget-bar-val-badge">${curr}${Math.round(w.weeklyBudget)}</span>
+                        </div>
+                        <!-- Actual Expenses Bar -->
+                        <div class="budget-single-bar ${expenseBarClass}" style="height: ${expenseHeight}px;" title="Weekly Expenses: ${curr}${w.totalExpenses.toFixed(2)}">
+                          <span class="budget-bar-val-badge" style="color: ${w.isOverBudget ? 'var(--danger)' : 'var(--text-main)'};">
+                            ${w.totalExpenses > 0 ? curr + Math.round(w.totalExpenses) : curr + '0'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <!-- Week labels -->
+                      <div class="budget-week-labels">
+                        <span class="budget-week-title">Week ${w.weekNumber}</span>
+                        <span class="budget-week-sublabel">${w.shortLabel}</span>
+                        <span style="font-size: 11px; margin-top: 2px; color: ${w.isOverBudget ? 'var(--danger)' : (w.totalExpenses > 0 ? 'var(--success)' : 'var(--text-muted)')}; font-weight: 600;">
+                          ${w.totalExpenses > 0 
+                            ? (w.isOverBudget ? 'Over by ' + curr + Math.abs(w.remainingBudget).toFixed(0) : curr + Math.round(w.remainingBudget) + ' left') 
+                            : 'Full budget left'}
+                        </span>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOGGED EXPENSES SECTION -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <h3 class="card-title" style="margin: 0;">Logged Grocery Receipts</h3>
+              <div style="display: flex; gap: 4px; background: var(--bg-surface-2, #f1f5f9); padding: 2px 4px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <button class="btn btn-sm ${filterMode === 'week' ? 'btn-primary' : 'btn-secondary'}" 
+                        onclick="window.ModulesUI.setBudgetExpenseFilter('week')"
+                        style="padding: 3px 10px; font-size: 12px;">
+                  📅 Selected Week (${metrics.transactionCount})
+                </button>
+                <button class="btn btn-sm ${filterMode === 'all' ? 'btn-primary' : 'btn-secondary'}" 
+                        onclick="window.ModulesUI.setBudgetExpenseFilter('all')"
+                        style="padding: 3px 10px; font-size: 12px;">
+                  📋 All Receipts (${allExpenses.length})
+                </button>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 12.5px; color: var(--text-muted);">
+                ${filterMode === 'week' 
+                  ? 'Showing ' + metrics.transactionCount + ' receipts (' + curr + metrics.totalExpenses.toFixed(2) + ')' 
+                  : 'Showing ' + allExpenses.length + ' receipts total (' + curr + metrics.allTimeExpensesTotal.toFixed(2) + ')'}
+              </span>
+              <button class="btn btn-primary btn-sm" onclick="window.ModalService.openLogExpenseModal()">
+                ${window.renderIcon('plus')} Add Receipt
+              </button>
+            </div>
+          </div>
+
+          ${sortedExpenses.length === 0 ? `
+            <div style="text-align: center; padding: 40px 16px; color: var(--text-muted); background: var(--bg-surface-2, rgba(0,0,0,0.01)); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+              <div style="font-size: 28px; margin-bottom: 8px;">🧾</div>
+              <div style="font-weight: 700; font-size: 14px; color: var(--text-main); margin-bottom: 4px;">
+                ${filterMode === 'week' ? 'No Receipts Logged for this Week' : 'No Receipts Logged Yet'}
+              </div>
+              <p style="font-size: 13px; max-width: 440px; margin: 0 auto 14px;">
+                ${filterMode === 'week' 
+                  ? 'There are zero expenses recorded for ' + metrics.weekInfo.label + '. Total expenses start at ' + curr + '0.00 with ' + curr + metrics.weeklyBudget.toFixed(2) + ' remaining.' 
+                  : 'Start tracking your grocery expenses to monitor budget compliance.'}
+              </p>
+              <button class="btn btn-primary btn-sm" onclick="window.ModalService.openLogExpenseModal()">
+                ${window.renderIcon('plus')} Log an Expense
+              </button>
+            </div>
+          ` : `
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 580px;">
+                <thead>
+                  <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
+                    <th style="padding: 10px;">Date</th>
+                    <th style="padding: 10px;">Store / Vendor</th>
+                    <th style="padding: 10px;">Category</th>
+                    <th style="padding: 10px;">Notes</th>
+                    <th style="padding: 10px; text-align: right;">Amount</th>
+                    <th style="padding: 10px; text-align: right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${sortedExpenses.map(exp => {
+                    const expWeek = window.CalculationEngine.getWeekBoundaries(exp.date);
+                    const isExpInActiveWeek = expWeek.weekKey === metrics.weekInfo.weekKey;
+                    return `
+                      <tr style="border-bottom: 1px solid var(--border-color); ${isExpInActiveWeek ? 'background: rgba(var(--primary-rgb, 61, 112, 84), 0.03);' : ''}">
+                        <td style="padding: 10px; white-space: nowrap;">
+                          <div style="font-weight: 600;">${exp.date}</div>
+                          ${filterMode === 'all' ? '<span style="font-size: 11px; color: var(--text-muted);">' + expWeek.shortLabel + '</span>' : ''}
+                        </td>
+                        <td style="padding: 10px; font-weight: 600;">${exp.store}</td>
+                        <td style="padding: 10px;"><span class="badge badge-muted">${exp.category || 'Other'}</span></td>
+                        <td style="padding: 10px; color: var(--text-secondary); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${exp.notes || '-'}</td>
+                        <td style="padding: 10px; text-align: right; font-weight: 700; color: var(--text-main); font-size: 14px;">${curr}${Number(exp.amount).toFixed(2)}</td>
+                        <td style="padding: 10px; text-align: right; white-space: nowrap;">
+                          <button class="btn-icon btn-sm" onclick="window.ModalService.openEditExpenseModal('${exp.id}')" title="Edit Receipt Details & Date" style="margin-right: 4px;">
+                            ${window.renderIcon('edit')}
+                          </button>
+                          <button class="btn-icon btn-sm" onclick="window.ModulesUI.deleteExpense('${exp.id}')" title="Delete Receipt">
+                            ${window.renderIcon('trash-2')}
+                          </button>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          `}
         </div>
       `;
 
       window.hydrateIcons(container);
     },
 
+    navigateBudgetWeek: function(direction) {
+      if (!window.budgetSelectedWeekStart) {
+        window.budgetSelectedWeekStart = window.formatDateISO(window.getMonday(new Date()));
+      }
+      if (direction === 0) {
+        window.budgetSelectedWeekStart = window.formatDateISO(window.getMonday(new Date()));
+      } else {
+        const parts = window.budgetSelectedWeekStart.split('-');
+        const curDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        curDate.setDate(curDate.getDate() + (direction * 7));
+        window.budgetSelectedWeekStart = window.formatDateISO(window.getMonday(curDate));
+      }
+
+      // Sync chart year and month with selected week
+      const selParts = window.budgetSelectedWeekStart.split('-');
+      window.budgetChartYear = Number(selParts[0]);
+      window.budgetChartMonth = Number(selParts[1]);
+
+      this.renderBudget();
+      if (typeof this.renderDashboard === 'function') this.renderDashboard();
+      if (window.EventBus) window.EventBus.emit('BUDGET_UPDATED', window.appState.budget);
+    },
+
+    selectBudgetWeek: function(weekKey) {
+      window.budgetSelectedWeekStart = weekKey;
+      const parts = weekKey.split('-');
+      window.budgetChartYear = Number(parts[0]);
+      window.budgetChartMonth = Number(parts[1]);
+
+      this.renderBudget();
+      if (typeof this.renderDashboard === 'function') this.renderDashboard();
+      if (window.EventBus) window.EventBus.emit('BUDGET_UPDATED', window.appState.budget);
+    },
+
+    navigateBudgetMonth: function(direction) {
+      if (!window.budgetChartYear || !window.budgetChartMonth) {
+        const d = new Date();
+        window.budgetChartYear = d.getFullYear();
+        window.budgetChartMonth = d.getMonth() + 1;
+      }
+      let m = window.budgetChartMonth + direction;
+      let y = window.budgetChartYear;
+      if (m < 1) {
+        m = 12;
+        y--;
+      } else if (m > 12) {
+        m = 1;
+        y++;
+      }
+      window.budgetChartYear = y;
+      window.budgetChartMonth = m;
+      this.renderBudget();
+    },
+
+    setBudgetExpenseFilter: function(mode) {
+      window.budgetExpenseFilterMode = mode;
+      this.renderBudget();
+    },
+
+    showBudgetChartTooltip: function(event, weekKeyOrJson) {
+      const tooltip = document.getElementById('budget-chart-tooltip');
+      const container = document.getElementById('budget-chart-container');
+      if (!tooltip || !container || !weekKeyOrJson) return;
+
+      const curr = (window.appState && window.appState.profile && window.appState.profile.currency) || '$';
+      let data = {};
+
+      if (typeof weekKeyOrJson === 'string' && /^\d{4}-\d{2}-\d{2}/.test(weekKeyOrJson)) {
+        const m = window.CalculationEngine.calculateBudgetMetrics(weekKeyOrJson);
+        data = {
+          label: m.weekInfo.label,
+          budget: curr + m.weeklyBudget.toFixed(2),
+          expenses: curr + m.totalExpenses.toFixed(2),
+          remaining: (m.remainingWeekly >= 0 ? curr : '-' + curr) + Math.abs(m.remainingWeekly).toFixed(2),
+          percent: m.percentSpent + '%',
+          isOver: m.isOverBudget,
+          receipts: m.transactionCount,
+          isCurrent: m.weekInfo.isCurrentWeek
+        };
+      } else {
+        try {
+          data = typeof weekKeyOrJson === 'string' ? JSON.parse(weekKeyOrJson) : weekKeyOrJson;
+        } catch(e) {
+          return;
+        }
+      }
+
+      tooltip.innerHTML = `
+        <div style="font-weight: 700; font-size: 13px; margin-bottom: 6px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+          <span>📅 ${data.label}</span>
+          ${data.isCurrent ? '<span class="badge badge-primary" style="font-size: 9px; padding: 1px 5px;">Active</span>' : ''}
+        </div>
+        <div style="display: flex; justify-content: space-between; gap: 16px; margin-bottom: 4px;">
+          <span style="color: var(--text-muted);">Weekly Budget:</span>
+          <strong style="color: #4f46e5;">${data.budget}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; gap: 16px; margin-bottom: 4px;">
+          <span style="color: var(--text-muted);">Weekly Expenses:</span>
+          <strong style="color: ${data.isOver ? 'var(--danger)' : 'var(--text-main)'};">${data.expenses}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; gap: 16px; margin-bottom: 4px;">
+          <span style="color: var(--text-muted);">Remaining Budget:</span>
+          <strong style="color: ${data.isOver ? 'var(--danger)' : 'var(--success)'};">${data.remaining}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; gap: 16px; margin-bottom: 4px;">
+          <span style="color: var(--text-muted);">Budget Usage:</span>
+          <strong style="color: ${data.isOver ? 'var(--danger)' : 'var(--text-main)'};">${data.percent} ${data.isOver ? '⚠️' : ''}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; gap: 16px; font-size: 11px; margin-top: 6px; padding-top: 4px; border-top: 1px dashed var(--border-color); color: var(--text-secondary);">
+          <span>Transactions:</span>
+          <span>${data.receipts} receipt(s)</span>
+        </div>
+        <div style="margin-top: 7px; font-size: 11px; color: var(--primary); text-align: center; font-weight: 700;">
+          👉 Click to view & filter this week
+        </div>
+      `;
+
+      const rect = container.getBoundingClientRect();
+      const colRect = event.currentTarget.getBoundingClientRect();
+      let leftPos = colRect.left - rect.left + (colRect.width / 2);
+      let topPos = colRect.top - rect.top;
+
+      tooltip.style.display = 'block';
+      const tooltipWidth = tooltip.offsetWidth || 250;
+      if (leftPos - (tooltipWidth / 2) < 12) {
+        leftPos = (tooltipWidth / 2) + 12;
+      } else if (leftPos + (tooltipWidth / 2) > rect.width - 12) {
+        leftPos = rect.width - (tooltipWidth / 2) - 12;
+      }
+
+      tooltip.style.left = `${leftPos}px`;
+      tooltip.style.top = `${Math.max(10, topPos - 12)}px`;
+    },
+
+    hideBudgetChartTooltip: function() {
+      const tooltip = document.getElementById('budget-chart-tooltip');
+      if (tooltip) tooltip.style.display = 'none';
+    },
+
     quickSetWeeklyBudget: function(val) {
       const num = Number(val);
       if (isNaN(num) || num <= 0) return;
       if (!window.appState.budget) window.appState.budget = { weeklyBudget: 150, monthlyBudget: 600, expenses: [] };
+      if (!window.appState.budget.weeklyBudgets) window.appState.budget.weeklyBudgets = {};
+
+      const activeWeekKey = window.budgetSelectedWeekStart || window.formatDateISO(window.getMonday(new Date()));
       window.appState.budget.weeklyBudget = Number(num.toFixed(2));
+      window.appState.budget.weeklyBudgets[activeWeekKey] = Number(num.toFixed(2));
       window.appState.budget.monthlyBudget = Number((num * 4.33).toFixed(2));
+
       window.StorageService.saveState();
       this.renderBudget();
       if (typeof this.renderDashboard === 'function') this.renderDashboard();
@@ -6890,10 +7726,13 @@
     },
 
     deleteExpense: function(id) {
+      if (!confirm('Are you sure you want to remove this receipt from your budget?')) return;
       window.appState.budget.expenses = (window.appState.budget.expenses || []).filter(e => e.id !== id);
       window.StorageService.saveState();
       this.renderBudget();
-      window.ToastService.show('Expense removed');
+      if (typeof this.renderDashboard === 'function') this.renderDashboard();
+      if (window.EventBus) window.EventBus.emit('BUDGET_UPDATED', window.appState.budget);
+      window.ToastService.show('Expense deleted successfully.');
     },
 
     // --------------------------------------------------------------------------
@@ -10515,15 +11354,15 @@
       const bodyHtml = `
         <div class="form-group">
           <label class="form-label">Store / Vendor</label>
-          <input type="text" class="form-control" id="exp-store" required placeholder="e.g. Whole Foods">
+          <input type="text" class="form-control" id="exp-store" required placeholder="e.g. Whole Foods, Trader Joe's">
         </div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Amount (${window.appState.profile.currency})</label>
-            <input type="number" class="form-control" id="exp-amount" value="35.00" step="0.01" required>
+            <input type="number" class="form-control" id="exp-amount" value="35.00" step="0.01" min="0.01" required>
           </div>
           <div class="form-group">
-            <label class="form-label">Date</label>
+            <label class="form-label">Expense Date</label>
             <input type="date" class="form-control" id="exp-date" value="${window.formatDateISO()}">
           </div>
         </div>
@@ -10531,12 +11370,16 @@
           <label class="form-label">Category</label>
           <select class="form-select" id="exp-cat">
             <option value="Produce">Produce</option>
-            <option value="Meat">Meat</option>
-            <option value="Grains">Grains</option>
-            <option value="Dairy">Dairy</option>
-            <option value="Pantry">Pantry</option>
-            <option value="Other" selected>Other</option>
+            <option value="Meat">Meat & Seafood</option>
+            <option value="Grains">Grains & Bakery</option>
+            <option value="Dairy">Dairy & Eggs</option>
+            <option value="Pantry">Pantry & Spices</option>
+            <option value="Other" selected>Other / General</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes (Optional)</label>
+          <input type="text" class="form-control" id="exp-notes" placeholder="e.g. Weekly staples, organic produce">
         </div>
       `;
 
@@ -10549,23 +11392,158 @@
     },
 
     saveExpense: function() {
-      const store = document.getElementById('exp-store').value;
-      const amount = Number(document.getElementById('exp-amount').value) || 0;
-      if (!store || amount <= 0) return;
+      const storeInput = document.getElementById('exp-store');
+      const amountInput = document.getElementById('exp-amount');
+      const dateInput = document.getElementById('exp-date');
+      const catInput = document.getElementById('exp-cat');
+      const notesInput = document.getElementById('exp-notes');
+
+      const store = storeInput ? storeInput.value.trim() : '';
+      const amount = amountInput ? Number(amountInput.value) : 0;
+      const date = dateInput && dateInput.value ? dateInput.value : window.formatDateISO();
+      const category = catInput ? catInput.value : 'Other';
+      const notes = notesInput ? notesInput.value.trim() : '';
+
+      if (!store || isNaN(amount) || amount <= 0) {
+        window.ToastService.show('Please enter a valid store and expense amount.');
+        return;
+      }
+
+      if (!window.appState.budget) {
+        window.appState.budget = { weeklyBudget: 150, monthlyBudget: 600, expenses: [], weeklyBudgets: {} };
+      }
+      if (!Array.isArray(window.appState.budget.expenses)) {
+        window.appState.budget.expenses = [];
+      }
 
       window.appState.budget.expenses.push({
         id: window.generateId('exp'),
-        date: document.getElementById('exp-date').value || window.formatDateISO(),
+        date,
         store,
-        amount,
-        category: document.getElementById('exp-cat').value,
-        notes: ''
+        amount: Number(amount.toFixed(2)),
+        category,
+        notes
       });
 
       window.StorageService.saveState();
       this.close();
-      window.ModulesUI.renderBudget();
+
+      if (window.ModulesUI && typeof window.ModulesUI.renderBudget === 'function') {
+        window.ModulesUI.renderBudget();
+      }
+      if (window.ModulesUI && typeof window.ModulesUI.renderDashboard === 'function') {
+        window.ModulesUI.renderDashboard();
+      }
+      if (window.EventBus) {
+        window.EventBus.emit('BUDGET_UPDATED', window.appState.budget);
+      }
       window.ToastService.show('Expense logged successfully! 💰');
+    },
+
+    openEditExpenseModal: function(expenseId) {
+      const expenses = (window.appState && window.appState.budget && window.appState.budget.expenses) || [];
+      const exp = expenses.find(e => e.id === expenseId);
+      if (!exp) {
+        window.ToastService.show('Expense receipt not found.');
+        return;
+      }
+
+      const curr = (window.appState && window.appState.profile && window.appState.profile.currency) || '$';
+      const bodyHtml = `
+        <div class="form-group">
+          <label class="form-label">Store / Vendor</label>
+          <input type="text" class="form-control" id="edit-exp-store" required value="${window.escapeHtml(exp.store || '')}" placeholder="e.g. Whole Foods, Trader Joe's">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount (${curr})</label>
+            <input type="number" class="form-control" id="edit-exp-amount" value="${Number(exp.amount || 0).toFixed(2)}" step="0.01" min="0.01" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Expense Date</label>
+            <input type="date" class="form-control" id="edit-exp-date" value="${(exp.date || '').split('T')[0] || window.formatDateISO()}" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="edit-exp-cat">
+            <option value="Produce" ${exp.category === 'Produce' ? 'selected' : ''}>🥦 Produce</option>
+            <option value="Meat" ${exp.category === 'Meat' ? 'selected' : ''}>🥩 Meat & Seafood</option>
+            <option value="Grains" ${exp.category === 'Grains' ? 'selected' : ''}>🍞 Grains & Bakery</option>
+            <option value="Dairy" ${exp.category === 'Dairy' ? 'selected' : ''}>🧀 Dairy & Eggs</option>
+            <option value="Pantry" ${exp.category === 'Pantry' ? 'selected' : ''}>🥫 Pantry & Spices</option>
+            <option value="Other" ${exp.category === 'Other' || !exp.category ? 'selected' : ''}>🛒 Other / General</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes (Optional)</label>
+          <input type="text" class="form-control" id="edit-exp-notes" value="${window.escapeHtml(exp.notes || '')}" placeholder="Receipt notes, items bought...">
+        </div>
+        <div style="font-size: 11.5px; color: var(--text-muted); background: var(--bg-surface-2); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          ℹ️ Changing the expense date will automatically reassign this transaction to its corresponding weekly budget period.
+        </div>
+      `;
+
+      const footerHtml = `
+        <button class="btn btn-danger btn-sm" style="margin-right: auto;" onclick="window.ModalService.close(); window.ModulesUI.deleteExpense('${exp.id}');">Delete Receipt</button>
+        <button class="btn btn-secondary" onclick="window.ModalService.close()">Cancel</button>
+        <button class="btn btn-primary" onclick="window.ModalService.saveEditedExpense('${exp.id}')">Save Changes</button>
+      `;
+
+      this.open('Edit Grocery Receipt', bodyHtml, footerHtml);
+    },
+
+    saveEditedExpense: function(expenseId) {
+      const expenses = (window.appState && window.appState.budget && window.appState.budget.expenses) || [];
+      const exp = expenses.find(e => e.id === expenseId);
+      if (!exp) return;
+
+      const storeInput = document.getElementById('edit-exp-store');
+      const amountInput = document.getElementById('edit-exp-amount');
+      const dateInput = document.getElementById('edit-exp-date');
+      const catInput = document.getElementById('edit-exp-cat');
+      const notesInput = document.getElementById('edit-exp-notes');
+
+      const store = storeInput ? storeInput.value.trim() : '';
+      const amount = amountInput ? Number(amountInput.value) : 0;
+      const date = dateInput ? dateInput.value : '';
+      const category = catInput ? catInput.value : 'Other';
+      const notes = notesInput ? notesInput.value.trim() : '';
+
+      if (!store || isNaN(amount) || amount <= 0) {
+        window.ToastService.show('Please enter a valid store and expense amount.');
+        return;
+      }
+      if (!date) {
+        window.ToastService.show('Please select a valid date.');
+        return;
+      }
+
+      exp.store = store;
+      exp.amount = Number(amount.toFixed(2));
+      exp.date = date;
+      exp.category = category;
+      exp.notes = notes;
+
+      // Automatically sync active selected week to the updated receipt date so the user sees their edited receipt immediately
+      if (window.CalculationEngine && typeof window.CalculationEngine.getWeekBoundaries === 'function') {
+        window.budgetSelectedWeekStart = window.CalculationEngine.getWeekBoundaries(date).weekKey;
+      }
+
+      window.StorageService.saveState();
+      this.close();
+
+      if (window.ModulesUI && typeof window.ModulesUI.renderBudget === 'function') {
+        window.ModulesUI.renderBudget();
+      }
+      if (window.ModulesUI && typeof window.ModulesUI.renderDashboard === 'function') {
+        window.ModulesUI.renderDashboard();
+      }
+      if (window.EventBus) {
+        window.EventBus.emit('BUDGET_UPDATED', window.appState.budget);
+      }
+
+      window.ToastService.show('Receipt updated and budget recalculated! 💰');
     },
 
     // --------------------------------------------------------------------------
@@ -10573,12 +11551,32 @@
     // --------------------------------------------------------------------------
     openEditBudgetModal: function() {
       const curr = (window.appState && window.appState.profile && window.appState.profile.currency) || '$';
-      const currentWeekly = (window.appState && window.appState.budget && Number(window.appState.budget.weeklyBudget)) || 150;
+      const activeWeekKey = window.budgetSelectedWeekStart || window.formatDateISO(window.getMonday(new Date()));
+      const activeWeek = window.CalculationEngine.getWeekBoundaries(activeWeekKey);
+      const activeWeekBudget = window.CalculationEngine.getWeeklyBudgetForWeek(activeWeekKey);
+      const defaultWeekly = (window.appState && window.appState.budget && Number(window.appState.budget.weeklyBudget)) || 150;
+      const currentWeekly = activeWeekBudget || defaultWeekly;
       const currentMonthly = (window.appState && window.appState.budget && Number(window.appState.budget.monthlyBudget)) || Math.round(currentWeekly * 4.33);
 
       const bodyHtml = `
         <div style="margin-bottom: 16px; color: var(--text-secondary); font-size: 13.5px; line-height: 1.5;">
           Customize your target food and grocery spending limit. Your dashboard meters, remaining balance, and financial reports will instantly recalculate.
+        </div>
+
+        <div style="margin-bottom: 16px; background: var(--bg-surface-2, #f8fafc); border: 1px solid var(--border-color); border-radius: var(--radius-md, 8px); padding: 12px 14px;">
+          <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px;">
+            Target Week Scope
+          </label>
+          <div style="display: flex; gap: 14px; font-size: 13px; flex-wrap: wrap;">
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <input type="radio" name="budget-scope" value="week" checked id="scope-week">
+              <span>Selected Week only (<strong>${activeWeek.shortLabel}</strong>)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <input type="radio" name="budget-scope" value="all" id="scope-all">
+              <span>All Weeks (Default allowance)</span>
+            </label>
+          </div>
         </div>
 
         <div style="margin-bottom: 18px;">
@@ -10590,6 +11588,7 @@
             <button type="button" class="btn btn-secondary btn-sm" onclick="window.ModalService.applyBudgetPreset(120)">${curr}120 <span style="opacity: 0.7; font-size: 11px;">(Student)</span></button>
             <button type="button" class="btn btn-secondary btn-sm" onclick="window.ModalService.applyBudgetPreset(150)">${curr}150 <span style="opacity: 0.7; font-size: 11px;">(Standard)</span></button>
             <button type="button" class="btn btn-secondary btn-sm" onclick="window.ModalService.applyBudgetPreset(200)">${curr}200 <span style="opacity: 0.7; font-size: 11px;">(Comfortable)</span></button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.ModalService.applyBudgetPreset(250)">${curr}250 <span style="opacity: 0.7; font-size: 11px;">(Generous)</span></button>
             <button type="button" class="btn btn-secondary btn-sm" onclick="window.ModalService.applyBudgetPreset(300)">${curr}300 <span style="opacity: 0.7; font-size: 11px;">(Family)</span></button>
           </div>
         </div>
@@ -10634,7 +11633,7 @@
 
       const footerHtml = `
         <button class="btn btn-secondary" onclick="window.ModalService.close()">Cancel</button>
-        <button class="btn btn-primary" onclick="window.ModalService.saveBudgetSettings()">Save Budget</button>
+        <button class="btn btn-primary" onclick="window.ModalService.saveBudgetSettings('${activeWeekKey}')">Save Budget</button>
       `;
 
       this.open('Customize Food Budget', bodyHtml, footerHtml);
@@ -10674,9 +11673,10 @@
       if (pPantry) pPantry.textContent = `${curr}${(weekly * 0.10).toFixed(2)}`;
     },
 
-    saveBudgetSettings: function() {
+    saveBudgetSettings: function(activeWeekKey) {
       const weeklyInput = document.getElementById('edit-weekly-budget');
       const monthlyInput = document.getElementById('edit-monthly-budget');
+      const isWeekScope = document.getElementById('scope-week')?.checked;
       const weekly = Number(weeklyInput?.value);
       const monthly = Number(monthlyInput?.value);
 
@@ -10686,10 +11686,20 @@
       }
 
       if (!window.appState.budget) {
-        window.appState.budget = { weeklyBudget: 150, monthlyBudget: 600, expenses: [] };
+        window.appState.budget = { weeklyBudget: 150, monthlyBudget: 600, expenses: [], weeklyBudgets: {} };
+      }
+      if (!window.appState.budget.weeklyBudgets) {
+        window.appState.budget.weeklyBudgets = {};
       }
 
-      window.appState.budget.weeklyBudget = Number(weekly.toFixed(2));
+      const weekKey = activeWeekKey || window.budgetSelectedWeekStart || window.formatDateISO(window.getMonday(new Date()));
+
+      if (isWeekScope) {
+        window.appState.budget.weeklyBudgets[weekKey] = Number(weekly.toFixed(2));
+      } else {
+        window.appState.budget.weeklyBudget = Number(weekly.toFixed(2));
+        window.appState.budget.weeklyBudgets[weekKey] = Number(weekly.toFixed(2));
+      }
       window.appState.budget.monthlyBudget = !isNaN(monthly) && monthly > 0 ? Number(monthly.toFixed(2)) : Number((weekly * 4.33).toFixed(2));
 
       window.StorageService.saveState();
@@ -11050,6 +12060,15 @@
     });
     window.EventBus.on('PROFILE_UPDATED', () => {
       if (typeof window.updateHeaderProfile === 'function') window.updateHeaderProfile();
+    });
+    window.EventBus.on('BUDGET_UPDATED', () => {
+      window.Router.refreshCurrentView();
+      if (window.ModulesUI && typeof window.ModulesUI.renderDashboard === 'function' && window.Router.currentView !== 'dashboard') {
+        window.ModulesUI.renderDashboard();
+      }
+      if (window.ModulesUI && typeof window.ModulesUI.updateSidebarBadges === 'function') {
+        window.ModulesUI.updateSidebarBadges();
+      }
     });
 
     // 4. Bind Header Controls & Mobile Sidebar Drawer

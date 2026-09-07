@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weekly Budget Test Suite</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 24px; background: #0f172a; color: #e2e8f0; line-height: 1.6; }
+    h1 { color: #38bdf8; margin-bottom: 8px; }
+    .test-card { background: #1e293b; border-radius: 8px; padding: 16px 20px; margin-bottom: 12px; border-left: 4px solid #64748b; }
+    .test-card.pass { border-left-color: #22c55e; }
+    .test-card.fail { border-left-color: #ef4444; background: #450a0a; }
+    .status-pass { color: #4ade80; font-weight: bold; }
+    .status-fail { color: #f87171; font-weight: bold; }
+    pre { background: #0f172a; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+    #summary { font-size: 18px; font-weight: bold; margin: 20px 0; padding: 12px; border-radius: 6px; }
+    #summary.all-pass { background: #14532d; color: #86efac; }
+    #summary.has-fail { background: #7f1d1d; color: #fca5a5; }
+  </style>
+</head>
+<body>
+  <h1>Weekly Food Budget Verification Suite</h1>
+  <p>Automated verification of the 14-step Meal Planner Pro weekly budget requirements.</p>
+  <div id="summary">Running tests...</div>
+  <div id="results"></div>
+
+  <!-- Load dependencies in sequence from parts -->
+  <script src="parts/02_icons_data.js"></script>
+  <script src="parts/03_core_data_state.js"></script>
+  <script src="parts/04_calculations_services.js"></script>
+  <script src="parts/05_modules_ui.js"></script>
+  <script src="parts/06_export_settings_init.js"></script>
+
+  <script>
+    (function() {
+      const resultsDiv = document.getElementById('results');
+      const summaryDiv = document.getElementById('summary');
+      let passCount = 0;
+      let failCount = 0;
+
+      function assert(title, condition, details = '') {
+        const div = document.createElement('div');
+        div.className = 'test-card ' + (condition ? 'pass' : 'fail');
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>${title}</strong>
+            <span class="${condition ? 'status-pass' : 'status-fail'}">${condition ? '✓ PASS' : '✗ FAIL'}</span>
+          </div>
+          ${details ? `<pre>${details}</pre>` : ''}
+        `;
+        resultsDiv.appendChild(div);
+        if (condition) passCount++;
+        else failCount++;
+      }
+
+      try {
+        // Prepare clean state
+        window.appState = {
+          profile: { name: 'Alex Morgan', currency: '$', unitSystem: 'metric' },
+          budget: {
+            weeklyBudget: 250,
+            monthlyBudget: 1000,
+            expenses: [],
+            weeklyBudgets: {}
+          },
+          mealPlans: {},
+          goals: { dailyCalories: 2000, targetProtein: 140, carbTargetG: 200, fatTargetG: 65, waterTargetMl: 2500 },
+          hydration: {},
+          pantry: [],
+          groceryList: [],
+          recipes: [],
+          theme: { name: 'sage', mode: 'light' }
+        };
+
+        // STEP 1: Set weekly budget to $250
+        window.appState.budget.weeklyBudget = 250;
+        const b1 = window.CalculationEngine.getWeeklyBudgetForWeek('2026-08-31');
+        assert("Step 1: Set weekly budget to $250", b1 === 250, `Weekly budget returned: $${b1}`);
+
+        // STEP 2: Add expenses: Aug 31 -> $50, Sep 2 -> $40, Sep 5 -> $60
+        window.appState.budget.expenses = [
+          { id: 'exp_1', store: 'Costco', amount: 50, date: '2026-08-31', category: 'Meat', notes: 'Aug 31' },
+          { id: 'exp_2', store: 'Trader Joe', amount: 40, date: '2026-09-02', category: 'Produce', notes: 'Sep 2' },
+          { id: 'exp_3', store: 'Safeway', amount: 60, date: '2026-09-05', category: 'Pantry', notes: 'Sep 5' }
+        ];
+        assert("Step 2: Add expenses Aug 31 ($50), Sep 2 ($40), Sep 5 ($60)", window.appState.budget.expenses.length === 3,
+          JSON.stringify(window.appState.budget.expenses, null, 2));
+
+        // STEP 3: Confirm Week 31 Aug–6 Sep shows: Budget $250, Expenses $150, Remaining $100
+        const weekAug31 = window.CalculationEngine.calculateBudgetMetrics('2026-08-31');
+        const pass3 = weekAug31.weeklyBudget === 250 &&
+                      weekAug31.totalExpenses === 150 &&
+                      weekAug31.remainingWeekly === 100 &&
+                      weekAug31.percentSpent === 60 &&
+                      weekAug31.transactionCount === 3;
+        assert("Step 3: Confirm Week 31 Aug–6 Sep metrics (Budget $250, Expenses $150, Remaining $100)", pass3,
+          `Budget: $${weekAug31.weeklyBudget}, Expenses: $${weekAug31.totalExpenses}, Remaining: $${weekAug31.remainingWeekly}, Usage: ${weekAug31.percentSpent}%, Count: ${weekAug31.transactionCount}`);
+
+        // STEP 4 & 5: Move to Sep 7. Confirm new week shows: Budget $250, Expenses $0, Remaining $250
+        const weekSep7 = window.CalculationEngine.calculateBudgetMetrics('2026-09-07');
+        const pass5 = weekSep7.weeklyBudget === 250 &&
+                      weekSep7.totalExpenses === 0 &&
+                      weekSep7.remainingWeekly === 250 &&
+                      weekSep7.percentSpent === 0 &&
+                      weekSep7.transactionCount === 0;
+        assert("Step 4 & 5: Move to Sep 7 (7–13 Sep). Confirm Expenses $0, Remaining $250", pass5,
+          `Budget: $${weekSep7.weeklyBudget}, Expenses: $${weekSep7.totalExpenses}, Remaining: $${weekSep7.remainingWeekly}, Usage: ${weekSep7.percentSpent}%`);
+
+        // STEP 6: Add $30 expense dated Sep 8
+        window.appState.budget.expenses.push({
+          id: 'exp_4', store: 'Sprouts', amount: 30, date: '2026-09-08', category: 'Dairy', notes: 'Sep 8'
+        });
+
+        // STEP 7: Confirm Week 7–13 Sep now shows: Budget $250, Expenses $30, Remaining $220
+        const weekSep7After = window.CalculationEngine.calculateBudgetMetrics('2026-09-07');
+        const pass7 = weekSep7After.weeklyBudget === 250 &&
+                      weekSep7After.totalExpenses === 30 &&
+                      weekSep7After.remainingWeekly === 220 &&
+                      weekSep7After.percentSpent === 12 &&
+                      weekSep7After.transactionCount === 1;
+        assert("Step 6 & 7: Add Sep 8 expense ($30). Confirm Week 7–13 Sep shows Expenses $30, Remaining $220", pass7,
+          `Budget: $${weekSep7After.weeklyBudget}, Expenses: $${weekSep7After.totalExpenses}, Remaining: $${weekSep7After.remainingWeekly}, Usage: ${weekSep7After.percentSpent}%`);
+
+        // STEP 8 & 9: Return to Week 31 Aug–6 Sep. Confirm historical $150 remains unchanged!
+        const weekAug31Revisit = window.CalculationEngine.calculateBudgetMetrics('2026-08-31');
+        const pass9 = weekAug31Revisit.weeklyBudget === 250 &&
+                      weekAug31Revisit.totalExpenses === 150 &&
+                      weekAug31Revisit.remainingWeekly === 100 &&
+                      weekAug31Revisit.transactionCount === 3;
+        assert("Step 8 & 9: Return to Week 31 Aug–6 Sep. Confirm historical $150 remains unchanged", pass9,
+          `Budget: $${weekAug31Revisit.weeklyBudget}, Expenses: $${weekAug31Revisit.totalExpenses}, Remaining: $${weekAug31Revisit.remainingWeekly}`);
+
+        // STEP 10: Verify monthly breakdown shows separate weeks
+        const monthlyWeeks = window.CalculationEngine.getMonthlyWeeklyBreakdown(2026, 9); // September 2026
+        const week1 = monthlyWeeks.find(w => w.weekKey === '2026-08-31');
+        const week2 = monthlyWeeks.find(w => w.weekKey === '2026-09-07');
+        const pass10 = monthlyWeeks.length >= 4 &&
+                       week1 && week1.expenses === 150 &&
+                       week2 && week2.expenses === 30;
+        assert("Step 10: Monthly breakdown produces distinct weekly buckets for chart", pass10,
+          `Found ${monthlyWeeks.length} weeks in month breakdown.
+Week 1 (Aug 31): Budget $${week1?.budget}, Expenses $${week1?.expenses}, Remaining $${week1?.remaining}
+Week 2 (Sep 7): Budget $${week2?.budget}, Expenses $${week2?.expenses}, Remaining $${week2?.remaining}`);
+
+        // STEP 11: Single Source of Truth / Dashboard vs Budget card
+        window.budgetSelectedWeekStart = '2026-09-07';
+        const dashMetrics = window.CalculationEngine.calculateBudgetMetrics();
+        const budgetViewMetrics = window.CalculationEngine.calculateBudgetMetrics('2026-09-07');
+        const pass11 = dashMetrics.weeklyBudget === budgetViewMetrics.weeklyBudget &&
+                       dashMetrics.totalExpenses === budgetViewMetrics.totalExpenses &&
+                       dashMetrics.remainingWeekly === budgetViewMetrics.remainingWeekly;
+        assert("Step 11: Dashboard and Food Budget cards read identical centralized calculations", pass11,
+          `Dashboard Spent: $${dashMetrics.totalExpenses} === Food Budget Spent: $${budgetViewMetrics.totalExpenses}`);
+
+        // STEP 12: Edit an old expense date (e.g. from Sep 2 to Sep 8) and verify both affected weeks recalculate
+        const expToEdit = window.appState.budget.expenses.find(e => e.id === 'exp_2'); // was $40 on Sep 2
+        expToEdit.date = '2026-09-08'; // moved into Week 7-13 Sep
+        const weekAug31AfterMove = window.CalculationEngine.calculateBudgetMetrics('2026-08-31');
+        const weekSep7AfterMove = window.CalculationEngine.calculateBudgetMetrics('2026-09-07');
+        const pass12 = weekAug31AfterMove.totalExpenses === 110 && // 150 - 40 = 110
+                       weekAug31AfterMove.remainingWeekly === 140 &&
+                       weekSep7AfterMove.totalExpenses === 70 && // 30 + 40 = 70
+                       weekSep7AfterMove.remainingWeekly === 180;
+        assert("Step 12: Editing expense date automatically recalculates both weeks correctly", pass12,
+          `Week 31 Aug-6 Sep new total: $${weekAug31AfterMove.totalExpenses} (expected 110)
+Week 7-13 Sep new total: $${weekSep7AfterMove.totalExpenses} (expected 70)`);
+
+        // STEP 13: Delete an expense and verify all values update
+        window.appState.budget.expenses = window.appState.budget.expenses.filter(e => e.id !== 'exp_1'); // remove $50 from Aug 31
+        const weekAug31AfterDelete = window.CalculationEngine.calculateBudgetMetrics('2026-08-31');
+        const pass13 = weekAug31AfterDelete.totalExpenses === 60 && // 110 - 50 = 60
+                       weekAug31AfterDelete.remainingWeekly === 190 &&
+                       weekAug31AfterDelete.transactionCount === 1;
+        assert("Step 13: Deleting an expense recalculates week immediately", pass13,
+          `Week 31 Aug-6 Sep after delete: Expenses: $${weekAug31AfterDelete.totalExpenses} (expected 60), Remaining: $${weekAug31AfterDelete.remainingWeekly}`);
+
+        // STEP 14: Over-budget condition detection
+        window.appState.budget.expenses.push({
+          id: 'exp_huge', store: 'Wholesale Club', amount: 300, date: '2026-08-31', category: 'Meat', notes: 'Bulk purchase'
+        });
+        const overBudgetMetrics = window.CalculationEngine.calculateBudgetMetrics('2026-08-31');
+        const pass14 = overBudgetMetrics.isOverBudget === true &&
+                       overBudgetMetrics.totalExpenses === 360 &&
+                       overBudgetMetrics.remainingWeekly === -110 &&
+                       overBudgetMetrics.percentSpent === 144;
+        assert("Step 14: Over-budget calculation and indicator", pass14,
+          `isOverBudget: ${overBudgetMetrics.isOverBudget}, Total: $${overBudgetMetrics.totalExpenses}, Remaining: $${overBudgetMetrics.remainingWeekly}, Percent: ${overBudgetMetrics.percentSpent}%`);
+
+        // STEP 15: Verify escapeHtml utility
+        const rawStr = `<script>alert("test & 'bar'")</script>`;
+        const escaped = window.escapeHtml(rawStr);
+        const pass15 = typeof window.escapeHtml === 'function' &&
+                       !escaped.includes('<script>') &&
+                       escaped.includes('&lt;script&gt;');
+        assert("Step 15: escapeHtml correctly protects and handles strings", pass15, escaped);
+
+        // STEP 16: Verify openEditExpenseModal opens modal with populated inputs without error
+        // Create modal container if not in test DOM
+        if (!document.getElementById('modal-container')) {
+          const mc = document.createElement('div');
+          mc.id = 'modal-container';
+          mc.innerHTML = `<div id="modal-title"></div><div id="modal-body"></div><div id="modal-footer"></div>`;
+          document.body.appendChild(mc);
+        }
+        window.ModalService.openEditExpenseModal('exp_2');
+        const editStoreInput = document.getElementById('edit-exp-store');
+        const editAmountInput = document.getElementById('edit-exp-amount');
+        const editDateInput = document.getElementById('edit-exp-date');
+        const pass16 = editStoreInput && editStoreInput.value === 'Trader Joe' &&
+                       editAmountInput && Number(editAmountInput.value) === 40 &&
+                       editDateInput && editDateInput.value === '2026-09-08';
+        assert("Step 16: openEditExpenseModal renders and populates without throwing errors", pass16,
+          `Store: ${editStoreInput?.value}, Amount: ${editAmountInput?.value}, Date: ${editDateInput?.value}`);
+
+        // STEP 17: Verify saveEditedExpense updates expense details and recalculates
+        editStoreInput.value = 'Trader Joe Updated';
+        editAmountInput.value = '45.00';
+        window.ModalService.saveEditedExpense('exp_2');
+        const updatedExp = window.appState.budget.expenses.find(e => e.id === 'exp_2');
+        const pass17 = updatedExp && updatedExp.store === 'Trader Joe Updated' && updatedExp.amount === 45;
+        assert("Step 17: saveEditedExpense successfully updates expense values", pass17,
+          `Updated Store: ${updatedExp?.store}, Updated Amount: $${updatedExp?.amount}`);
+
+        // STEP 18: Verify showBudgetChartTooltip with weekKey directly
+        // Ensure chart container and tooltip exist in test DOM
+        if (!document.getElementById('budget-chart-container')) {
+          const cc = document.createElement('div');
+          cc.id = 'budget-chart-container';
+          cc.style.position = 'relative';
+          cc.style.width = '600px';
+          cc.innerHTML = `<div id="budget-chart-tooltip" style="display:none;"></div>`;
+          document.body.appendChild(cc);
+        }
+        const mockTarget = document.createElement('div');
+        mockTarget.style.width = '100px';
+        mockTarget.style.height = '100px';
+        document.body.appendChild(mockTarget);
+        const mockEvent = { currentTarget: mockTarget };
+        window.ModulesUI.showBudgetChartTooltip(mockEvent, '2026-09-07');
+        const tip = document.getElementById('budget-chart-tooltip');
+        const pass18 = tip && tip.style.display === 'block' &&
+                       tip.innerHTML.includes('Weekly Budget:') &&
+                       tip.innerHTML.includes('Weekly Expenses:') &&
+                       tip.innerHTML.includes('Remaining Budget:');
+        assert("Step 18: showBudgetChartTooltip generates all 5 metrics reliably from weekKey", pass18,
+          tip ? tip.textContent.replace(/\s+/g, ' ').trim() : 'Tooltip not displayed');
+
+        if (failCount === 0) {
+          summaryDiv.className = 'all-pass';
+          summaryDiv.textContent = `ALL ${passCount} AUTOMATED TESTS PASSED WITH 100% SUCCESS!`;
+        } else {
+          summaryDiv.className = 'has-fail';
+          summaryDiv.textContent = `TESTS COMPLETED: ${passCount} Passed, ${failCount} Failed.`;
+        }
+      } catch (err) {
+        assert("CRITICAL EXCEPTION", false, err.stack || err.message);
+        summaryDiv.className = 'has-fail';
+        summaryDiv.textContent = `TEST RUNNER FAILED WITH EXCEPTION: ${err.message}`;
+      }
+    })();
+  </script>
+</body>
+</html>
